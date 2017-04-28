@@ -1,0 +1,9 @@
+The crack itself it typically darker than the background (low value)
+
+first background substraction (tophat)
+
+because crack is dark, do a negative RELU (only keep negative values)
+
+! Combine Convolution with substraction into 1 single TF (middle value 1- original middle value)
+
+1) Throw away all values higher than average (RELU) (removes the light marks)
