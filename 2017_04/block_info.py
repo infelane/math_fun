@@ -47,7 +47,7 @@ class Info():
                 
     def output_test(self, width, ext):
         set = 'zach'
-        # set = 'hand'
+        set = 'hand'
 
         data_input, map = block_data.test_data(set, width, ext, bool_new_data = True)
 
@@ -76,8 +76,9 @@ class Info():
 
         self.acc_summ(out_truth1, out_pred1)
         
-        scipy.misc.imsave('/ipi/private/lameeus/data/tensorflow/output/gen.png', diff[..., 1])
-        scipy.misc.imsave('/ipi/private/lameeus/data/tensorflow/output/gen_and_in.png', map)
+        folder = '/ipi/private/lameeus/data/lamb/output/'
+        scipy.misc.imsave(folder + set + '_gen.png', diff[..., 1])
+        scipy.misc.imsave(folder + set + '_gen_and_in.png', map)
 
         plt.figure()
         plt.subplot('321')

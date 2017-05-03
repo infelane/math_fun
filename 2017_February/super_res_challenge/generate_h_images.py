@@ -1,14 +1,7 @@
-import numpy as np
-from PIL import Image
-import matplotlib.pyplot as plt
-import network
-import config
-from main_sr import *
-import data_net
-import tensorflow as tf
 import scipy.misc
 
 import data_net_sr
+from main_sr import *
 
 
 # Generate each output image

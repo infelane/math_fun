@@ -3,15 +3,14 @@ Fuses multiple preprocessors
 """
 
 import matplotlib.pyplot as plt
-from PIL import Image
 import numpy as np
+from PIL import Image
 
-# My Modules
-import main_sr
-import network
 import config
 import data_net
 import generate_h_images
+import main_sr
+from lambnet import network
 
 
 class Settings():

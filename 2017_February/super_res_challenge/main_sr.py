@@ -1,13 +1,12 @@
-from PIL import Image
-import glob
+import os
+import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy
-from skimage.measure import compare_ssim as ssim
-from skimage.measure import compare_psnr as psnr
 import tensorflow as tf
-import os, sys
-import pickle
+from skimage.measure import compare_psnr as psnr
+from skimage.measure import compare_ssim as ssim
 
 # Own packages
 folder_loc = '/home/lameeus/Documents/Link to Python/2017_January/tensorflow_folder'
@@ -15,7 +14,7 @@ cmd_subfolder = os.path.realpath(folder_loc)
 if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 import generate_h_images
-import network
+from lambnet import network
 import data_net
 import config
 import data_net_sr
