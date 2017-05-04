@@ -60,6 +60,8 @@ class SoftmaxLayerSame(Layer):
         
         self.out = tf.nn.softmax(out1)
         self.log_out = tf.nn.log_softmax(out1)  # Log and softmax!
+        
+        tf.nn
     
     def get_log_out(self):
         return self.log_out
