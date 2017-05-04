@@ -8,7 +8,7 @@ import os
 import sys
 
 # Own libraries
-folder_loc = '/home/lameeus/Documents/Link to Python/2017_January/tensorflow_folder'
+folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_January/tensorflow_folder'
 cmd_subfolder = os.path.realpath(folder_loc)
 if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)

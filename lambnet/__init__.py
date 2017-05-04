@@ -1,1 +1,1 @@
-from lambnet import *
+from . import block_builder
