@@ -28,7 +28,7 @@ def main():
         width = 8
         data_all = data.ground_truth(width=width, ext=7)
         
-        batch_train = data_all[0].next_batch(1000)
+        batch_train = data_all[0].next_batch(100000)
         batch_test = data_all[1].get_test_data()
     
         pickle.dump(batch_train, open("batch_train.p", "wb"))
@@ -40,14 +40,14 @@ def main():
     X_test = batch_test.x
     Y_test = batch_test.y
     
-    
     layers = config_lamb.nn4()
     
     model = lambnet.block_builder.stack(layers)
 
-    optimizer = {'class_name': 'adam', 'config': {'lr': 0.0001}} #otherwise  = 'adam'
+    optimizer = {'class_name': 'adam', 'config': {'lr': 1.0e-4}} #otherwise  = 'adam'
+    # optimizer = 'adam'
     loss = 'categorical_crossentropy' # TODO find out if I can change this: loss = {'class_name': 'categorical_crossentropy', 'config' : {}}
-    loss = [loss, loss]
+    # loss = [loss, loss]
     
     import functools
 
@@ -68,19 +68,33 @@ def main():
         #                                                                                                 K.floatx()))
         # return K.categorical_crossentropy(y_pred, y_true) * final_mask
         import tensorflow as tf
-        a = tf.multiply(y_true * y_pred, weights) # tf.cast(weights, dtype=tf.float32))
+        a = tf.multiply(y_true * tf.log(y_pred), weights) # tf.cast(weights, dtype=tf.float32))
         cost = -tf.reduce_mean(a)
         return cost
     
-    loss_all = functools.partial(w_categorical_crossentropy, ) # to add aditional parameters
+    # loss = functools.partial(w_categorical_crossentropy, ) # to add aditional parameters
     
-    loss_all = w_categorical_crossentropy
+    loss = w_categorical_crossentropy
     
+    # def metric_foo(y_true, y_pred):
+    #
+    #
+    #
+    #     return keras.metrics.categorical_accuracy(y_true, y_pred)
+        
+    
+    # metric_i = lambnet.metrics.accuracy_test
+    TP = lambnet.metrics.TP
+    FP = lambnet.metrics.FP
+    FN = lambnet.metrics.FN
+    TN = lambnet.metrics.TN
+    sens = lambnet.metrics.sens
+    prec = lambnet.metrics.prec
 
     # todo
-    model.compile(loss = loss_all, #
+    model.compile(loss = loss, #
                   optimizer=optimizer,
-                  metrics=['accuracy']
+                  metrics=['accuracy', sens, prec]
                   )
     
     filepath = 'foo_weight.h5'
@@ -89,19 +103,25 @@ def main():
 
     #TODO
     if True:
-        model.fit(X_train, Y_train,
-                  batch_size=32, epochs=1, verbose=1,
+        model.fit(X_train[:10000, ...], Y_train[:10000, ...],
+                  batch_size=64, epochs=1, verbose=1, shuffle= True,
                   validation_data=(X_test, Y_test))
 
 
-    model.save_weights(filepath)
+    model.save_weights(filepath, )
     
   
     # lambnet.
 
     # print(model.summary())
 
-    score = model.evaluate(X_test, Y_test, verbose=0)
+    from keras import backend as K
+    
+    K.function()
+    
+    model.output()
+
+    score = model.evaluate(X_test, Y_test, batch_size=100, verbose=0)
     print(score)
     
 
