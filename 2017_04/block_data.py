@@ -196,53 +196,49 @@ def raw2data_gen(raw_list, width, ext):
 
     
 def data_train(width, ext):
+
+    list_ex = [ex_raw_zach, ex_raw_hand_close, ex_raw_zach_close]
+
+    # raw_list = [ex_raw_zach(), ex_raw_hand_close(), ex_raw_zach_close()]
+
+    import time
+
+    # todo augmentation on each element
+
+    start = time.time()
     
+    raw_list = []
+    for ex_i in range(3):
+        for mir_i in range(2):
+            for rot_i in range(4):
+                name = "data_train_{}_{}_{}.p".format(ex_i, mir_i, rot_i)
+                if bool_new_data:
                 
-    # if bool_new_data:
-        list_ex = [ex_raw_zach, ex_raw_hand_close, ex_raw_zach_close]
+                    raw_list_i = list_ex[ex_i]()
+                    raw_list_i.rotate(rot_i)
+                    if mir_i:
+                        raw_list_i.mir()
+
+                    pickle.dump(raw_list_i, open(save_path + name, "wb"))
+                else:
+                    raw_list_i = pickle.load(open(save_path + name, "rb"))
+                        
+                raw_list.append(raw_list_i)
+                
+                
+
+    end = time.time()
+    print('time1: {}'.format(end - start))
     
-        # raw_list = [ex_raw_zach(), ex_raw_hand_close(), ex_raw_zach_close()]
+    start = time.time()
 
-        import time
+    a = raw2data_gen(raw_list, width, ext)
 
-        # todo augmentation on each element
-
-        start = time.time()
-        
-        raw_list = []
-        for ex_i in range(3):
-            for mir_i in range(2):
-                for rot_i in range(4):
-                    name = "data_train_{}_{}_{}.p".format(ex_i, mir_i, rot_i)
-                    if bool_new_data:
-                    
-                        raw_list_i = list_ex[ex_i]()
-                        raw_list_i.rotate(rot_i)
-                        if mir_i:
-                            raw_list_i.mir()
-
-                        pickle.dump(raw_list_i, open(save_path + name, "wb"))
-                    else:
-                        raw_list_i = pickle.load(open(save_path + name, "rb"))
-                            
-                    raw_list.append(raw_list_i)
-                    
-                    
-
-        end = time.time()
-        print('time1: {}'.format(end - start))
-        
-        start = time.time()
-
-        a = raw2data_gen(raw_list, width, ext)
-
-        end = time.time()
-        print('time1: {}'.format(end - start))
-        
-        # pickle.dump(a, open(save_path + name, "wb"))
-        return a
-    # else:
-    #     return pickle.load( open(save_path + name, "rb" ) )
+    end = time.time()
+    print('time1: {}'.format(end - start))
+    
+    # pickle.dump(a, open(save_path + name, "wb"))
+    return a
 
 
 def data_valid(width, ext):
