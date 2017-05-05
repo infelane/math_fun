@@ -354,7 +354,7 @@ class Layers1():
                     input_i = tf.concat([in_place, self.list_a[0][:, 2:-2, 2:-2, :]], axis = 3)
                     layer = ConvLayer(input_i, W, b)
                 
-                if layer_type == 'last':
+                elif layer_type == 'last':
                     shape_W = [kernel_size[index][0], kernel_size[index][1],
                                self.kernel_depth[index], self.kernel_depth[index + 1]]
         
@@ -363,8 +363,8 @@ class Layers1():
                     layer = LastLayer(in_place, W)
         
                     self.var.update({W.name: W})
-                
-                if layer_type == 'conv':
+
+                elif layer_type == 'conv':
                     shape_W = [kernel_size[index][0], kernel_size[index][1],
                                self.kernel_depth[index], self.kernel_depth[index+1]]
                     shape_b = [1, 1, 1, self.kernel_depth[index + 1]]
@@ -383,8 +383,8 @@ class Layers1():
                         # This Variable will hold the state of the weights for the layer
                         with tf.name_scope('weight'):
                             variable_summaries(W)
-                
-                if layer_type == 'deconv':
+
+                elif layer_type == 'deconv':
                     shape_W = [kernel_size[index][0], kernel_size[index][1],
                                self.kernel_depth[index + 1], self.kernel_depth[index]]
                     
@@ -396,8 +396,8 @@ class Layers1():
                     layer = DeConvLayer(in_place, W, shape_out)
                     
                     self.var.update({W.name: W})
-                
-                if layer_type == 'convrgb':
+
+                elif layer_type == 'convrgb':
                     stddev = 0.01
                     
                     shape = (self.layer_size[index][0] * self.layer_size[index][0] * self.kernel_depth[index],
@@ -412,7 +412,7 @@ class Layers1():
                     self.var.update({W.name: W})
                     
                 # convolution were the input and output shape stays the same
-                if layer_type == 'convsame':
+                elif layer_type == 'convsame':
                     shape_W = [kernel_size[index][0], kernel_size[index][1],
                                self.kernel_depth[index], self.kernel_depth[index + 1]]
     
@@ -432,15 +432,15 @@ class Layers1():
                         # This Variable will hold the state of the weights for the layer
                         with tf.name_scope('weight'):
                             variable_summaries(W)
-    
-                if layer_type == 'conv1':
+
+                elif layer_type == 'conv1':
        
                     layer = ConvLayer1(in_place, kernel_size[index],
                                        self.kernel_depth[index: index+2], index)
                     
                     self.var.update(layer.vars)
-    
-                if layer_type == 'convsameflat':
+
+                elif layer_type == 'convsameflat':
                     shape_W = [1, kernel_size[index][1],
                                self.kernel_depth[index], self.kernel_depth[index + 1]]
         
@@ -454,9 +454,8 @@ class Layers1():
         
                     self.var.update({W.name: W})
                     self.var.update({b.name: b})
-                    
-    
-                if layer_type == 'deconvsame':
+
+                elif layer_type == 'deconvsame':
                     shape_W = [kernel_size[index][0], kernel_size[index][1],
                                self.kernel_depth[index + 1], self.kernel_depth[index]]
     
@@ -468,8 +467,8 @@ class Layers1():
                     layer = DeConvLayer(in_place, W, shape_out, padding = "SAME")
     
                     self.var.update({W.name: W})
-                    
-                if layer_type == 'softmax':
+
+                elif layer_type == 'softmax':
                     kernel_size_i = kernel_size[index]
                     kernel_depth_i = self.kernel_depth[index : index+2]
                     layer_size_out = self.layer_size[index + 1]
@@ -479,8 +478,8 @@ class Layers1():
                     self.var.update(layer.vars)
                     
                     self.log_out = layer.get_log_out()
-    
-                if layer_type == 'softmaxsame':
+
+                elif layer_type == 'softmaxsconv':
                     kernel_size_i = kernel_size[index]
                     kernel_depth_i = self.kernel_depth[index: index + 2]
                     layer_size_out = self.layer_size[index + 1]
@@ -490,6 +489,10 @@ class Layers1():
                     self.var.update(layer.vars)
         
                     self.log_out = layer.get_log_out()
+                    
+                else:
+                    errmsg = "Unknown layer type: " + layer_type
+                    raise (ValueError(errmsg))
     
                 in_place = layer.get_output()
                 self.list_a.append(in_place)

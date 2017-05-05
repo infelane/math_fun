@@ -1,7 +1,10 @@
 import keras
+from keras import backend as K
+import lambnet
 
 def stack(layers_foo):
-    model = keras.models.Sequential()
+    model = lambnet.models.Sequential()
+    # model = keras.models.Sequential()
 
     # todo
     input_shape = list(layers_foo.layer_size[0]) + [layers_foo.kernel_depth[0]]
@@ -13,8 +16,8 @@ def stack(layers_foo):
         kernel_size = layers_foo.kernel_size[index]
 
         if layer_type == 'conv':
-     
-            layer_i = keras.layers.Conv2D(filters, kernel_size, padding='valid', activation = 'relu',input_shape = input_shape) # same as Convolution2D
+            activation = K.elu # https://arxiv.org/pdf/1511.07289.pdf
+            layer_i = keras.layers.Conv2D(filters, kernel_size, padding='valid', activation = activation,input_shape = input_shape) # same as Convolution2D
                 
         # elif if layer_type == 'conv':
         
