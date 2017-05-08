@@ -3,6 +3,7 @@
 
 import keras
 import lambnet
+from keras import backend as K
 
 import os, sys
 import numpy as np
@@ -45,15 +46,13 @@ def main():
     model = lambnet.block_builder.stack(layers)
 
     optimizer = {'class_name': 'adam', 'config': {'lr': 1.0e-4}} #otherwise  = 'adam'
-    # optimizer = 'adam'
-    loss = 'categorical_crossentropy' # TODO find out if I can change this: loss = {'class_name': 'categorical_crossentropy', 'config' : {}}
+    # loss = 'categorical_crossentropy' # TODO find out if I can change this: loss = {'class_name': 'categorical_crossentropy', 'config' : {}}
     # loss = [loss, loss]
     
     import functools
 
     # todo
     def w_categorical_crossentropy(y_true, y_pred, weights = np.ones((2,))):
-        import keras.backend as K
         
         # nb_cl = len(weights)
         
@@ -92,7 +91,7 @@ def main():
     prec = lambnet.metrics.prec
 
     # todo
-    model.compile(loss = loss, #
+    model.compile(loss = loss,
                   optimizer=optimizer,
                   metrics=['accuracy', sens, prec]
                   )
@@ -103,27 +102,34 @@ def main():
 
     #TODO
     if True:
-        model.fit(X_train[:10000, ...], Y_train[:10000, ...],
-                  batch_size=64, epochs=1, verbose=1, shuffle= True,
-                  validation_data=(X_test, Y_test))
+        epochs = 10
+        for i in range(epochs):
+            print('epoch {}/{}'.format(i, epochs))
+            model.fit(X_train[:1000, ...], Y_train[:1000, ...],
+                      batch_size=64, epochs=1, verbose=1, shuffle= False,
+                      validation_data=(X_test, Y_test) )
 
+        model.save_weights(filepath)
+    model.save_weights(filepath)
 
-    model.save_weights(filepath, )
-    
-  
-    # lambnet.
-
-    # print(model.summary())
-
-    from keras import backend as K
-    
-    K.function()
-    
-    model.output()
-
-    score = model.evaluate(X_test, Y_test, batch_size=100, verbose=0)
-    print(score)
-    
+    # # lambnet.
+    #
+    # # print(model.summary())
+    #
+    #
+    # get_last_layer_output = K.function([model.layers[0].input], [model.layers[-1].output])
+    #
+    # print(get_last_layer_output([X_test])[0])
+    # #
+    # score = model.evaluate(X_test, Y_test, batch_size=100, verbose=0)
+    # print(score)
+    # #
+    info = lambnet.block_info.Info(model)
+    # #
+    # info.output_test(8, 7)
+    # #
+    info.output_vis(8, 7)
+    #
 
 if __name__ == '__main__':
     main()

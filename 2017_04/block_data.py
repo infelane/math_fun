@@ -7,12 +7,12 @@ import sys, os
 import pickle
 
 #own
-folder_loc = '/home/lameeus/Documents/Link to Python/2017_February/super_res_challenge'
+folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_February/super_res_challenge'
 cmd_subfolder = os.path.realpath(folder_loc)
 if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
+    
 import data_net
-
 import block_pre
 
 # global settings
