@@ -279,7 +279,7 @@ def test_data(set, width, ext, bool_new_data):
         # # todo
         # foo.rotate(2)
         
-        ab = (raw_data(foo, width, ext), np.copy(foo.get_image()))
+        ab = (raw_data(foo, width, ext), foo.get_image())
         
         pickle.dump(ab, open(save_path + name, "wb"))
 

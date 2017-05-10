@@ -11,7 +11,7 @@ cmd_subfolder = os.path.realpath(folder_loc)
 if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 import lam_warnings
-import network_eval
+# import network_eval
 
 # Abstract class
 from abc import ABCMeta

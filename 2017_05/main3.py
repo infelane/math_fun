@@ -13,10 +13,11 @@ folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_January/tensorf
 cmd_subfolder = os.path.realpath(folder_loc)
 if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
-import config_lamb
+# import config_lamb
 import data
 
 import pickle
+import config3
 
 
 load_prev = True
@@ -41,11 +42,12 @@ def main():
     X_test = batch_test.x
     Y_test = batch_test.y
     
-    layers = config_lamb.nn4()
+    flag = config3.flag()
+    layers = config3.nn()
     
     model = lambnet.block_builder.stack(layers)
-
-    optimizer = {'class_name': 'adam', 'config': {'lr': 1.0e-4}} #otherwise  = 'adam'
+    
+    optimizer = {'class_name': 'adam', 'config': {'lr': flag.lr}} #otherwise  = 'adam'
     # loss = 'categorical_crossentropy' # TODO find out if I can change this: loss = {'class_name': 'categorical_crossentropy', 'config' : {}}
     # loss = [loss, loss]
     
@@ -71,9 +73,9 @@ def main():
         cost = -tf.reduce_mean(a)
         return cost
     
-    # loss = functools.partial(w_categorical_crossentropy, ) # to add aditional parameters
-    
-    loss = w_categorical_crossentropy
+    loss = lambda a, b : w_categorical_crossentropy(a, b, weights=np.asarray(layers.w_c))
+    # loss = functools.partial(w_categorical_crossentropy, weights = ) # to add aditional parameters
+    # loss = w_categorical_crossentropy
     
     # def metric_foo(y_true, y_pred):
     #
@@ -97,20 +99,35 @@ def main():
                   )
     
     filepath = 'foo_weight.h5'
+    
+    file_pre = '/scratch/Downloads_local/vgg16_weights.h5'
 
-    model.load_weights(filepath)
 
+    if flag.bool_prev:
+        model.load_weights(filepath, layer_i = [0,3])
+        # model.load_weights(file_pre)
+
+    checkpoint = keras.callbacks.ModelCheckpoint(filepath, verbose=0,
+                                    save_weights_only=True, period=1)
+
+    callbacks_list = [checkpoint]
+    
     #TODO
     if True:
-        epochs = 10
+        epochs = 1
         for i in range(epochs):
             print('epoch {}/{}'.format(i, epochs))
-            model.fit(X_train[:1000, ...], Y_train[:1000, ...],
-                      batch_size=64, epochs=1, verbose=1, shuffle= False,
-                      validation_data=(X_test, Y_test) )
+            model.fit(X_train, Y_train,
+                      batch_size=64, epochs=1, verbose=1, shuffle=True,
+                      validation_data=(X_test, Y_test), callbacks=callbacks_list)
 
-        model.save_weights(filepath)
-    model.save_weights(filepath)
+            # model.save_weights('foo_weight.h5')
+
+            # model.save_weights('foo_weight.h5', layer_i=[0, 3])
+            # model.save_weights('foo_weight_0.h5', layer_i = [0,2])
+
+    #     model.save_weights(filepath)
+    # model.save_weights(filepath)
 
     # # lambnet.
     #
@@ -125,11 +142,12 @@ def main():
     # print(score)
     # #
     info = lambnet.block_info.Info(model)
-    # #
-    # info.output_test(8, 7)
-    # #
+
+    # info.output_test(8, 7, set='hand')
+    # info.output_test(8, 7, set='zach')
+    
     info.output_vis(8, 7)
-    #
+    
 
 if __name__ == '__main__':
     main()

@@ -1,5 +1,7 @@
 # All config
 
+import lambnet.layer.LayerConfig as LayerConfig
+
 # Settings
 class FLAGS1():
     lr = 1.0e-6
@@ -79,24 +81,4 @@ def layer_config_fus0():
     return LayerConfig(layer_size, kernel_size, kernel_depth, layer_types)
 
 
-# Some classes
-class LayerConfig():
-    def __init__(self, layer_size, kernel_size, kernel_depth, layer_types, cost = None, k = None, r = None):
-        self.layer_size = layer_size
-        self.kernel_size = kernel_size
-        self.kernel_depth = kernel_depth
-        self.layer_types = layer_types
-        if cost == 'xentropy':
-            self.cost = cost
-        elif cost == 'wxentropy':
-            self.cost = cost
-            self.w_c = ((r + 1)/(r + k) , k*(r+1)/(r + k))
-        else:
-            self.cost = 'l2'
 
-    def x_shape(self):
-        return [None, self.layer_size[0][0], self.layer_size[0][1], self.kernel_depth[0]]
-
-    def y_shape(self):
-        return [None, self.layer_size[-1][0], self.layer_size[-1][1], self.kernel_depth[-1]]
-    

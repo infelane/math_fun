@@ -2,7 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 #own libraries
-import data_net_sr
 import copy
 
 np.random.seed(seed=0)
@@ -22,6 +21,7 @@ class Data():
         self.im_out = im_out
         
         if bool_tophat:
+            import data_net_sr
             self.im_in_gausshat = data_net_sr.tophatblur(self.im_in)
         
         self.bool_residue = bool_residue
@@ -43,7 +43,7 @@ class Data():
         # generate the patches
         self.images2patches()
                     
-    def patches2images(self, out_patches):
+    def patches2images(self, out_patches, normalize = True):
         
         if self.colors_sep:
             shape = np.shape(out_patches)
@@ -78,9 +78,12 @@ class Data():
         if self.bool_residue == True:   # add residue to input
             im_gen = self.im_in + im_gen
 
-        return self._normalization(im_gen)
+        if normalize:
+            return self._normalization(im_gen)
+        else:
+            return im_gen
     
-    def right_patches2images(self, out_patches):
+    def right_patches2images(self, out_patches, normalize = True):
     
         if self.colors_sep:
             shape = np.shape(out_patches)
@@ -91,20 +94,29 @@ class Data():
                 out_patches_star[..., color_i] = out_patches[:, color_i, :, :]
             out_patches = out_patches_star
             
-        return self._normalization(out_patches)
+        if normalize:
+            return self._normalization(out_patches)
+        else:
+            return out_patches
     
-    def bot_patches2images(self, out_patches):
+    def bot_patches2images(self, out_patches, normalize = True):
         
         if self.colors_sep:
             out_patches = self._color_sep(out_patches)
     
-        return self._normalization(out_patches)
+        if normalize:
+            return self._normalization(out_patches)
+        else:
+            return out_patches
     
-    def botright_patch2image(self, out_patch):
+    def botright_patch2image(self, out_patch, normalize = True):
         if self.colors_sep:
             out_patch = self._color_sep(out_patch)
             
-        return self._normalization(out_patch)
+        if normalize:
+            return self._normalization(out_patch)
+        else:
+            return out_patch
     
     def _color_sep(self, out_patches):
         shape = np.shape(out_patches)
