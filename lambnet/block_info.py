@@ -29,7 +29,7 @@ class Info():
 #     # todo write summaries
 #     def foo_summary(self):
 #         ...
-#
+
     def acc_summ(self, truth, pred):
         def bar(a, b):
             return np.sum(np.logical_and(a, b))
@@ -69,25 +69,31 @@ class Info():
             shape_i = np.shape(output_i)
             ext_i = int((shape_i[1].value - width)/2.0)
         
-            outs.append(output_i[...,ext_i:width+ext_i, ext_i:width+ext_i, 0:1])
+            outs.append(output_i[...,ext_i:width+ext_i, ext_i:width+ext_i, :])
             
         func = K.function([self.model.layers[0].input], outs)
         
         generated_im = gen_image(func, data_input)
 
+        n_depth = np.shape(generated_im)[-1]
+
         gen_im = []
 
-        for im_i in range(n_depth):
-            gen_im.append(generated_im[..., im_i])
+        for i_im in range(n_depth):
+            gen_im.append(generated_im[..., i_im])
 
         win_h = [400, 200]
         win_w = [200, 400]
 
+        save_folder = '/media/lameeus/TOSHIBA/'
+
+        from scipy.misc import imsave
+
         plt.figure()
-        for im_i in range(n_depth):
-            plt.subplot(3, 4, im_i+1)
+        for i_im in range(n_depth):
+            plt.subplot(5, 5, i_im+1)
     
-            gen_im_i = gen_im[im_i]
+            gen_im_i = gen_im[i_im]
 
             # mean = np.mean(gen_im_i)
             # std = np.std(gen_im_i)
@@ -100,9 +106,13 @@ class Info():
             
             plt.imshow(gen_im_i, cmap='seismic')
 
-            plt.axis([win_w[0], win_w[1], win_h[0], win_h[1]])
+            # plt.axis([win_w[0], win_w[1], win_h[0], win_h[1]])
             
-            plt.title('layer {}'.format(im_i + 1))
+            plt.title('layer {}'.format(i_im + 1))
+
+            imsave(save_folder + 'grey_{}.png'.format(i_im), gen_im_i)
+            
+            
         
         plt.show()
         plt.title('layer 10b')

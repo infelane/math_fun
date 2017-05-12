@@ -1,18 +1,16 @@
 # should be cleaner than main2
 # probs will convert everything to keras
 
+import os
+import sys
+
 import keras
-import lambnet
 
 # some_file.py
-import sys
 # sys.path.insert(0, '/ipi/private/lameeus/private_Documents')
 # from ipi.private.lameeus.private_Documents import keras_ipi
 import keras_ipi
-from keras import backend as K
-
-import os, sys
-import numpy as np
+import lambnet
 
 #3th party
 folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_January/tensorflow_folder'
@@ -61,16 +59,14 @@ def main():
     #
     # keras.losses.categorical_crossentropy
     
-    # loss = lambnet.losses.weigthed_crossentropy(layers.w_c)
     loss = keras_ipi.losses.weigthed_crossentropy(layers.w_c)
     
-    # metric_i = lambnet.metrics.accuracy_test
-    TP = lambnet.metrics.TP
-    FP = lambnet.metrics.FP
-    FN = lambnet.metrics.FN
-    TN = lambnet.metrics.TN
-    sens = lambnet.metrics.sens
-    prec = lambnet.metrics.prec
+    TP = keras_ipi.metrics.TP
+    FP = keras_ipi.metrics.FP
+    FN = keras_ipi.metrics.FN
+    TN = keras_ipi.metrics.TN
+    sens = keras_ipi.metrics.sens
+    prec = keras_ipi.metrics.prec
 
     # todo
     model.compile(loss = loss,
@@ -84,7 +80,7 @@ def main():
 
 
     if flag.bool_prev:
-        model.load_weights(filepath, layer_i = [0,3])
+        model.load_weights(filepath, layer_i = None)
         # model.load_weights(file_pre)
 
     checkpoint = keras.callbacks.ModelCheckpoint(filepath, verbose=0,
@@ -101,15 +97,9 @@ def main():
                       batch_size=64, epochs=1, verbose=1, shuffle=True,
                       validation_data=(X_test, Y_test), callbacks=callbacks_list)
 
-            # model.save_weights('foo_weight.h5')
-
-            # model.save_weights('foo_weight.h5', layer_i=[0, 3])
-            # model.save_weights('foo_weight_0.h5', layer_i = [0,2])
 
     #     model.save_weights(filepath)
     # model.save_weights(filepath)
-
-    # # lambnet.
     #
     # # print(model.summary())
     #
@@ -126,7 +116,7 @@ def main():
     # info.output_test(8, 7, set='hand')
     # info.output_test(8, 7, set='zach')
     
-    info.output_vis(8, 7)
+    # info.output_vis(8, 7)
     
 
 if __name__ == '__main__':

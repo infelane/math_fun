@@ -111,7 +111,7 @@ for i in range(20000):
     print("step %d, training accuracy %g, tr cost = %g"%(i, train_accuracy, tr_cost))
 
     # foo = cost_LAM.eval(feed_dict=feed_dict)
-    # sum_and = cost.eval(feed_dict=feed_dict)
+    # _sum_and = cost.eval(feed_dict=feed_dict)
     # print(foo)
     # print(sum_and)
 
