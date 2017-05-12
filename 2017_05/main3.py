@@ -3,6 +3,12 @@
 
 import keras
 import lambnet
+
+# some_file.py
+import sys
+# sys.path.insert(0, '/ipi/private/lameeus/private_Documents')
+# from ipi.private.lameeus.private_Documents import keras_ipi
+import keras_ipi
 from keras import backend as K
 
 import os, sys
@@ -45,44 +51,18 @@ def main():
     flag = config3.flag()
     layers = config3.nn()
     
-    model = lambnet.block_builder.stack(layers)
-    
+    model = keras_ipi.block_builder.stack(layers)
+
     optimizer = {'class_name': 'adam', 'config': {'lr': flag.lr}} #otherwise  = 'adam'
     # loss = 'categorical_crossentropy' # TODO find out if I can change this: loss = {'class_name': 'categorical_crossentropy', 'config' : {}}
     # loss = [loss, loss]
     
-    import functools
-
-    # todo
-    def w_categorical_crossentropy(y_true, y_pred, weights = np.ones((2,))):
-        
-        # nb_cl = len(weights)
-        
-        # from itertools import product
-        # final_mask = K.zeros_like(y_pred[..., 0])
-        # y_pred_max = K.max(y_pred, axis=1)
-        # y_pred_max = K.expand_dims(y_pred_max, 1)
-        # y_pred_max_mat = K.equal(y_pred, y_pred_max)
-        # for c_p, c_t in product(range(nb_cl), range(nb_cl)):
-        #     final_mask += (
-        #     K.cast(weights[c_t, c_p], K.floatx()) * K.cast(y_pred_max_mat[:, c_p], K.floatx()) * K.cast(y_true[..., c_t],
-        #                                                                                                 K.floatx()))
-        # return K.categorical_crossentropy(y_pred, y_true) * final_mask
-        import tensorflow as tf
-        a = tf.multiply(y_true * tf.log(y_pred), weights) # tf.cast(weights, dtype=tf.float32))
-        cost = -tf.reduce_mean(a)
-        return cost
+    # import functools
+    #
+    # keras.losses.categorical_crossentropy
     
-    loss = lambda a, b : w_categorical_crossentropy(a, b, weights=np.asarray(layers.w_c))
-    # loss = functools.partial(w_categorical_crossentropy, weights = ) # to add aditional parameters
-    # loss = w_categorical_crossentropy
-    
-    # def metric_foo(y_true, y_pred):
-    #
-    #
-    #
-    #     return keras.metrics.categorical_accuracy(y_true, y_pred)
-        
+    # loss = lambnet.losses.weigthed_crossentropy(layers.w_c)
+    loss = keras_ipi.losses.weigthed_crossentropy(layers.w_c)
     
     # metric_i = lambnet.metrics.accuracy_test
     TP = lambnet.metrics.TP
