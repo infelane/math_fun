@@ -4,7 +4,7 @@ import keras_ipi
 class flag():
     bool_prev = True   # Load previous
     lr = 1.0e-1     # learning rate
-    epochs = 0
+    epochs = 1
     
 
 def nn():
