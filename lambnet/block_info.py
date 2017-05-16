@@ -54,7 +54,7 @@ class Info():
     
     def output_vis(self, width, ext):
         set = 'zach'
-        set = 'hand'
+        # set = 'hand'
     
         data_input, map = block_data.test_data(set, width, ext, bool_new_data=False)
         
@@ -110,7 +110,7 @@ class Info():
             
             plt.title('layer {}'.format(i_im + 1))
 
-            imsave(save_folder + 'grey_{}.png'.format(i_im), gen_im_i)
+            # imsave(save_folder + 'grey_{}.png'.format(i_im), gen_im_i)
             
             
         

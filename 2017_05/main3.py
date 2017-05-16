@@ -12,6 +12,9 @@ import keras
 import keras_ipi
 import lambnet
 
+
+import config3
+
 #3th party
 folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_January/tensorflow_folder'
 cmd_subfolder = os.path.realpath(folder_loc)
@@ -21,7 +24,6 @@ if cmd_subfolder not in sys.path:
 import data
 
 import pickle
-import config3
 
 
 load_prev = True
@@ -52,14 +54,15 @@ def main():
     model = keras_ipi.block_builder.stack(layers)
 
     optimizer = {'class_name': 'adam', 'config': {'lr': flag.lr}} #otherwise  = 'adam'
-    # loss = 'categorical_crossentropy' # TODO find out if I can change this: loss = {'class_name': 'categorical_crossentropy', 'config' : {}}
-    # loss = [loss, loss]
     
-    # import functools
-    #
+    # loss = 'categorical_crossentropy' # TODO find out if I can change this: loss = {'class_name': 'categorical_crossentropy', 'config' : {}}
     # keras.losses.categorical_crossentropy
     
     loss = keras_ipi.losses.weigthed_crossentropy(layers.w_c)
+    # loss = keras.losses.categorical_crossentropy
+    # loss = keras.losses.mean_squared_error
+    # loss = keras.losses.mean_absolute_error
+    # loss = 'categorical_crossentropy'
     
     TP = keras_ipi.metrics.TP
     FP = keras_ipi.metrics.FP
@@ -76,25 +79,39 @@ def main():
     
     filepath = 'foo_weight.h5'
     
-    file_pre = '/scratch/Downloads_local/vgg16_weights.h5'
+    # file_pre = '/scratch/Downloads_local/vgg16_weights.h5'
 
 
     if flag.bool_prev:
-        model.load_weights(filepath, layer_i = None)
+        model.load_weights(filepath, depth = 2)
         # model.load_weights(file_pre)
 
     checkpoint = keras.callbacks.ModelCheckpoint(filepath, verbose=0,
                                     save_weights_only=True, period=1)
+    
+    # summary = keras.callbacks.RemoteMonitor(root = 'http://localhost:9000',
+    #                                         path = '/scratch/lameeus/data/lamb/summ_keras/',
+    #                                         field='data',
+    #                                         headers = None)
 
-    callbacks_list = [checkpoint]
+    summary = keras.callbacks.TensorBoard(log_dir='/scratch/lameeus/data/lamb/summ_keras/',
+                                          histogram_freq=1,
+                                          write_graph=False,
+                                          write_images=False,
+                                          embeddings_freq=0,
+                                          embeddings_layer_names=None,
+                                          embeddings_metadata=None)
+
+    callbacks_list = [checkpoint, summary]
     
     #TODO
     if True:
-        epochs = 1
+        epochs = flag.epochs
         for i in range(epochs):
             print('epoch {}/{}'.format(i, epochs))
-            model.fit(X_train, Y_train,
+            model.fit(X_train[:100000, ...], Y_train[:100000, ...],
                       batch_size=64, epochs=1, verbose=1, shuffle=True,
+                      # class_weight= (1.0, 10.0),
                       validation_data=(X_test, Y_test), callbacks=callbacks_list)
 
 
@@ -117,6 +134,10 @@ def main():
     # info.output_test(8, 7, set='zach')
     
     # info.output_vis(8, 7)
+
+    # keras_ipi.
+    
+    keras_ipi.results.roc(model, X_test, Y_test)
     
 
 if __name__ == '__main__':
