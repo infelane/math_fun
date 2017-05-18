@@ -3,8 +3,8 @@ import keras_ipi
 
 class flag():
     bool_prev = True   # Load previous
-    lr = 1.0e-1     # learning rate
-    epochs = 1
+    lr = 1.0e-2     # learning rate
+    epochs = 10
     
 
 def nn():
