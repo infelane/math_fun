@@ -26,10 +26,11 @@ import data
 import pickle
 
 
-load_prev = True
+load_prev = True #TODO set to True
 def main():
     if load_prev:
         batch_train = pickle.load(open("batch_train.p", "rb"))
+        batch_vali = pickle.load(open("batch_vali.p", "rb"))
         batch_test = pickle.load(open("batch_test.p", "rb"))
         
     else:
@@ -37,14 +38,18 @@ def main():
         data_all = data.ground_truth(width=width, ext=7)
         
         batch_train = data_all[0].next_batch(100000)
-        batch_test = data_all[1].get_test_data()
+        batch_vali = data_all[1].next_batch(10000)
+        batch_test = data_all[2].next_batch(10000)
     
         pickle.dump(batch_train, open("batch_train.p", "wb"))
+        pickle.dump(batch_vali, open("batch_vali.p", "wb"))
         pickle.dump(batch_test, open("batch_test.p", "wb"))
 
     # todo
     X_train = batch_train.x
     Y_train = batch_train.y
+    X_vali = batch_vali.x
+    Y_vali = batch_vali.y
     X_test = batch_test.x
     Y_test = batch_test.y
     
@@ -53,12 +58,12 @@ def main():
     
     model = keras_ipi.block_builder.stack(layers)
 
-    optimizer = {'class_name': 'adam', 'config': {'lr': flag.lr}} #otherwise  = 'adam'
+    optimizer = {'class_name': 'adam', 'config': {'lr': flag.lr, 'beta_1': flag.beta}} #otherwise  = 'adam'
     
     # loss = 'categorical_crossentropy' # TODO find out if I can change this: loss = {'class_name': 'categorical_crossentropy', 'config' : {}}
     # keras.losses.categorical_crossentropy
     
-    loss = keras_ipi.losses.weigthed_crossentropy(layers.w_c)
+    loss = keras_ipi.losses.weigthed_crossentropy(k = layers['k'], r = layers['r'])
     # loss = keras.losses.categorical_crossentropy
     # loss = keras.losses.mean_squared_error
     # loss = keras.losses.mean_absolute_error
@@ -83,7 +88,8 @@ def main():
 
 
     if flag.bool_prev:
-        model.load_weights(filepath, depth = 2)
+        depth = len(model.layers)
+        model.load_weights(filepath, depth = depth)
         # model.load_weights(file_pre)
 
     checkpoint = keras.callbacks.ModelCheckpoint(filepath, verbose=0,
@@ -110,16 +116,23 @@ def main():
         for i in range(epochs):
             print('epoch {}/{}'.format(i, epochs))
             model.fit(X_train[:100000, ...], Y_train[:100000, ...],
-                      batch_size=64, epochs=1, verbose=1, shuffle=True,
+                      batch_size=flag.batch_size, epochs=1,  shuffle=True,
+                      verbose=1,    # how much information to show 1 much or 0, nothing
                       # class_weight= (1.0, 10.0),
                       validation_data=(X_test, Y_test), callbacks=callbacks_list)
 
+            score = model.evaluate(X_train, Y_train, batch_size=flag.batch_size, verbose=0)
+            print(score)
+            score = model.evaluate(X_test, Y_test, batch_size=flag.batch_size, verbose=0)
+            print(score)
+
+            keras_ipi.results.roc(model, X_vali, Y_vali, auc_only=True) # hand
+            keras_ipi.results.roc(model, X_test, Y_test, auc_only=True) # Zach
 
     #     model.save_weights(filepath)
     # model.save_weights(filepath)
     #
     # # print(model.summary())
-    #
     #
     # get_last_layer_output = K.function([model.layers[0].input], [model.layers[-1].output])
     #
@@ -127,18 +140,22 @@ def main():
     # #
     # score = model.evaluate(X_test, Y_test, batch_size=100, verbose=0)
     # print(score)
-    # #
+    
     info = lambnet.block_info.Info(model)
 
     # info.output_test(8, 7, set='hand')
     # info.output_test(8, 7, set='zach')
-    
+
     # info.output_vis(8, 7)
 
     # keras_ipi.
-    
-    keras_ipi.results.roc(model, X_test, Y_test)
-    
+    import numpy as np
+    print(np.shape(X_train)[0])
+
+    # keras_ipi.results.roc(model, X_train[11000:12000], Y_train[11000:12000], auc_only=False)
+    # keras_ipi.results.roc(model, X_vali, Y_vali, auc_only = False)   # hand
+    # keras_ipi.results.roc(model, X_test, Y_test, auc_only = False)   # Zach
+
 
 if __name__ == '__main__':
     main()

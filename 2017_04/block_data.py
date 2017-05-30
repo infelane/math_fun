@@ -17,7 +17,7 @@ import block_pre
 
 # global settings
 save_path = '/scratch/lameeus/data/lamb/xy/'
-bool_new_data = False
+bool_new_data = False   # TODO set to False
 
 # raw data example
 def raw_data(ex_raw_data, width, ext): #(ex_raw_data_i):
@@ -255,6 +255,20 @@ def data_valid(width, ext):
     else:
         return pickle.load( open(save_path + name, "rb" ) )
 
+
+def data_test(width, ext):
+    name = "data_test.p"
+    
+    if bool_new_data:
+        
+        raw_list = [ex_raw_zach()]
+        
+        a = raw2data_gen(raw_list, width, ext)
+        
+        pickle.dump(a, open(save_path + name, "wb"))
+        return a
+    else:
+        return pickle.load(open(save_path + name, "rb"))
 
 def test_data(set, width, ext, bool_new_data):
     """

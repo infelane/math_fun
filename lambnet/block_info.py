@@ -91,7 +91,10 @@ class Info():
 
         plt.figure()
         for i_im in range(n_depth):
-            plt.subplot(5, 5, i_im+1)
+            # plt.subplot(5, 5, i_im+1)
+
+            plt.figure()
+            plt.subplot(1, 1, 1)
     
             gen_im_i = gen_im[i_im]
 

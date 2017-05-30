@@ -32,15 +32,16 @@ if cmd_subfolder not in sys.path:
 import block_data
 
   
-# todo return train, validation and test data
+# todo return test data
 def ground_truth(width = 16, ext = 0):
     
     a = block_data.data_train(width, ext)
-    
+
     # todo validation data
     b = block_data.data_valid(width, ext)
+    c = block_data.data_test(width, ext)
     
-    return (a, b, a)
+    return (a, b, c)
 
 
 def data_ex2(new = True, ext_in = 1, ext_out = 0, n_i = 10000):
