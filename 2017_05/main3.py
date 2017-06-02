@@ -46,17 +46,21 @@ def main():
         pickle.dump(batch_test, open("batch_test.p", "wb"))
 
     # todo
-    X_train = batch_train.x
-    Y_train = batch_train.y
-    X_vali = batch_vali.x
-    Y_vali = batch_vali.y
-    X_test = batch_test.x
-    Y_test = batch_test.y
+    # subset
+    n_subset = 100000 # 10000 for small subset, 100000 for all
+    X_train = batch_train.x[:n_subset]
+    Y_train = batch_train.y[:n_subset]
+    X_vali = batch_vali.x[:n_subset]
+    Y_vali = batch_vali.y[:n_subset]
+    X_test = batch_test.x[:n_subset]
+    Y_test = batch_test.y[:n_subset]
     
     flag = config3.flag()
     layers = config3.nn()
     
     model = keras_ipi.block_builder.stack(layers)
+    
+    print(model.summary())
 
     optimizer = {'class_name': 'adam', 'config': {'lr': flag.lr, 'beta_1': flag.beta}} #otherwise  = 'adam'
     
@@ -115,19 +119,19 @@ def main():
         epochs = flag.epochs
         for i in range(epochs):
             print('epoch {}/{}'.format(i, epochs))
-            model.fit(X_train[:100000, ...], Y_train[:100000, ...],
+            model.fit(X_train, Y_train,
                       batch_size=flag.batch_size, epochs=1,  shuffle=True,
                       verbose=1,    # how much information to show 1 much or 0, nothing
                       # class_weight= (1.0, 10.0),
-                      validation_data=(X_test, Y_test), callbacks=callbacks_list)
+                      validation_data=(X_test[:10000], Y_test[:10000]), callbacks=callbacks_list)
 
-            score = model.evaluate(X_train, Y_train, batch_size=flag.batch_size, verbose=0)
+            score = model.evaluate(X_train[:10000], Y_train[:10000], batch_size=flag.batch_size, verbose=0)
             print(score)
-            score = model.evaluate(X_test, Y_test, batch_size=flag.batch_size, verbose=0)
+            score = model.evaluate(X_test[:10000], Y_test[:10000], batch_size=flag.batch_size, verbose=0)
             print(score)
 
-            keras_ipi.results.roc(model, X_vali, Y_vali, auc_only=True) # hand
-            keras_ipi.results.roc(model, X_test, Y_test, auc_only=True) # Zach
+            keras_ipi.results.roc(model, X_vali[:10000], Y_vali[:10000], auc_only=True) # hand
+            keras_ipi.results.roc(model, X_test[:10000], Y_test[:10000], auc_only=True) # Zach
 
     #     model.save_weights(filepath)
     # model.save_weights(filepath)
@@ -143,14 +147,14 @@ def main():
     
     info = lambnet.block_info.Info(model)
 
-    # info.output_test(8, 7, set='hand')
-    # info.output_test(8, 7, set='zach')
+    info.output_test(8, 7, set='hand')
+    info.output_test(8, 7, set='zach')
 
-    # info.output_vis(8, 7)
-
-    # keras_ipi.
-    import numpy as np
-    print(np.shape(X_train)[0])
+    info.output_vis(8, 7)
+    #
+    # # keras_ipi.
+    # import numpy as np
+    # print(np.shape(X_train)[0])
 
     # keras_ipi.results.roc(model, X_train[11000:12000], Y_train[11000:12000], auc_only=False)
     # keras_ipi.results.roc(model, X_vali, Y_vali, auc_only = False)   # hand

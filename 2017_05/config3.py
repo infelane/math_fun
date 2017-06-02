@@ -3,10 +3,10 @@ import numpy as np
 
 
 class flag():
-    bool_prev = False   # Load previous
-    lr = 2.0e-5    # learning rate
-    beta =0.90    # standard 0.9
-    epochs = 1
+    bool_prev = True   # Load previous
+    lr =1.0e-4  # learning rate
+    beta =0.9    # standard 0.9
+    epochs = 0
     batch_size = 100
     
 
@@ -15,16 +15,16 @@ def nn():
     
     depth = 6
     kernel_width = 3
-    kernel_dep = 100
+    kernel_dep = 2
     
     layer_size_in = [layer_width + 2*7, layer_width + 2*7]
     layer_size_out = [layer_width, layer_width]
 
-    kernel_size = [[kernel_width, kernel_width]] * depth + [[kernel_width, kernel_width]]
-    kernel_depth = [7] + [kernel_dep]*(depth-1) + [100] + [2]
+    kernel_size = [[kernel_width, kernel_width]] * (depth - 1) + [[]]*5 + [[kernel_width, kernel_width]]
+    kernel_depth = [7] + [kernel_dep]*(depth-1) + [0] + [1] + [2] + [3] + [4] + [2]
     
     # layer_types = ['convsame'] * (depth - 1) + ['softmaxsame']
-    layer_types = ['conv'] * (depth - 1) + ['concat'] + ['conv']
+    layer_types = ['conv'] * (depth - 1) + ['concat']*5 + ['conv']
     # layer_types = ['conv'] * (depth - 1) + ['conv']
     
     cost = 'wxentropy'  # 'wxentropy'
@@ -40,14 +40,19 @@ def nn():
     layers = []
     for i_layer in range(len(layer_types)):
         # if layer_types[i_layer] == 'conv':
-        layer_config_i = {'type': layer_types[i_layer],
-                          'depth': kernel_depth[i_layer + 1],
-                          'kernel': kernel_size[i_layer]
+        layer_config_i = {'type': layer_types[i_layer]
                           }
+        
+        if layer_config_i['type'] == 'conv':
+            layer_config_i.update({'depth': kernel_depth[i_layer + 1],
+                                   'kernel': kernel_size[i_layer]
+                                   })
         
         if layer_config_i['type'] == 'concat':
             # TODO select layer to concat with
-            ...
+            layer_config_i.update({'value': kernel_depth[i_layer + 1]
+                                   })
+
             
         #last layer
         if i_layer == (len(layer_types) - 1):

@@ -4,8 +4,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.misc
 import os, sys
+import keras
 import keras.backend as K
-#
+
 folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_04'
 cmd_subfolder = os.path.realpath(folder_loc)
 if cmd_subfolder not in sys.path:
@@ -58,20 +59,21 @@ class Info():
     
         data_input, map = block_data.test_data(set, width, ext, bool_new_data=False)
         
-        n_depth = len(self.model.layers)
+        n_depth = self.model.get_depth()
         
         outs = []
         
         for layer_i in range(n_depth):
             
-            output_i = self.model.layers[layer_i].output
+            output_i = self.model.get_conv_output(layer_i)
+            # output_i = self.model.layers[layer_i].output
             
             shape_i = np.shape(output_i)
             ext_i = int((shape_i[1].value - width)/2.0)
         
             outs.append(output_i[...,ext_i:width+ext_i, ext_i:width+ext_i, :])
             
-        func = K.function([self.model.layers[0].input], outs)
+        func = K.function([self.model.layers[0].input, K.learning_phase()], outs)
         
         generated_im = gen_image(func, data_input)
 
@@ -182,14 +184,14 @@ def gen_image(func, data_input):
     for batch_i in range(batch_amount):
         x = data_input.in_patches()[batch_i * batch_size:(batch_i + 1) * batch_size]
 
-        out_i = np.concatenate(func([x]), axis = -1)
+        out_i = np.concatenate(func([x, 0]), axis = -1)
         out.append(out_i)
     out = np.concatenate(out, axis=0)
     im_lam = data_input.patches2images(out, normalize = False)
 
     # RIGHT
     x = data_input.right_patches().x
-    out = np.concatenate(func([x]), axis = -1)
+    out = np.concatenate(func([x, 0]), axis = -1)
     im_right = data_input.right_patches2images(out, normalize = False)
     width = data_input.width
     shape_im = data_input.shape
@@ -198,14 +200,14 @@ def gen_image(func, data_input):
         
     # BOT
     x = data_input.bot_patches().x
-    out = np.concatenate(func([x]), axis = -1)
+    out = np.concatenate(func([x, 0]), axis = -1)
     im_bot = data_input.bot_patches2images(out, normalize = False)
     for w_i in range(int(shape_im[1] / width)):
         im_lam[-width:, w_i * width: (w_i + 1) * width, :] = im_bot[w_i]
         
     # BOTRIGHT
     x = data_input.botright_patch().x
-    out = np.concatenate(func([x]), axis = -1)
+    out = np.concatenate(func([x, 0]), axis = -1)
     im_bot_right = data_input.botright_patch2image(out, normalize = False)
     im_lam[-width:, -width:, :] = im_bot_right[...]
     
@@ -213,11 +215,9 @@ def gen_image(func, data_input):
     
 
 def net2h_image(info=None, data=None, tophat_bool=True):
-
-    layer_out = info.model.layers[-1].output[..., 0:2]
-
-    func = K.function([info.model.layers[0].input], [layer_out])
-
+    layer_out = info.model.output[..., 0:2]
+    func = K.function([info.model.input, K.learning_phase()], [layer_out])
+    
     im_lam = gen_image(func, data)
     
     return im_lam

@@ -6,46 +6,87 @@ import matplotlib.pyplot as plt
 import time
 
 bit_max = 65536 - 1     # 16bit
+bit_max = 256 - 1     # 16bit
 
+h_top = 232  # Transition zone between top and middle pill
+h_bot = 1121  # Transition zone between middle and bottom pill
+r_pill = 877  # radius of the pill
+
+
+def main():
+    if 0:  # if you want to rerotate the images
+        if 0:
+            data_all = open_orig()
+        else:  # Data from Jan, preprocessed holes
+            data_all = open_jan()
+        
+        if 1:
+            cross_section(data_all, norm_im=False)
+            plot_inter(data_all, norm_im=False)
+        
+        data_rot = rotation(data_all)
+        
+        if 0:
+            cross_section(data_rot, norm_im=False)
+            plot_inter(data_rot, norm_im=False)
+        
+        save_interstate(data_rot, folder_name='/scratch/lameeus/data/pharmacy_tablets/rot_holes/')
+    
+    else:  # load rotated image
+        data_rot = open_rot(folder_name='/scratch/lameeus/data/pharmacy_tablets/rot_holes/')
+
+        # cross_section(data_rot, norm_im=False)
+        # plot_inter(data_rot, norm_im=False)
+
+        filter_cross_section(data_rot)
+        
+        # scale_color()
+        
+
+def gen_3d_folder(n_begin, n_end, folder, ext = 'tif'):
+    i_im = np.arange(n_begin, n_end + 1, dtype=int)
+    
+    def foo(index):
+        im_name_i = folder + '3_{0:05d}.{1}'.format(index, ext)
+        im = Image.open(im_name_i)
+        imarray = np.array(im, dtype=np.uint16)
+        return imarray
+    
+    data_all = np.stack([foo(index) for index in i_im], axis=0)
+    
+    return data_all
 
 def open_orig():
-    def gen_3d():
-        n_begin = 500  # 500 to 1700
-        n_end = 1700
-        
-        folder = '/net/ipids/microscopy/CT/pharmacy_tablets/'
-        
-        i_im = np.arange(n_begin, n_end + 1, dtype=int)
-        
-        def foo(index):
-            im_name_i = folder + '3_{0:05d}.tif'.format(index)
-            im = Image.open(im_name_i)
-            imarray = np.array(im, dtype=np.uint16)
-            return imarray
-        
-        data_all = np.stack([foo(index) for index in i_im], axis=0)
-        
-        return data_all
+    n_begin = 500  # 500 to 1700
+    n_end = 1700
+    folder = '/net/ipids/microscopy/CT/pharmacy_tablets/'
+    lambda0 = lambda : gen_3d_folder(n_begin, n_end, folder)
     
-    # name_3d = '3dimage'
-    
-    data_all = time_func(gen_3d)  # 14s
+    data_all = time_func(lambda0)  # 14s
     
     return data_all
 
 
-def open_rot():
-    folder = '/scratch/lameeus/data/pharmacy_tablets/rotated/'
+def open_jan():
+    n_begin = 500  # 500 to 1693
+    n_end = 1693
+    folder = '/net/ipids/microscopy/CT/temp/holes/'
+    lambda0 = lambda: gen_3d_folder(n_begin, n_end, folder, 'png')
+    
+    data_all = time_func(lambda0)  # 14s
+    
+    return data_all
+
+def open_rot(folder_name = '/scratch/lameeus/data/pharmacy_tablets/rotated/'):
 
     def gen_3d():
         def foo(index):
-            im_name_i = folder + 'cut_{}.tif'.format(index)
+            im_name_i = folder_name + 'cut_{}.tif'.format(index)
             im = Image.open(im_name_i)
             imarray = np.array(im, dtype=np.uint16)
             return imarray
     
-        # nr_images = 1291 # 1291 max
-        nr_images = 1291
+        nr_images = 1284 # 1291 max
     
         i_im = np.arange(0, nr_images +1)
         data_rot = np.stack([foo(index) for index in i_im], axis=0)
@@ -72,49 +113,34 @@ def int16to8(map3d):
 
     lambda0 = lambda: np.load('3dimage.npy')
     data_all = time_func(lambda0)
-
-
-def main():
-    if 0: # if you want to rerotate the images
-        data_all = open_orig()
-        data_rot = rotation(data_all)
-
-        if 0:
-            plot_inter(data_all)
-
-        if 1:
-            cross_section(data_rot)
-            plot_inter(data_rot)
+        
     
-        save_interstate(data_rot)
-
-    else: # load rotated image
-        data_rot = open_rot()
-
-        # cross_section(data_rot)
-
-        filter_cross_section(data_rot)
-   
+def scale_color():
+    folder = '/scratch/lameeus/data/pharmacy_tablets/hi_res/'
+    im_name = folder + 'results.tif'
+    # im_name = '/ipi/private/lameeus/private_Documents/python/2017_05/results.tif'
     
-    # cross_section(data_all)
-    #
-    # data_rot = rotation(data_all)
-    # cross_section(data_rot)
-    #
-    #
-    # intens, bins = np.histogram(data_all, bins = 256, range=[0, bit_max])
-    #
-    #
-    #
-    # # print(a)
-    #
-    # bins_center = (bins[0:-1] + bins[1:])/2.0
-    #
-    # print(np.shape(bins_center))
-    # print(np.shape(intens))
-    #
-    # plt.plot(bins_center, intens)
-    # plt.show()
+    im = Image.open(im_name)
+    array = np.array(im)
+    
+    array = crop2(array, 100, 1)
+    
+    if 0:
+        intens, bins = np.histogram(array, bins=256, range=[0, bit_max])
+    
+        bins_center = (bins[0:-1] + bins[1:]) / 2.0
+    
+        plt.plot(bins_center, intens)
+        plt.show()
+        
+    else:
+        val_max = 40000 # guessed based on histogram
+
+    array_norm = 1 - array/val_max
+
+    plt.imshow(array_norm, vmin = 0, vmax = 0.15, cmap = 'jet')
+    plt.colorbar()
+    plt.show()
     
 
 def time_func(func):
@@ -149,8 +175,7 @@ def plot_inter(map3d, norm_im = True):
     plt.show()
     
     
-folder_name = '/scratch/lameeus/data/pharmacy_tablets/'
-def save_interstate(map3d, folder_name= folder_name):
+def save_interstate(map3d, folder_name= '/scratch/lameeus/data/pharmacy_tablets/'):
     
     shape = np.shape(map3d)
     d = shape[0]
@@ -169,62 +194,26 @@ def save_interstate(map3d, folder_name= folder_name):
     
 def filter_cross_section(map3d):
     
-    # # cross_section(map3d)
-    #
-    # shape = np.shape(map3d)
-    #
-    # h_bot = 1120
-    # h_top = 232
-    #
-    #
-    # h_now = 100
-    #
-    # start = time.time()
-    #
-
-
-    #
-    # if dist_inner <= 1.0 or 1: # TODO
-    #     # kernel overlaps with center, do something else
-    #
-
-    #
-    #
-    #
-    #
-    #     # TODO
-    #     # center_filter = [center[0] - w_pixel[0], center[1] - d_pixel[0]]
-    #     # print(center_filter)
-    #
-    #
-    #     shape_filter = np.shape(filter_all)
-    #
-
-    #
-
-    #
-
-    #
-
-    #
-    #
-    #
-    # else: # TODO speeds up the filter
-    #     border_inner_w = center[0] - dist_inner
-    #
-        
-        
-    # TODO start from here, clean up top
+    if 0:   # TODO more educated guess on dust
+        intens, bins = np.histogram(map3d[::2,::2,::2], bins = 256, range=[0, bit_max])
     
+        bins_center = (bins[0:-1] + bins[1:])/2.0
+    
+        print(np.shape(bins_center))
+        print(np.shape(intens))
+    
+        plt.plot(bins_center, intens)
+        plt.show()
+        
+    else:
+        c_mean_guess = 36990. # For original
+        c_mean_guess = 255 # For holes (a higher value is air)
+        
     # Settings
-    # step_size = 10
-    # r_range = np.arange(0., 850., step_size)
-    # h_range = np.arange(100, 1100, step_size, dtype=int)
-    # std = step_size     # 10.0
-    step_size = 5
-    r_range = np.arange(0., 850., step_size, dtype=float)
-    h_range = np.arange(100, 1100, step_size, dtype=int)
-    std = 5.0     # 10.0
+    step_size = 1
+    r_range = np.arange(0., 901., step_size, dtype=float)   # 0 to 901, per 10
+    h_range = np.arange(100, 1200, step_size, dtype=int)    # 100 to 1200 per 10
+    std = 1.0     # 5.0
 
     # calculated values
     height_range = int(2*std)
@@ -285,17 +274,29 @@ def filter_cross_section(map3d):
             results[i_h, i_r] = value
     
         print('progress: {} / {} goes slower towards the end'.format(i_r, r_len))
+        
+    # normalize
+    results = results/float(c_mean_guess)
     
-    results = results.astype(np.uint16)
-    im = Image.frombytes('I;16', (r_len, h_len), results.tobytes())
-    im.save("results.tif")
+    results = results.astype(float)
+    import scipy.misc
+    scipy.misc.toimage(results, cmin=0.0, cmax=1.0).save('results.tif')
 
     cmap = plt.cm.jet
-    norm = plt.Normalize(vmin=0, vmax=bit_max)
+    norm = plt.Normalize(vmin=0, vmax=1.0)
     im = cmap(norm(results))
     plt.imsave('colormap.png', im)
     
-    plt.imshow(results, vmin = 0.0, vmax = bit_max)
+    # Crop the results
+    results = crop2(results, h_range_0=h_range[0] ,step_size = step_size)
+    
+    vmax = 0.2
+    
+    norm = plt.Normalize(vmin=0, vmax=vmax)
+    im = cmap(norm(results))
+    plt.imsave('colormap_final.png', im)
+    plt.imshow(results, vmin = 0.0, vmax = vmax, interpolation='nearest', cmap = 'jet')
+    plt.colorbar()
     plt.show()
     
             # def build_filter(r):
@@ -363,6 +364,23 @@ def filter_cross_section(map3d):
     #
     # plt.imshow(concentration)
     # plt.show()
+
+    
+def crop(results, h_range_0 = 0, step_size = 1):
+    # set everything to zero
+    results[0: int((h_top -h_range_0) / step_size), :] = 0
+    results[int((h_bot -h_range_0) / step_size) + 1:, :] = 0
+    results[:, int(r_pill / step_size) + 1:] = 0
+    
+    return results
+
+def crop2(results, h_range_0 = 0, step_size = 1):
+    # removes borders
+
+    results = results[int((h_top -h_range_0) / step_size): int((h_bot -h_range_0) / step_size) + 1,
+              : int(r_pill / step_size) + 1]
+    
+    return results
   
 
 def rotation(map3d):
