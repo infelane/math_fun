@@ -53,17 +53,27 @@ class Info():
         print("prec: {}".format(TN / (TN + FN)))
         print("sens: {}".format(TN / (TN + FP)))
     
-    def output_vis(self, width, ext):
-        set = 'zach'
-        # set = 'hand'
+    def output_vis(self, width, ext, set = 'zach', bool_save = False, last_layer = False):
+        """
+        :param width:
+        :param ext:
+        :param set: 'zach' or 'hand'
+        :return:
+        """
     
         data_input, map = block_data.test_data(set, width, ext, bool_new_data=False)
         
         n_depth = self.model.get_depth()
         
-        outs = []
+        if last_layer:
+            n_depth_start = n_depth-1
+        else:
+            n_depth_start = 0
         
-        for layer_i in range(n_depth):
+        outs = []
+        n_outs = []
+        
+        for layer_i in range(n_depth_start, n_depth):
             
             output_i = self.model.get_conv_output(layer_i)
             # output_i = self.model.layers[layer_i].output
@@ -72,55 +82,54 @@ class Info():
             ext_i = int((shape_i[1].value - width)/2.0)
         
             outs.append(output_i[...,ext_i:width+ext_i, ext_i:width+ext_i, :])
+            n_outs.append(shape_i[-1])
             
         func = K.function([self.model.layers[0].input, K.learning_phase()], outs)
         
         generated_im = gen_image(func, data_input)
 
-        n_depth = np.shape(generated_im)[-1]
-
         gen_im = []
-
-        for i_im in range(n_depth):
+        
+        n_images = np.sum(n_outs)
+        
+        for i_im in range(n_images):
             gen_im.append(generated_im[..., i_im])
 
-        win_h = [400, 200]
-        win_w = [200, 400]
+        folder = '/ipi/private/lameeus/data/lamb/output/layers/'
+        cmap = plt.cm.seismic
 
-        save_folder = '/media/lameeus/TOSHIBA/'
-
-        from scipy.misc import imsave
-
-        plt.figure()
-        for i_im in range(n_depth):
-            # plt.subplot(5, 5, i_im+1)
-
+        for i_depth in range(len(n_outs)):
             plt.figure()
-            plt.subplot(1, 1, 1)
-    
-            gen_im_i = gen_im[i_im]
+            
+            n_outs_i = int(n_outs[i_depth])
+            subplot_w = int(np.ceil(np.sqrt(n_outs_i)))
+            subplot_h = int(np.ceil(n_outs_i/subplot_w))
+            
+            
+            for j in range(n_outs_i):
+                # gen_im contains all outputs from all layersc
+                gen_im_ij = gen_im.pop(0)
+                
+                plt.subplot(subplot_h, subplot_w, j+1)
+                
+                if i_depth == len(n_outs) - 1:
+                    vmin = 0.
+                    vmax = 1.
+                else:
+                    vmin = np.percentile(gen_im_ij, 5)
+                    vmax = np.percentile(gen_im_ij, 95)
+                    
+                plt.imshow(gen_im_ij, vmin = vmin, vmax = vmax, cmap=cmap, interpolation = 'nearest')
 
-            # mean = np.mean(gen_im_i)
-            # std = np.std(gen_im_i)
-            # extension = 3
-            # vmin = mean - extension*std
-            # vmax = mean + extension*std
-            # vmin = np.min(gen_im_i)
-            # vmax= np.max(gen_im_i)
-            # plt.imshow(gen_im_i, vmin=vmin, vmax = vmax, cmap='seismic')
-            
-            plt.imshow(gen_im_i, cmap='seismic')
-
-            # plt.axis([win_w[0], win_w[1], win_h[0], win_h[1]])
-            
-            plt.title('layer {}'.format(i_im + 1))
-
-            # imsave(save_folder + 'grey_{}.png'.format(i_im), gen_im_i)
-            
-            
-        
+   
+                if bool_save:
+                    norm = plt.Normalize(vmin=vmin, vmax=vmax)
+                    im_cmap = cmap(norm(gen_im_ij))
+                    save_name = folder + set + '_l{}_{}'.format(i_depth, j)
+                    plt.imsave(save_name, im_cmap)
+                
+            plt.title('layer: {}'.format(n_depth_start + i_depth + 1))
         plt.show()
-        plt.title('layer 10b')
 
     def output_test(self, width, ext, set = None):
         if not set:
@@ -131,6 +140,7 @@ class Info():
 
         generated_im = net2h_image(self, data_input, tophat_bool=False)
 
+        gen_pred0 = generated_im[..., 0]
         gen_pred1 = generated_im[..., 1]
 
         out_pred1 = (np.greater(gen_pred1, 0.5)).astype(float)
@@ -151,8 +161,15 @@ class Info():
         self.acc_summ(out_truth1, out_pred1)
 
         folder = '/ipi/private/lameeus/data/lamb/output/'
-        scipy.misc.imsave(folder + set + '_gen.png', diff[..., 1])
+        scipy.misc.imsave(folder + set + '_gen.png', out_pred1)
         scipy.misc.imsave(folder + set + '_gen_and_in.png', map)
+        # scipy.misc.imsave(folder + set + '_pred.png', out_pred1, cmap = 'seismic')
+
+        # saves colormap
+        cmap = plt.cm.seismic
+        norm = plt.Normalize(vmin=0, vmax=1.0)
+        im = cmap(norm(gen_pred1))
+        plt.imsave(folder + set + '_pred.png', im)
 
         plt.figure()
         plt.subplot('321')
@@ -161,14 +178,17 @@ class Info():
         plt.subplot('322')
         plt.imshow(out_truth1, vmin=0.0, vmax=1.0, cmap='seismic')
         plt.title('truth loss')
-        plt.subplot('323')
+        plt.subplot(3, 2, 3)
+        plt.imshow(gen_pred0, vmin=0.0, vmax=1.0, cmap='seismic')
+        plt.title('pred loss 0')
+        plt.subplot(3, 2, 4)
         plt.imshow(gen_pred1, vmin=0.0, vmax=1.0, cmap='seismic')
-        plt.title('pred loss')
-        ax = plt.subplot('324')
+        plt.title('pred loss 1')
+        ax = plt.subplot(3, 2, 5)
         plt.imshow(diff, vmin=0.0, vmax=1.0, cmap='seismic')
         plt.title('differenece')
 
-        plt.subplot('325')
+        plt.subplot(3, 2, 6)
         plt.imshow(map)
         plt.title('map')
 
@@ -215,7 +235,7 @@ def gen_image(func, data_input):
     
 
 def net2h_image(info=None, data=None, tophat_bool=True):
-    layer_out = info.model.output[..., 0:2]
+    layer_out = info.model.output[..., :]
     func = K.function([info.model.input, K.learning_phase()], [layer_out])
     
     im_lam = gen_image(func, data)

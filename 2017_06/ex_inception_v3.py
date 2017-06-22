@@ -399,7 +399,8 @@ if __name__ == '__main__':
     model = InceptionV3(include_top=True, weights='imagenet')
 
     img_path = 'elephant.jpg'
-    img_path = 'jan.jpg'
+    # img_path = 'jan.jpg'
+    # img_path = 'cat.jpg'
     img = image.load_img(img_path, target_size=(299, 299))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)

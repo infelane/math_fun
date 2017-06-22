@@ -33,14 +33,14 @@ def main():
         save_interstate(data_rot, folder_name='/scratch/lameeus/data/pharmacy_tablets/rot_holes/')
     
     else:  # load rotated image
-        data_rot = open_rot(folder_name='/scratch/lameeus/data/pharmacy_tablets/rot_holes/')
+        # data_rot = open_rot(folder_name='/scratch/lameeus/data/pharmacy_tablets/rot_holes/')
 
         # cross_section(data_rot, norm_im=False)
         # plot_inter(data_rot, norm_im=False)
 
-        filter_cross_section(data_rot)
+        # filter_cross_section(data_rot)
         
-        # scale_color()
+        scale_color()
         
 
 def gen_3d_folder(n_begin, n_end, folder, ext = 'tif'):
@@ -116,7 +116,15 @@ def int16to8(map3d):
         
     
 def scale_color():
-    folder = '/scratch/lameeus/data/pharmacy_tablets/hi_res/'
+    # 0: no preprocessing
+    # 1: holes preprocessing
+    bool_preproc = 1
+    
+    if bool_preproc:
+        folder = '/scratch/lameeus/data/pharmacy_tablets/results_from_holes/'
+    else:
+        folder = '/scratch/lameeus/data/pharmacy_tablets/results/'
+   
     im_name = folder + 'results.tif'
     # im_name = '/ipi/private/lameeus/private_Documents/python/2017_05/results.tif'
     
@@ -135,10 +143,19 @@ def scale_color():
         
     else:
         val_max = 40000 # guessed based on histogram
+        
+    print(np.max(array))
 
-    array_norm = 1 - array/val_max
+    if bool_preproc:
+        array_norm = array/255
+    else:
+        array_norm = 1 - array/val_max
 
-    plt.imshow(array_norm, vmin = 0, vmax = 0.15, cmap = 'jet')
+    plt.imshow(array_norm, vmin = 0.044, vmax = 0.155, cmap = 'jet')
+    if bool_preproc:
+        plt.title('cross section after mathematical morphology')
+    else:
+        plt.title('cross section by averaging raw images')
     plt.colorbar()
     plt.show()
     
