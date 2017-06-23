@@ -78,15 +78,53 @@ def good_images():
 mypath = '/scratch/lameeus/data/altarpiece_close_up/beard/'
 
 
+def show_histo(array):
+    intens, bins = np.histogram(np.reshape(array, (-1)), bins=256, range=[0, 1])
+    
+    bins_center = (bins[0:-1] + bins[1:]) / 2.0
+    
+    plt.plot(bins_center, intens)
+    plt.show()
+
+
 def generate_y():
-    path = '/ipi/private/lameeus/data/lamb/input/lam_anot.tif'
+    path = '/scratch/Dropbox/_PhD/THUIS WERKEN/Link to input/lam_anot.tif'
 
     im = path2im(path)
     array = np.array(im)
     
-    plt.imshow(array)
-    plt.show()
+    # Throw away transparancy
+    array = array[:, :, 0:3]
+    
+    # plt.imshow(array)
+    # plt.show()
+    
+    print(np.shape(array))
 
+    show_histo(array[:,:,:]/255)
+    
+
+    color = np.asarray([255, 0, 0]) # red
+
+    a = np.equal(array[:,:, 0], color[0])
+    b = np.equal(array[:,:, 1], color[1])
+    c = np.equal(array[:,:, 2], color[2])
+    foo = np.where(np.logical_and(np.logical_and(a, b), c))
+
+    print(foo)
+    
+    bar = np.zeros(shape=np.shape(array))
+
+    foo =  np.transpose(foo)
+    
+    for i in range(len(foo)):
+        x = foo[i][0]
+        y = foo[i][1]
+        bar[x,y,:] = 1.
+    
+    
+    plt.imshow(bar)
+    plt.show()
 
 def main():
     generate_y()
