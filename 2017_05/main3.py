@@ -48,6 +48,7 @@ def main():
 
     # subset
     n_subset = 100000   # 10000 for small subset, 100000 for all
+    
     x_train = batch_train.x[:n_subset]
     y_train = batch_train.y[:n_subset]
     x_vali = batch_vali.x[:n_subset]
@@ -150,7 +151,7 @@ def main():
             
             # # fits the model on batches with real-time data augmentation:
             # model.fit_generator(datagen.flow(x_train, y_train, shuffle=True, batch_size = 100)
-            #                     ,steps_per_epoch=flag.batch_size, epochs=10,
+            # #                     ,steps_per_epoch=flag.batch_size, epochs=10,
             #                     verbose=1,    # how much information to show 1 much or 0, nothing
             #                     # class_weight= (1.0, 10.0),
             #                     # validation_data=(X_test[:10000], Y_test[:10000]),

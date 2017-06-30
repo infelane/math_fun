@@ -60,8 +60,10 @@ class Info():
         :param set: 'zach' or 'hand'
         :return:
         """
-    
-        data_input, map = block_data.test_data(set, width, ext, bool_new_data=False)
+
+        # data_input, map = block_data.test_data(set, width, ext, bool_new_data=False)
+        import block_data2
+        data_input = block_data2.test_data(set, width, ext)
         
         n_depth = self.model.get_depth()
         
@@ -137,11 +139,24 @@ class Info():
             # set = 'hand'
 
         data_input, map = block_data.test_data(set, width, ext, bool_new_data = False)
+        import block_data2
+        data_input = block_data2.test_data(set, width, ext)
 
         generated_im = net2h_image(self, data_input, tophat_bool=False)
 
         gen_pred0 = generated_im[..., 0]
         gen_pred1 = generated_im[..., 1]
+
+        def show_histo(array):
+            intens, bins = np.histogram(np.reshape(array, (-1)), bins=256, range=[-1, 2])
+    
+            bins_center = (bins[0:-1] + bins[1:]) / 2.0
+    
+            plt.plot(bins_center, intens)
+            plt.show()
+            
+        show_histo(gen_pred0)
+        show_histo(gen_pred1)
 
         out_pred1 = (np.greater(gen_pred1, 0.5)).astype(float)
         out_truth1 = data_input.im_out[..., 1]
@@ -194,6 +209,125 @@ class Info():
 
         plt.show()
 
+    
+    def certainty(self, width, ext, set = None):
+        
+        version_nr = 'no_clean'
+        
+        if not set:
+            set = 'zach'
+            # set = 'hand'
+
+        folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_06'
+        cmd_subfolder = os.path.realpath(folder_loc)
+        if cmd_subfolder not in sys.path:
+            sys.path.insert(0, cmd_subfolder)
+        #
+        import block_data
+        from paint_tools import image_tools
+        
+        if set == 'zach':
+            im_clean = image_tools.path2im('/home/lameeus/data/ghent_altar/input/13_clean.tif')
+        elif set == 'hand':
+            im_clean = image_tools.path2im('/home/lameeus/data/ghent_altar/input/19_clean_crop_scale.tif')
+        elif set == 'zach_small':
+            im_clean = image_tools.path2im('/scratch/lameeus/data/ghentaltarpiece/altarpiece_close_up/beard_updated/rgb_cleaned.tif')
+
+        # data_input, map = block_data.test_data(set, width, ext, bool_new_data = False)
+        import block_data2
+        data_input = block_data2.test_data(set, width, ext)
+
+        generated_im = net2h_image(self, data_input, tophat_bool=False)
+    
+        gen_pred0 = generated_im[..., 0]
+        gen_pred1 = generated_im[..., 1]
+
+        cert0 = 1-np.abs(gen_pred0 - 1.0)
+        cert1 = 1-np.abs(gen_pred1 - 1.0)
+
+        # uncertain =  np.abs(gen_pred0 - 1.0) + np.abs(gen_pred0 - 0.0)
+        
+        #
+        # def show_histo(array):
+        #     intens, bins = np.histogram(np.reshape(array, (-1)), bins=256, range=[-1, 2])
+        #
+        #     bins_center = (bins[0:-1] + bins[1:]) / 2.0
+        #
+        #     plt.plot(bins_center, intens)
+        #     plt.show()
+        #
+        # show_histo(gen_pred0)
+        # show_histo(gen_pred1)
+        #
+        # out_pred1 = (np.greater(gen_pred1, 0.5)).astype(float)
+        # out_truth1 = data_input.im_out[..., 1]
+        #
+        # diff = np.zeros(shape=list(np.shape(out_truth1)) + [3])
+        #
+        # red = [1.0, 0.0, 0.0]
+        # green = [0.0, 1.0, 0.0]
+        # blue = [0.0, 0.0, 1.0]
+        #
+        # diff[np.logical_and(out_pred1 == 1.0, out_truth1 == 1.0)] = red
+        # diff[np.greater(out_pred1, out_truth1)] = green
+        # diff[np.greater(out_truth1, out_pred1)] = blue
+        #
+        # map[out_pred1 == 1.0] = red
+        #
+        # self.acc_summ(out_truth1, out_pred1)
+        #
+        # folder = '/ipi/private/lameeus/data/lamb/output/'
+        # scipy.misc.imsave(folder + set + '_gen.png', out_pred1)
+        # scipy.misc.imsave(folder + set + '_gen_and_in.png', map)
+        # # scipy.misc.imsave(folder + set + '_pred.png', out_pred1, cmap = 'seismic')
+        #
+        # # saves colormap
+        # cmap = plt.cm.seismic
+        # norm = plt.Normalize(vmin=0, vmax=1.0)
+        # im = cmap(norm(gen_pred1))
+        # plt.imsave(folder + set + '_pred.png', im)
+        #
+
+
+        orange = np.reshape([1., 165./255., 0], (1,1,3))
+        red = np.reshape([1., 0., 0], (1,1,3))
+
+        im_clean[np.greater_equal(gen_pred1, 0.5)] = orange
+        im_clean[np.greater_equal(gen_pred1, 0.8)] = red
+
+        path = '/home/lameeus/data/ghent_altar/output/{}_7in_vhand_v{}.tif'.format(set, version_nr)
+        image_tools.save_im(im_clean, path)
+        
+        plt.imshow(im_clean)
+        plt.show()
+        
+        plt.figure()
+        # plt.subplot('321')
+        # plt.imshow(out_pred1, vmin=0.0, vmax=1.0, cmap='seismic')
+        # plt.title('pred loss')
+        # plt.subplot('322')
+        # plt.imshow(out_truth1, vmin=0.0, vmax=1.0, cmap='seismic')
+        # plt.title('truth loss')
+        plt.subplot(3, 2, 3)
+        plt.imshow(gen_pred0, vmin=0.0, vmax=1.0, cmap='seismic')
+        plt.title('pred loss 0')
+        plt.subplot(3, 2, 4)
+        plt.imshow(gen_pred1, vmin=0.0, vmax=1.0, cmap='seismic')
+        plt.title('pred loss 1')
+        plt.subplot(3, 2, 5)
+        plt.imshow(cert0, vmin=0.0, vmax=1.0, cmap='seismic')
+        plt.title('certainty of class 0')
+        plt.subplot(3, 2, 6)
+        plt.imshow(cert1, vmin=0.0, vmax=1.0, cmap='seismic')
+        plt.title('certainty of class 1')
+        
+
+        
+        # plt.subplot(3, 2, 6)
+        # plt.imshow(map)
+        # plt.title('map')
+        #
+        plt.show()
 
 def gen_image(func, data_input):
     in_patches = data_input.in_patches()
@@ -237,7 +371,5 @@ def gen_image(func, data_input):
 def net2h_image(info=None, data=None, tophat_bool=True):
     layer_out = info.model.output[..., :]
     func = K.function([info.model.input, K.learning_phase()], [layer_out])
-    
     im_lam = gen_image(func, data)
-    
     return im_lam

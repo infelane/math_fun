@@ -169,18 +169,17 @@ class Data():
     def images2patches(self):
         
         im_in = self.im_in
-        
-        _width = 1 + 2 * self.ext
-        im_in_seg = SegmentedImage(im_in, width = _width)
+
+        im_in_seg = SegmentedImage(im_in, ext = self.ext)
         if self._bool_tophat:
-            im_in_gausshat_seg = SegmentedImage(self.im_in_gausshat, width=_width)
+            im_in_gausshat_seg = SegmentedImage(self.im_in_gausshat, ext = self.ext)
                    
         if self.bool_residue == True:
             im_out = self.im_residue
         else:
             im_out = self.im_out
             
-        im_out_seg = SegmentedImage(im_out, width = 1)
+        im_out_seg = SegmentedImage(im_out, ext = 0)
 
         shape = np.shape(im_in)
         
@@ -198,33 +197,33 @@ class Data():
             
             for h_i in range(shape[0]//width ):
                 for w_i in range(shape[1]//width ):
-                    patch_in = im_in_seg.get_patch(width * h_i, width * w_i, width, self.ext)
+                    patch_in = im_in_seg.get_patch(width * h_i, width * w_i, width)
                     self.patches_input.append(patch_in)
                     if self._bool_tophat:
-                        patch_in = im_in_gausshat_seg.get_patch(width * h_i, width * w_i, width, self.ext)
+                        patch_in = im_in_gausshat_seg.get_patch(width * h_i, width * w_i, width)
                         self.patches_input_gausshat.append(patch_in)
-                    patch_i = im_out_seg.get_patch(width * h_i, width * w_i, width, 0)
+                    patch_i = im_out_seg.get_patch(width * h_i, width * w_i, width)
                     self.patches_output.append(patch_i)
                     
             for h_i in range(shape[0]//width):
-                patch_in = im_in_seg.get_patch(width * h_i, shape[1]-width, width, self.ext)
+                patch_in = im_in_seg.get_patch(width * h_i, shape[1]-width, width)
                 self.patches_input_right.append(patch_in)
                 if self._bool_tophat:
-                    patch_in = im_in_gausshat_seg.get_patch(width * h_i, shape[1]-width, width, self.ext)
+                    patch_in = im_in_gausshat_seg.get_patch(width * h_i, shape[1]-width, width)
                     self.patches_input_right_gausshat.append(patch_in)
 
             for w_i in range(shape[1] // width):
-                patch_in = im_in_seg.get_patch(shape[0] - width, width * w_i, width, self.ext)
+                patch_in = im_in_seg.get_patch(shape[0] - width, width * w_i, width)
                 self.patches_input_bot.append(patch_in)
                 if self._bool_tophat:
-                    patch_in = im_in_gausshat_seg.get_patch(shape[0] - width, width * w_i, width, self.ext)
+                    patch_in = im_in_gausshat_seg.get_patch(shape[0] - width, width * w_i, width)
                     self.patches_input_bot_gausshat.append(patch_in)
 
-            patch_in = im_in_seg.get_patch(shape[0] - width, shape[1] - width, width, self.ext)
+            patch_in = im_in_seg.get_patch(shape[0] - width, shape[1] - width, width)
             self.patch_input_botright = np.reshape(patch_in, newshape=(1, width + 2*self.ext,
                                                                        width + 2*self.ext, shape[2]))
             if self._bool_tophat:
-                patch_in = im_in_gausshat_seg.get_patch(shape[0] - width, shape[1] - width, width, self.ext)
+                patch_in = im_in_gausshat_seg.get_patch(shape[0] - width, shape[1] - width, width)
                 self.patch_input_botright_gausshat = np.reshape(patch_in, newshape=(1, width + 2 * self.ext,
                                                                            width + 2 * self.ext, shape[2]))
 
@@ -366,7 +365,13 @@ def extend_image(image_orig, ext):
     shape_ext[0] = shape_orig[0] + 2 * ext
     shape_ext[1] = shape_orig[1] + 2 * ext
     
-    image_extended = np.zeros((shape_orig[0] + width - 1, shape_orig[1] + width - 1, shape_orig[2]))
+    if len(shape_orig) == 2:
+        image_extended = np.zeros((shape_orig[0] + width - 1, shape_orig[1] + width - 1))
+    elif len(shape_orig) == 3:
+        image_extended = np.zeros((shape_orig[0] + width - 1, shape_orig[1] + width - 1, shape_orig[2]))
+    else:
+        raise LookupError
+    
     image_extended[ext: shape_orig[0] + ext, ext: shape_orig[1] + ext, ...] = image_orig
        
     if ext != 0:
@@ -378,17 +383,15 @@ def extend_image(image_orig, ext):
     return image_extended
 
 class SegmentedImage():
-    def __init__(self, image_orig, width):
-        self.width = width
-        ext = int((self.width - 1) / 2)
-
+    def __init__(self, image_orig, ext = 0):
         self.image_extended = extend_image(image_orig, ext)
+        self.ext = ext
     
     def get_segm(self, h_i, w_i):
         return self.image_extended[h_i: h_i + self.width, w_i: w_i + self.width, ...]
 
-    def get_patch(self, h_i, w_i, orig_width, ext):
-        return self.image_extended[h_i: h_i + orig_width + 2 * ext, w_i: w_i + orig_width + 2 * ext, ...]
+    def get_patch(self, h_i, w_i, orig_width):
+        return self.image_extended[h_i: h_i + orig_width + 2 * self.ext, w_i: w_i + orig_width + 2 *self.ext, ...]
 
 class DataGen():
     """
