@@ -62,6 +62,16 @@ def ex_raw_zach_small():
     return ExRawImage(input_1, input_2, input_3, out)
     
     
+def ex_raw_hand_small():
+    folder = '/scratch/lameeus/data/ghentaltarpiece/altarpiece_close_up/finger/'
+    input_1 = folder + "hand_cleaned.tif"
+    input_2 = folder + "hand_rgb.tif"
+    input_3 = folder + "hand_ir.tif"
+    out = folder + "ground_truth.tif"
+    
+    return ExRawImage(input_1, input_2, input_3, out)
+
+    
 def ex_raw_zach():
 
     folder = '/home/lameeus/data/ghent_altar/input/'
@@ -100,9 +110,17 @@ def raw_data(ex_raw_data, width, ext):  # (ex_raw_data_i):
     #
    
     # print(np.shape(im_in_3))
-    # np.mean(im_in_3[..., 0:3], axis = 2, keepdims=True)
+    
     # im_in1 = np.concatenate((im_in_1, im_in_2, np.mean(im_in_3[:,:, 0:3], axis = 2, keepdims=True)), axis=-1)
-    im_in1 = np.concatenate((im_in_1, im_in_2, np.stack([im_in_3], axis = 2)), axis=-1)
+    
+
+    
+    if len(np.shape(im_in_3)) == 3:
+        im_in_3 = np.mean(im_in_3[..., 0:3], axis = 2, keepdims=True)
+    else:
+        im_in_3 = np.stack([im_in_3], axis=2)
+        
+    im_in1 = np.concatenate((im_in_1, im_in_2, im_in_3), axis=2)
     
     im_label1[..., 1] = detectRed(im_out)
     im_label1[..., 0] = 1 - im_label1[..., 1]
@@ -119,5 +137,7 @@ def test_data(set, width, ext):
         ex_raw_i = ex_raw_zach_small
     elif set == 'hand':
         ex_raw_i = ex_raw_hand
+    elif set == 'hand_small':
+        ex_raw_i = ex_raw_hand_small
     foo = ex_raw_i()
     return raw_data(foo, width, ext)

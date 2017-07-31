@@ -832,7 +832,7 @@ def main():
     ext = 7
     set = 'zach'
     # generate_y(ext, set = set)
-    # train_net(ext, set)
+    train_net(ext, set)
     test_net(ext, set)
     
     # good_images()
