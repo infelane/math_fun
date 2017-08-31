@@ -9,7 +9,7 @@ if cmd_subfolder not in sys.path:
 
 import data_net
 
-from paint_tools import image_tools
+from maus.paint_tools import image_tools
 
 # def im2array(path):
 #
@@ -87,7 +87,8 @@ def ex_raw_hand():
     input_1 = folder + "19_clean_crop_scale.tif"
     input_2 = folder + "19_rgb.tif"
     input_3 = folder + "19_ir_single.tif"
-    out = folder + "19_clean_crop_scale.tif"    # TODO
+    # out = folder + "19_clean_crop_scale.tif"    # TODO this is not annotated
+    out = folder + "19_annot.tif"
     
     return ExRawImage(input_1, input_2, input_3, out)
     
