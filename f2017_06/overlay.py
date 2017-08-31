@@ -8,9 +8,11 @@ import numpy as np
 
 from link_to_soliton.paint_tools import image_tools
 
-folder = '/ipi/private/lameeus/data/ghent_altar/output/'
+# folder = '/ipi/private/lameeus/data/ghent_altar/output/'
 # net_a = image_tools.path2im(folder + 'zach_gen.png')
-net_a = image_tools.path2im(folder + 'gen_zach.png')
+# net_a = image_tools.path2im(folder + 'gen_zach.png')
+folder = '/scratch/lameeus/data/tensorflow/results/'
+net_a = image_tools.path2im(folder + 'outfile_beard_OLD.tif')
 folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/beard_updated/'
 ref_a = image_tools.path2im(folder + 'ground_truth.tif')
 clean = image_tools.path2im(folder + 'rgb_cleaned.tif')
@@ -33,6 +35,9 @@ yellow = np.asarray([1, 1, 0])
 green = np.asarray([0, 1, 0])
 red = np.asarray([1, 0, 0])
 
+if 1:
+    net_a = 1-net_a
+
 ref_loss = ref_a[:, :, 0] == 1
 net_loss = net_a[:, :] >= 0.5 # 0.05
 
@@ -40,11 +45,14 @@ overlay[~net_loss & ref_loss] = green   # missed regions
 overlay[net_loss & ~ref_loss] = red     # over classification
 overlay[ref_loss & net_loss] = blue     # correct
 
-imgplot = plt.imshow(net_a)
+plt.figure()
+imgplot = plt.imshow(ref_loss, vmin = 0, vmax = 1)
+plt.figure()
+imgplot = plt.imshow(net_a, vmin = 0, vmax = 1)
 plt.figure()
 imgplot = plt.imshow(overlay)
 plt.show()
 
 folder = '/home/lameeus/data/ghent_altar/overlay/'
 
-image_tools.save_im(folder + "overlay.tif")
+image_tools.save_im(overlay, folder + "overlay.tif")
