@@ -288,9 +288,10 @@ def ResNet50(include_top=True, weights='imagenet',
 if __name__ == '__main__':
     model = ResNet50(include_top=True, weights='imagenet')
 
+    folder = '/home/lameeus/data/NO_PLACE/'
     img_path = 'elephant.jpg'
     img_path = 'cat.jpg'
-    img = image.load_img(img_path, target_size=(224, 224))
+    img = image.load_img(folder + img_path, target_size=(224, 224))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
     x = preprocess_input(x)

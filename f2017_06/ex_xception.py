@@ -272,8 +272,10 @@ def preprocess_input(x):
 if __name__ == '__main__':
     model = Xception(include_top=True, weights='imagenet')
 
+    folder = '/home/lameeus/data/NO_PLACE/'
+    
     img_path = 'jan.jpg'
-    img = image.load_img(img_path, target_size=(299, 299))
+    img = image.load_img(folder + img_path, target_size=(299, 299))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
     x = preprocess_input(x)

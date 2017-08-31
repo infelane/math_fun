@@ -153,8 +153,9 @@ def MusicTaggerCRNN(weights='msd', input_tensor=None,
 if __name__ == '__main__':
     model = MusicTaggerCRNN(weights='msd')
 
+    folder = '/home/lameeus/data/NO_PLACE/'
     audio_path = 'audio_file.mp3'
-    melgram = preprocess_input(audio_path)
+    melgram = preprocess_input(folder + audio_path)
     melgrams = np.expand_dims(melgram, axis=0)
 
     preds = model.predict(melgrams)
