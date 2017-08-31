@@ -1,13 +1,14 @@
 # Trying to build some unsupervised stuff
 
+import os
+import sys
+
 import keras
-from keras.layers import Input, Dense, Conv2D, Deconv2D
-from keras.models import Model
 # use Matplotlib (don't ask)
 import matplotlib.pyplot as plt
-import pickle
-import sys, os
 import numpy as np
+from keras.layers import Input, Dense, Conv2D
+from keras.models import Model
 
 # own
 folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_February/super_res_challenge'
@@ -15,7 +16,6 @@ cmd_subfolder = os.path.realpath(folder_loc)
 if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 # import config_lamb
-import data_net
 import keras_ipi
 
 
@@ -173,9 +173,10 @@ def main():
     # print(x_train.shape)
     # print(x_test.shape)
     
+    folder = '/home/lameeus/data/NO_PLACE/'
     filepath = 'weights_unsuper.h5'
     if flag.bool_prev:
-        autoencoder.load_weights(filepath)
+        autoencoder.load_weights(folder + filepath)
     checkpoint = keras.callbacks.ModelCheckpoint(filepath, verbose=0,
                                                  save_weights_only=True, period=1)
     callbacks_list = [checkpoint]
