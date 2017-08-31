@@ -49,8 +49,8 @@ def hsi_processed():
 
 def hsi_mask():
     if 1:
-        import maus.paint_tools.image_tools
-        mask_img = maus.paint_tools.image_tools.path2im('/home/lameeus/data/hsi/mask.png', type = 'png')
+        from link_to_soliton.paint_tools import image_tools
+        mask_img = image_tools.path2im('/home/lameeus/data/hsi/mask.png', type = 'png')
     
         shape = np.shape(mask_img)
         mask = np.zeros(shape = (shape[0], shape[1]), dtype=int)

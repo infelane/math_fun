@@ -6,7 +6,7 @@ import time
 import matplotlib.pyplot as plt
 
 from f2017_08.hsi import tools_datasets, tools_data, nn, tools_plot
-from maus.paint_tools import image_tools
+from link_to_soliton.paint_tools import image_tools
 
 
 def main():
@@ -48,7 +48,7 @@ def main():
     auto_encoder = nn.AutoEncoder()
     auto_encoder.load()
     
-    epochs = 20
+    epochs = 1
     if epochs:
         auto_encoder.train(x_train, epochs = epochs, save = True)
     
