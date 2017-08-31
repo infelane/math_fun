@@ -1,19 +1,18 @@
-import matplotlib.pyplot as plt
+import os
+import sys
 # from keras.preprocessing import image
-from PIL import Image
 import time
-import numpy as np
-# import skimage
-import scipy.ndimage
-import tifffile as tiff
-import cv2
-import pylab
-import keras
-import os, sys
-
-import keras_ipi
 
 import config4
+import cv2
+import keras
+import matplotlib.pyplot as plt
+import numpy as np
+import pylab
+# import skimage
+import scipy.ndimage
+
+import keras_ipi
 import lambnet
 
 folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_February/super_res_challenge'
@@ -22,7 +21,7 @@ if cmd_subfolder not in sys.path:
     sys.path.insert(0, cmd_subfolder)
 import data_net
 
-from paint_tools import image_tools
+from maus.paint_tools import image_tools
 
 
 def time_func(func, n = 1):
@@ -172,6 +171,36 @@ def get_input(set):
         im_clean = image_tools.path2im(folder + '19_clean_crop_scale.tif')[:, :, 0:3]
         im_rgb = image_tools.path2im(folder + '19_rgb.tif')[:, :, 0:3]
         im_ir = np.stack([image_tools.path2im(folder + '19_ir_single.tif')], axis=2)
+    elif set == 'hand8':
+        folder = '/home/lameeus/data/ghent_altar/input/'
+        im_clean = image_tools.path2im(folder + '19_clean_crop_scale.tif')[:, :, 0:3]
+        im_rgb = image_tools.path2im(folder + '19_rgb.tif')[:, :, 0:3]
+        im_ir = np.stack([image_tools.path2im(folder + '19_ir_single.tif')], axis=2)
+        
+    elif set == 'hand_big':
+        folder = '/home/lameeus/data/ghent_altar/input/'
+        im_clean = image_tools.path2im(folder + '19_clean.tif')[:, :, 0:3]
+        im_rgb_small = image_tools.path2im(folder + '19_rgb.tif')[:, :, 0:3]
+        im_ir_small = np.stack([image_tools.path2im(folder + '19_ir_single.tif')], axis=2)
+
+        im_rgb_test3 = 0.5*np.ones(shape=np.shape(im_clean))
+
+        rescale = 2.73747126457
+        im_rgb_test = cv2.resize(im_rgb_small, (0, 0), fx=rescale, fy=rescale, interpolation=4)
+        
+        shape_test = np.shape(im_rgb_test)
+        h = 20
+        w = 0 #8
+        
+        im_rgb_test3[h:h+shape_test[0], w:w+shape_test[1]] = im_rgb_test
+        im_rgb_test2 = np.concatenate([im_clean[..., 0:1], im_rgb_test3[..., 1:3]], axis = 2)
+        
+        plt.imshow(im_rgb_test2, interpolation = 'nearest')
+        plt.show()
+        
+        
+        # im_rgb = image_tools.path2im(folder + '19_rgb_big.tif')[:, :, 0:3]
+        # im_ir = np.stack([image_tools.path2im(folder + '19_ir_single_big.tif')], axis=2)
     
     else:
         raise NotImplementedError
@@ -215,6 +244,12 @@ def gen_y_part1(set):
         path_ground = folder_big + '13_clean.tif'
     elif set == 'hand':
         path_ground = folder_big + '19_clean_crop_scale.tif'
+    elif set == 'hand8':
+        path_ground = folder_big + '19_clean_crop_scale.tif'
+    elif set == 'hand_big':
+        path_ground = folder_big + '19_clean.tif'
+    else:
+        raise NotImplementedError
         
     im_ground = image_tools.path2im(path_ground)
     array_big = np.array(im_ground)
@@ -241,11 +276,10 @@ def gen_y_part1(set):
     
         im_close_clean[map_red] = red
 
-
-
-    
     folder_annot = '/home/lameeus/data/ghent_altar/annotation/'
     if set == 'zach':
+        
+        
         # Zachary,
         # P1: 790, 790
         # P2: 371, 150
@@ -275,7 +309,7 @@ def gen_y_part1(set):
         w_start_close = 3557
         array_big[h_start_close:h_start_close + shape[0], w_start_close:w_start_close + shape[1], :] = im_close_clean
     
-    elif set == 'hand':
+    elif set == 'hand' or set == 'hand8':
         im_annot1 = remove_transparancy(image_tools.path2im(folder_annot + '19_1.tif'))  #'John_the_Evangelist_P1FINAL.tif'
         im_annot2 = remove_transparancy(image_tools.path2im(folder_annot +  '19_2.tif' ))   # 'John_the_Evangelist_P2FINAL.tif'
         im_annot3 = remove_transparancy(image_tools.path2im(folder_annot +  '19_3.tif' )) #'data_2BD.tif'
@@ -301,6 +335,36 @@ def gen_y_part1(set):
         shape1 = np.shape(foo)
         array_big[h1:h1 + shape1[0], w1: w1 + shape1[1], :] =foo[...]
 
+    elif set == 'hand_big':
+        im_annot1 = remove_transparancy(
+            image_tools.path2im(folder_annot + '19_1.tif'))  # 'John_the_Evangelist_P1FINAL.tif'
+        im_annot2 = remove_transparancy(
+            image_tools.path2im(folder_annot + '19_2.tif'))  # 'John_the_Evangelist_P2FINAL.tif'
+        im_annot3 = remove_transparancy(image_tools.path2im(folder_annot + '19_3.tif'))  # 'data_2BD.tif'
+
+        # rescale = 0.3653006382
+        h1 = 5455 + 27 #int(1993/rescale) + 27
+        w1 = 4089 #int(1494/rescale)
+        
+        # foo = cv2.resize(im_annot1, (0, 0), fx=rescale, fy=rescale, interpolation=0)
+        shape1 = np.shape(im_annot1)
+        array_big[h1:h1 + shape1[0], w1: w1 + shape1[1], :] = im_annot1[...]
+        
+        h1 = 4711+25
+        w1 = 3597
+        # foo = cv2.resize(im_annot2, (0, 0), fx=rescale, fy=rescale, interpolation=0)
+        shape1 = np.shape(im_annot2)
+        array_big[h1:h1 + shape1[0], w1: w1 + shape1[1], :] = im_annot2[...]
+
+        h1 = 4402+23
+        w1 = 2637
+        # rescale = 0.3653006382
+        # foo = cv2.resize(im_annot3, (0, 0), fx=rescale, fy=rescale, interpolation=0)
+        shape1 = np.shape(im_annot3)
+        array_big[h1:h1 + shape1[0], w1: w1 + shape1[1], :] = im_annot3[...]
+
+    else:
+        raise NotImplementedError
     
     # # Second annotation
     # path = '/home/lameeus/data/ghent_altar/annotation/corr1.tif'
@@ -343,21 +407,29 @@ def gen_y_part1(set):
     #
     # print(zip(coords_info))
     #
-    annot_big_color = np.zeros(shape=np.shape(array_big))
+    shape_array_big = np.shape(array_big)
+    annot_big_color = np.zeros(shape=shape_array_big)
+    alpha = np.zeros(shape=(shape_array_big[0], shape_array_big[1], 1))
     
     # plt.imshow(array_big, vmax = 1.)
     # plt.show()
     
-
     class_map = color2map(array_big)
 
     blue = [0., 0., 1.]
     #
-    annot_big_color[class_map == 1] = np.reshape(red, newshape=(1, 1, -1))
-    annot_big_color[class_map == 0] = np.reshape(blue, newshape=(1, 1, -1))
-    annot_big_color[class_map == -1] = np.reshape(np.array([1, 1, 1]), newshape=(1, 1, -1))
+    annot_big_color[class_map == 1, :] = np.reshape(red, newshape=(1, 1, -1))
+    # annot_big_color[class_map == 1, 3] = 0.5
+    annot_big_color[class_map == 0, :] = np.reshape(blue, newshape=(1, 1, -1))
+    # annot_big_color[class_map == 0, 3] = 0.5
+    annot_big_color[class_map == -1, :] = np.reshape(np.array([1, 1, 1]), newshape=(1, 1, -1))
 
-    plt.imshow(annot_big_color, vmax = 1.)
+    annot_big_color_show = np.concatenate([annot_big_color, alpha], axis = 2)
+    annot_big_color_show[class_map != -1, 3] = 0.5
+    
+    plt.imshow(im_ground, vmax=1., interpolation='nearest')
+    plt.imshow(annot_big_color_show, vmax = 1., interpolation='nearest')
+    plt.title('annot big color')
     plt.show()
     
     folder = '/home/lameeus/data/ghent_altar/input/'
@@ -366,6 +438,10 @@ def gen_y_part1(set):
         image_tools.save_im(annot_big_color, folder + '13_annot.tif')
     elif set == 'hand':
         image_tools.save_im(annot_big_color, folder + '19_annot.tif')
+    elif set == 'hand_big':
+        image_tools.save_im(annot_big_color, folder + '19_annot_big.tif')
+    else:
+        raise NotImplementedError
 
     annot_to_annotclean(annot_big_color, set)
     
@@ -430,6 +506,12 @@ def annot_to_annotclean(annot, set):
         path = '/home/lameeus/data/ghent_altar/input/' + '13_annot_clean.tif'
     elif set == 'hand':
         path = '/home/lameeus/data/ghent_altar/input/' + '19_annot_clean.tif'
+    elif set == 'hand8':
+        path = '/home/lameeus/data/ghent_altar/input/' + '19_annot_clean.tif'
+    elif set == 'hand_big':
+        path = '/home/lameeus/data/ghent_altar/input/' + '19_annot_clean_big.tif'
+    else:
+        raise NotImplementedError
     image_tools.save_im(clean, path)
 
 
@@ -452,6 +534,8 @@ def color2map(image):
 
 def generate_y(ext, set):
     gen_y_part1(set)
+    
+    1/0
     # gen_y_part2()
 
     folder = '/home/lameeus/data/ghent_altar/input/'
@@ -459,9 +543,22 @@ def generate_y(ext, set):
     if set == 'hand':
         im_all = get_input('hand')
         annot_big_color = image_tools.path2im(folder + '19_annot_clean.tif')
-    if set == 'zach':
+    elif set == 'zach':
         im_all = get_input('big_v1')
         annot_big_color = image_tools.path2im(folder + '13_annot_clean.tif')
+        
+    elif set == 'hand8':
+        im_all = get_input('hand')
+        annot_big_color = image_tools.path2im(folder + '19_annot_clean.tif')
+        
+    elif set == 'hand_big':
+        im_all = get_input('hand_big')
+        annot_big_color = image_tools.path2im(folder + '19_annot_clean_big.tif')
+        
+    else:
+        raise NotImplementedError
+        
+    
 
     class_map = color2map(annot_big_color)
 
@@ -473,9 +570,17 @@ def generate_y(ext, set):
     x_inputs = []
     y_outputs = []
 
-    width = 3    # segment more than one pixel at once
-    im_seg = data_net.SegmentedImage(im_all, ext = ext + width)
-    class_map_seg = data_net.SegmentedImage(class_map, ext = width)
+    if set == 'hand8':
+        width = 8
+        extra_width_left = 3
+        extra_width_right = 4
+    else:
+        width = 7
+        extra_width_left = 3
+        extra_width_right = 3
+        # extra_width = 3    # segment more than one pixel at once, 1 + 2*3 = 7
+    im_seg = data_net.SegmentedImage(im_all, ext = ext)
+    class_map_seg = data_net.SegmentedImage(class_map, ext = 0)
     
     idx = np.arange(len(coords_info[0]))
     np.random.seed(1)
@@ -483,15 +588,16 @@ def generate_y(ext, set):
     
     n_pixels = min(100000, len(coords_info[0]))
     n_pixels = len(coords_info[0])
+    # n_pixels = 10    # TODO remove, only for testing
     
     print('amount of patches: {}'.format(n_pixels))
     
     for i_pixel in range(n_pixels):
         # shuffling
-        x_co = coords_info[0][idx[i_pixel]]
-        y_co = coords_info[1][idx[i_pixel]]
+        x_co = coords_info[0][idx[i_pixel]] + extra_width_left
+        y_co = coords_info[1][idx[i_pixel]] + extra_width_left
 
-        input_patch = im_seg.get_patch(x_co, y_co, orig_width=1)
+        input_patch = im_seg.get_patch(x_co, y_co, orig_width=width)
         
         
         # plt.subplot(2,2,1)
@@ -503,9 +609,9 @@ def generate_y(ext, set):
         # plt.show()
         
         # input_patch = im_all[x_co-ext:x_co+ext+1, y_co-ext:y_co+ext+1,:]
-        output_patch = np.zeros(shape=(1 + 2*width, 1 + 2*width, 2), dtype=float)
+        output_patch = np.zeros(shape=(width, width, 2), dtype=float)
     
-        output_patch_map = class_map_seg.get_patch(x_co, y_co, orig_width=1)
+        output_patch_map = class_map_seg.get_patch(x_co, y_co, orig_width=width)
 
         # output_patch[np.equal(output_patch_map, 0), 0] = 1.
 
@@ -528,11 +634,15 @@ def generate_y(ext, set):
     def save_it(x_inputs, y_outputs, set):
         x_inputs = np.stack(x_inputs, axis=0)
         y_outputs = np.stack(y_outputs, axis=0)
+
+        folder_xy = '/home/lameeus/data/ghent_altar/input_arrays/'
     
         if set == 'zach':
-            np.savez_compressed('xy_comp_ext7_100000.npz', x=x_inputs, y=y_outputs)
+            np.savez_compressed(folder_xy + 'xy_comp_ext7_100000.npz', x=x_inputs, y=y_outputs)
         elif set == 'hand':
-            np.savez_compressed('xy_hand_ext7.npz', x=x_inputs, y=y_outputs)
+            np.savez_compressed(folder_xy + 'xy_hand_ext7.npz', x=x_inputs, y=y_outputs)
+        elif set == 'hand8':
+            np.savez_compressed(folder_xy + 'xy_hand_ext8.npz', x=x_inputs, y=y_outputs)
 
     if 1:
         save_it(x_inputs, y_outputs, set)
@@ -549,7 +659,7 @@ def generate_y(ext, set):
     # plt.show()
     
     
-def registration():
+def registration_13():
     folder = '/home/lameeus/data/ghent_altar/input/'
     ir = image_tools.path2im(folder+'13_ir.tif')
     rgb =image_tools.path2im(folder+'13_rgb.tif')
@@ -715,10 +825,11 @@ def registration():
     
     
 def load_xy(set ):
+    folder = '/home/lameeus/data/ghent_altar/input_arrays/'
     
     if set == 'combo':
-        xy = np.load('xy_comp_ext7_100000.npz')
-        xy2 = np.load('xy_hand_ext7.npz')
+        xy = np.load(folder+ 'xy_comp_ext7_100000.npz')
+        xy2 = np.load(folder + 'xy_hand_ext7.npz')
         # combine both
     
         x = np.concatenate([xy['x'], xy2['x']], axis=0)
@@ -727,12 +838,12 @@ def load_xy(set ):
         return x, y
     
     if set == 'zach':
-        xy = np.load('xy_comp_ext7_100000.npz')
+        xy = np.load(folder+ 'xy_comp_ext7_100000.npz')
         
     elif set == 'hand':
-        xy = np.load('xy_hand_ext7.npz')
+        xy = np.load(folder + 'xy_hand_ext7.npz')
     elif set == 'idk':
-        xy = np.load('xy_comp.npz')
+        xy = np.load(folder +'xy_comp.npz')
     
     return xy['x'], xy['y']
 
@@ -828,12 +939,12 @@ def test_net(ext, set):
 
 
 def main():
-    # registration()
+    # registration_13()
     ext = 7
-    set = 'zach'
-    # generate_y(ext, set = set)
-    train_net(ext, set)
-    test_net(ext, set)
+    set = 'hand_big'
+    generate_y(ext, set = set)
+    # train_net(ext, set)
+    # test_net(ext, set)
     
     # good_images()
     #
@@ -865,3 +976,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+a = 1 + 1
+print('test')
