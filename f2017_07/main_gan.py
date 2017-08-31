@@ -634,7 +634,9 @@ def main():
         
 
     def testing_disc():
-        x_gen = np.load('x_gen.npy')
+        folder = '/home/lameeus/data/mnist/'
+        
+        x_gen = np.load(folder + 'x_gen.npy')
         # x_train2 = np.concatenate([x_train, x_gen], axis = 0)
         
         idx = np.arange(len(x_train))
@@ -847,12 +849,14 @@ def main():
     
         y_gen_cat = np.zeros(shape=(len(x_gen), 1, 1, 11))
         y_gen_cat[:, :, :, 10] = 1
-    
-        np.save('x_gen.npy', x_gen)
-        np.save('y_gen.npy', y_gen_cat)
+
+        folder = '/home/lameeus/data/mnist/'
         
-        np.save('x_gen_auto.npy', x_gen_auto)
-        np.save('y_gen_auto.npy', y_gen_auto)
+        np.save(folder +'x_gen.npy', x_gen)
+        np.save(folder + 'y_gen.npy', y_gen_cat)
+        
+        np.save(folder + 'x_gen_auto.npy', x_gen_auto)
+        np.save(folder + 'y_gen_auto.npy', y_gen_auto)
         
     def train_discr_all2():
         """ also takes in to account the generated
@@ -860,11 +864,13 @@ def main():
 
         # xy_gen()
 
-        x_gen = np.load('x_gen.npy')
-        y_gen_cat = np.load('y_gen.npy')
+        folder = '/home/lameeus/data/mnist/'
+
+        x_gen = np.load(folder + 'x_gen.npy')
+        y_gen_cat = np.load(folder + 'y_gen.npy')
         
-        x_gen_auto = np.load('x_gen_auto.npy')
-        y_gen_auto = np.load('y_gen_auto.npy')
+        x_gen_auto = np.load(folder + 'x_gen_auto.npy')
+        y_gen_auto = np.load(folder + 'y_gen_auto.npy')
 
         # x_train2 = np.concatenate([x_train, x_gen], axis = 0)
         # y_train2 = np.concatenate([y_train_cat, y_gen_cat], axis = 0)

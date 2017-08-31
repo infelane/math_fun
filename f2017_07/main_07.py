@@ -1,16 +1,12 @@
 """ the MAIN thingy of July """
 
-import numpy as np
 import keras
-import sys, os
+import numpy as np
 
 import keras_ipi
 import lambnet
 
-folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_06'
-cmd_subfolder = os.path.realpath(folder_loc)
-if cmd_subfolder not in sys.path:
-    sys.path.insert(0, cmd_subfolder)
+# folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_06'
 
 
 def load_xy(set):
@@ -87,12 +83,12 @@ def gen_model2():
 
     encoding_dim = 12
 
-    layer_encode = keras_ipi.layers.Cropping2D(((1, 1), (1,1)))(layer_in)
+    layer_encode = keras_ipi.layers.Cropping2D(((1, 1), (1, 1)))(layer_in)
     # layer_encode = keras.layers.Conv2D(encoding_dim, (3,3), activation='sigmoid',
     #                         )(layer_encode)
     
     layer_encode = layer_inception(layer_encode)    #layer_encode
-    layer_encode = keras_ipi.layers.Cropping2D(((6, 6), (6,6)))(layer_encode)
+    layer_encode = keras_ipi.layers.Cropping2D(((6, 6), (6, 6)))(layer_encode)
     
     # layer_decoder = keras.la
 
@@ -250,10 +246,8 @@ def net_other():
     model = gen_model3()
 
 
-
-
 def main():
-    # train_net()
+    train_net()
     net_test()
     
     net_other()
