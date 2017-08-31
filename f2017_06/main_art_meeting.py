@@ -3,7 +3,7 @@ import sys
 # from keras.preprocessing import image
 import time
 
-import config4
+from f2017_06 import config4
 import cv2
 import keras
 import matplotlib.pyplot as plt
@@ -15,11 +15,7 @@ import scipy.ndimage
 import keras_ipi
 import lambnet
 
-folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_February/super_res_challenge'
-cmd_subfolder = os.path.realpath(folder_loc)
-if cmd_subfolder not in sys.path:
-    sys.path.insert(0, cmd_subfolder)
-import data_net
+from f2017_02.super_res_challenge import data_net
 
 from maus.paint_tools import image_tools
 
