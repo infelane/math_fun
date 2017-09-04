@@ -5,19 +5,19 @@ import matplotlib.pyplot as plt
 from PIL import Image
 import scipy.misc
 
-
-
 # hand
-input_1 = "/scratch/lameeus/data/altarpiece_close_up/finger/hand_cleaned.tif"
-input_2 = "/scratch/lameeus/data/altarpiece_close_up/finger/hand_rgb.tif"
-input_3 = "/scratch/lameeus/data/altarpiece_close_up/finger/hand_ir.tif"
-output_1 = "/scratch/lameeus/data/altarpiece_close_up/finger/ground_truth.tif"
+folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/finger/'
+input_1 = folder + "hand_cleaned.tif"
+input_2 = folder + "hand_rgb.tif"
+input_3 = folder + "hand_ir.tif"
+output_1 = folder + "ground_truth.tif"
 
 # # Zachary
-# input_1 = "/scratch/lameeus/data/altarpiece_close_up/beard_updated/rgb_cleaned.tif"
-# input_2 = "/scratch/lameeus/data/altarpiece_close_up/beard_updated/rgb.tif"
-# input_3 = "/scratch/lameeus/data/altarpiece_close_up/beard_updated/ir_non_refl.tif"
-# output_1 = "/scratch/lameeus/data/altarpiece_close_up/beard_updated/ground_truth.tif"
+folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/beard_updated/'
+input_1 = folder + "rgb_cleaned.tif"
+input_2 = folder + "rgb.tif"
+input_3 = folder + "ir_non_refl.tif"
+output_1 = folder +"ground_truth.tif"
 
 def open_image(arr, resize=1.0):
     arr1 = Image.open(arr)

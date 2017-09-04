@@ -3,17 +3,11 @@
 #3th party
 from PIL import Image
 import numpy as np
-import sys, os
 import pickle
 
 #own
-folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_February/super_res_challenge'
-cmd_subfolder = os.path.realpath(folder_loc)
-if cmd_subfolder not in sys.path:
-    sys.path.insert(0, cmd_subfolder)
-    
-import data_net
-import block_pre
+from f2017_02.super_res_challenge import data_net
+from f2017_04 import block_pre
 
 # global settings
 save_path = '/scratch/lameeus/data/lamb/xy/'
@@ -124,19 +118,23 @@ class ExRawImage(object):
 
 
 def ex_raw_zach():
-    input_1 = "/scratch/lameeus/data/altarpiece_close_up/beard_updated/rgb_cleaned.tif"
-    input_2 = "/scratch/lameeus/data/altarpiece_close_up/beard_updated/rgb.tif"
-    input_3 = "/scratch/lameeus/data/altarpiece_close_up/beard_updated/ir_non_refl.tif"
-    out = "/scratch/lameeus/data/altarpiece_close_up/beard_updated/ground_truth.tif"
+    folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/beard_updated/'
+    input_1 = folder + "rgb_cleaned.tif"
+    input_2 = folder + "rgb.tif"
+    input_3 = folder + "ir_non_refl.tif"
+    out = folder + "ground_truth.tif"
 
     return ExRawImage(input_1, input_2, input_3, out)
 
 
 def ex_raw_zach_close():
-    input_1 = "/scratch/lameeus/data/altarpiece_close_up/beard_updated/rgb_cleaned.tif"
-    input_2 = "/scratch/lameeus/data/altarpiece_close_up/beard_updated/rgb.tif"
-    input_3 = "/scratch/lameeus/data/altarpiece_close_up/beard_updated/ir_non_refl.tif"
-    out = '/scratch/lameeus/data/altarpiece_close_up/ground_truth/data_1BDcorrected.tif'
+    folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/beard_updated/'
+    input_1 = folder + "rgb_cleaned.tif"
+    input_2 = folder + "rgb.tif"
+    input_3 = folder + "ir_non_refl.tif"
+
+    folder = '/home/lameeus/data/ghent_altar/annotation/'
+    out = folder + 'data_1BDcorrected.tif'
     
     ex_raw_data = ExRawImage(input_1, input_2, input_3, out)
     
@@ -149,19 +147,25 @@ def ex_raw_zach_close():
 
 
 def ex_raw_hand():
-    input_1 = "/scratch/lameeus/data/altarpiece_close_up/finger/hand_cleaned.tif"
-    input_2 = "/scratch/lameeus/data/altarpiece_close_up/finger/hand_rgb.tif"
-    input_3 = "/scratch/lameeus/data/altarpiece_close_up/finger/hand_ir.tif"
-    output_1 = "/scratch/lameeus/data/altarpiece_close_up/finger/ground_truth.tif"
+    folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/finger/'
+    input_1 = folder + "hand_cleaned.tif"
+    input_2 = folder + "hand_rgb.tif"
+    input_3 = folder + "hand_ir.tif"
+    output_1 = folder + "ground_truth.tif"
 
     return ExRawImage(input_1, input_2, input_3, output_1)
 
 
 def ex_raw_hand_close():
-    input_1 = "/scratch/lameeus/data/altarpiece_close_up/finger/hand_cleaned.tif"
-    input_2 = "/scratch/lameeus/data/altarpiece_close_up/finger/hand_rgb.tif"
-    input_3 = "/scratch/lameeus/data/altarpiece_close_up/finger/hand_ir.tif"
-    out = '/scratch/lameeus/data/altarpiece_close_up/ground_truth/data_2BD.tif'
+    folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/finger/'
+    
+    input_1 = folder + "hand_cleaned.tif"
+    input_2 = folder + "hand_rgb.tif"
+    input_3 = folder + "hand_ir.tif"
+    
+    folder = '/home/lameeus/data/ghent_altar/annotation/'
+    
+    out = folder + 'data_2BD.tif'
 
     ex_raw_data = ExRawImage(input_1, input_2, input_3, out)
 

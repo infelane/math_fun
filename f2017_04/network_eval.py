@@ -1,11 +1,12 @@
 """
 For evaluation the network
 """
+# TODO make it work
 
 #3th party libraries
 import numpy as np
 
-import net_builder
+from f2017_04 import net_builder
 
 
 def eval1(net_base):

@@ -4,15 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 
-import block_data
-
-import os, sys
-folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_February/super_res_challenge'
-cmd_subfolder = os.path.realpath(folder_loc)
-if cmd_subfolder not in sys.path:
-    sys.path.insert(0, cmd_subfolder)
-
-import generate_h_images
+from f2017_02.super_res_challenge import generate_h_images
+from f2017_04 import block_data
 
 
 class Info():
