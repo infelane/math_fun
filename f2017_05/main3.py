@@ -1,38 +1,22 @@
 # should be cleaner than main2
 # probs will convert everything to keras
 
-import os
-import sys
 import pickle
 import keras
 
-# some_file.py
-# sys.path.insert(0, '/ipi/private/lameeus/private_Documents')
-# from ipi.private.lameeus.private_Documents import keras_ipi
-import keras_ipi
-import lambnet
-from PIL import Image
-import config3
-import numpy as np
-
-import testing23
-
 # 3th party
-folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_January/tensorflow_folder'
-cmd_subfolder = os.path.realpath(folder_loc)
-if cmd_subfolder not in sys.path:
-    sys.path.insert(0, cmd_subfolder)
-# import config_lamb
-import data
+from f2017_05 import config3
+import keras_ipi
+from f2017_01.tensorflow_folder import data
 
 load_prev = True    # TODO set to True
 
-
 def main():
+    folder_data = '/home/lameeus/data/ghent_altar/input_arrays/main3/'
     if load_prev:
-        batch_train = pickle.load(open("batch_train.p", "rb"))
-        batch_vali = pickle.load(open("batch_vali.p", "rb"))
-        batch_test = pickle.load(open("batch_test.p", "rb"))
+        batch_train = pickle.load(open(folder_data + "batch_train.p", "rb"))
+        batch_vali = pickle.load(open(folder_data + "batch_vali.p", "rb"))
+        batch_test = pickle.load(open(folder_data + "batch_test.p", "rb"))
         
     else:
         width = 8
@@ -42,9 +26,9 @@ def main():
         batch_vali = data_all[1].next_batch(10000)
         batch_test = data_all[2].next_batch(10000)
     
-        pickle.dump(batch_train, open("batch_train.p", "wb"))
-        pickle.dump(batch_vali, open("batch_vali.p", "wb"))
-        pickle.dump(batch_test, open("batch_test.p", "wb"))
+        pickle.dump(batch_train, open(folder_data + "batch_train.p", "wb"))
+        pickle.dump(batch_vali, open(folder_data + "batch_vali.p", "wb"))
+        pickle.dump(batch_test, open(folder_data + "batch_test.p", "wb"))
 
     # subset
     n_subset = 100000   # 10000 for small subset, 100000 for all
@@ -103,7 +87,8 @@ def main():
                   metrics=metrics
                   )
     
-    filepath = 'foo_weight.h5'
+    folder_weights = '/home/lameeus/data/ghent_altar/net_weight/main3/'
+    filepath = folder_weights + 'foo_weight.h5'
     
     # file_pre = '/scratch/Downloads_local/vgg16_weights.h5'
 
@@ -188,8 +173,8 @@ def main():
     # print(np.shape(X_train)[0])
 
     # keras_ipi.results.roc(model, X_train[11000:12000], Y_train[11000:12000], auc_only=False)
-    keras_ipi.results.roc(model, x_vali, y_vali, auc_only = False, set = 'hand')   # hand
-    keras_ipi.results.roc(model, x_test, y_test, auc_only = False, set = 'zach')   # Zach
+    keras_ipi.results.roc(model, x_vali, y_vali, auc_only = False, set ='hand')   # hand
+    keras_ipi.results.roc(model, x_test, y_test, auc_only = False, set ='zach')   # Zach
 
 
 if __name__ == '__main__':
