@@ -6,7 +6,7 @@ class flag():
     bool_prev = True   # Load previous
     lr =0.3e-4 # learning rate
     beta =0.90    # standard 0.9
-    epochs = 0
+    epochs = 1
     batch_size = 100
     
 
@@ -83,12 +83,14 @@ def nn2():
     input_depth = 7
     output_depth = 2
     kernel_dep = 10
+    
+    ext = 7
 
     # Can be calculated from print(np.mean(Y_train, axis = (0, 1, 2)))
     class_rate = 21.5  # Fixed, should be calculated from the input data
     k = 4.0
     
-    layer_size_in = [layer_width + 2 * 7, layer_width + 2 * 7]
+    layer_size_in = [layer_width + 2 * ext, layer_width + 2 * ext]
     
     layers = []
     
@@ -161,5 +163,8 @@ def nn2():
     # layer_config.update({'depth': depth})
     layer_config.update({'k': k})
     layer_config.update({'r': class_rate})
+
+    layer_config.update({'width': layer_width})
+    layer_config.update({'ext': ext})
 
     return layer_config
