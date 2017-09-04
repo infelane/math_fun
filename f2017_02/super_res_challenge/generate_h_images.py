@@ -2,6 +2,7 @@ import scipy.misc
 
 import data_net_sr
 from main_sr import *
+from link_to_soliton.paint_tools import image_tools
 
 
 # Generate each output image
@@ -57,7 +58,8 @@ def return_image(name_im, folder=None):
     i = int(name_im)
     
     im_inp_name = dirname + '/' + "%04d" % i + 'x' + str(x) + '.png'
-    return image_float(im_inp_name)
+    # return image_float(im_inp_name)
+    return image_tools.path2im(im_inp_name)[..., 0:3]
 
 
 def image_float(name):

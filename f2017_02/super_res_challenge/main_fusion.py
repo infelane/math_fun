@@ -2,14 +2,14 @@
 Fuses multiple preprocessors
 """
 
-import matplotlib.pyplot as plt
-import numpy as np
-from PIL import Image
-
 import config
 import data_net
 import generate_h_images
 import main_sr
+import matplotlib.pyplot as plt
+import numpy as np
+from PIL import Image
+
 from lambnet import network
 
 

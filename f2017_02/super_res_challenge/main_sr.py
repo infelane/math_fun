@@ -19,6 +19,8 @@ import data_net
 import config
 import data_net_sr
 
+# from f2017_01.tensorflow_folder import
+
 
 # Input of a neural network
 class InputImage():

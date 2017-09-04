@@ -1,6 +1,7 @@
 # All config
 
-import lambnet.layer.LayerConfig as LayerConfig
+# import lambnet.layer.LayerConfig as LayerConfig
+from keras_ipi.layers import LayerConfig
 
 # Settings
 class FLAGS1():
