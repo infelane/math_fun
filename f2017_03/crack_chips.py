@@ -4,13 +4,6 @@ import numpy as np
 
 import timeit
 
-# plt.imshow(grey, cmap='Greys')
-# plt.colorbar()
-# plt.show()
-
-
-
-
 
 def tophat_tf(im, ext = None, kernel = None):
     if kernel is None:
@@ -103,7 +96,8 @@ def main():
     
     for index in range(3):
     
-        name = 'images/{}.png'.format(im_index[index])
+        folder = '/home/lameeus/data/xray/cracks/images/'
+        name = folder + '{}.png'.format(im_index[index])
         # Opening image
         im_inp_float = np.asarray(Image.open(name)) / 255
     
