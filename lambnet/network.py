@@ -6,11 +6,7 @@ import os
 import sys
 
 # own libraries
-folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_04'
-cmd_subfolder = os.path.realpath(folder_loc)
-if cmd_subfolder not in sys.path:
-    sys.path.insert(0, cmd_subfolder)
-import lam_warnings
+from f2017_04 import lam_warnings
 # import network_eval
 
 # Abstract class
