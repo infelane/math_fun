@@ -29,7 +29,7 @@ x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
 x = preprocess_input(x)
 
-preds = model.predict(x)
+preds = model.predict_auto(x)
 print('Predicted:', decode_predictions(preds))
 # print: [[u'n02504458', u'African_elephant']]
 ```
@@ -49,7 +49,7 @@ x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
 x = preprocess_input(x)
 
-features = model.predict(x)
+features = model.predict_auto(x)
 ```
 
 ### Extract features from an arbitrary intermediate layer
@@ -69,7 +69,7 @@ x = image.img_to_array(img)
 x = np.expand_dims(x, axis=0)
 x = preprocess_input(x)
 
-block4_pool_features = model.predict(x)
+block4_pool_features = model.predict_auto(x)
 ```
 
 ## References

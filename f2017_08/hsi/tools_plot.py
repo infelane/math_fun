@@ -34,10 +34,10 @@ def n_to_rgb(x, with_col = True, with_sat = False, with_lum = False):
         
     if with_lum:
         foo[..., 2] = 0.5 + 0.5*x_max   # adjust S value to x_p_max
-    
-    # print(foo)
-    # print(np.shape(foo))
-    
+       
+    black = np.sum(x, axis = -1) == 0
+    foo[black, :] = 0
+        
     # return colorsys.hls_to_rgb(foo)
     return colorconv.hsv2rgb(foo)
     
@@ -59,12 +59,36 @@ def imshow(rgb, n = 1, mask = None, title = None):
     # TODO n, multiple img's
     
     plt.figure()
-    if mask is None:
-        plt.imshow(rgb)
-    else:
-        rgb_mask = rgb[...]
-        rgb_mask[mask, :] = 0.5
-        plt.imshow(rgb_mask)
     
-    if title:
-        plt.title(title)
+    def plotter(a, b):
+        if mask is None:
+            plt.imshow(a)
+        else:
+            rgb_mask = np.zeros(shape = np.shape(a))
+            rgb_mask[...] = a
+            rgb_mask[mask == 0, :] = 0.5
+            plt.imshow(rgb_mask)
+    
+        if b:
+            plt.title(b)
+    
+    
+    if n == 1:
+        plotter(rgb, title)
+        
+    else:
+        for i in range(n):
+            plt.subplot(1, n, i+1)
+            plotter(rgb[i], title[i])
+            
+            
+            # if mask is None:
+            #     plt.imshow(rgb[i])
+            #
+            # else:
+            #     rgb_mask = rgb[...]
+            #     rgb_mask[mask, :] = 0.5
+            #     plt.imshow(rgb_mask)
+            #
+            # if title:
+            #     plt.title(title[i])

@@ -434,7 +434,7 @@ def part_discriminator():
         model.fit([x, y], [y_discr_true, y_discr_pred], epochs=50000)
         model_discr.save_weights(path_discr)
     
-    # foo = model.predict([x,y])
+    # foo = model.predict_auto([x,y])
     # print(foo)
 
     model_discr_same.load_weights(path_discr)

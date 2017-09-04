@@ -133,15 +133,15 @@ class PcaStuff(object):
 
 
 class HsiData(object):
-    def __init__(self, load = True):
-        if load:
-            img = tools_datasets.hsi_processed()
-       
-            # image3D = tools_data.Image3D()
-            # img = image3D.get_img()
-            # wavelengths = image3D.get_wavelength()
-            
-            self.img = tools_data.norm_hsi(img)
+    def __init__(self):
+        # if load:
+        #     img = tools_datasets.hsi_processed()
+        #
+        #     # image3D = tools_data.Image3D()
+        #     # img = image3D.get_img()
+        #     # wavelengths = image3D.get_wavelength()
+        #
+        #     self.img = tools_data.norm_hsi(img)
             # self.img = norm_img2(img)
     
         self.mean = 0.18 # np.mean(self.img)
@@ -150,15 +150,22 @@ class HsiData(object):
         self.i_rgb =  get_i_rgb(wavelengths)
         
     def get_img(self):
+        try:
+            self.img
+        except:
+            img = tools_datasets.hsi_processed()
+            self.img = tools_data.norm_hsi(img)
+            
         return self.img
     
     def get_data(self):
         """ removes the border """
-        mask = np.array(Image.open('/ipi/research/lameeus/data/hsi_raw/mask.png'))
+        path = '/home/lameeus/data/hsi/mask.png'
+        mask = np.array(Image.open(path))
         shape = np.shape(mask)
         mask_01 = np.zeros(shape=(shape[0], shape[1]))
         mask_01[mask[:, :, 0] == 0] = 1
-        return self.img[mask_01 == 1, :]
+        return self.get_img()[mask_01 == 1, :]
     
     # def get_i_rgb(self):
     #     return self.i_rgb

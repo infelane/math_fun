@@ -527,13 +527,13 @@ def main():
     #     x_orig_0 = x_0_test[:n_testing, ...]
     #     x_orig_1 = x_1_test[:n_testing, ...]
     #
-    #     x_pred_0_1 = dict_model_g[(0, 1)].predict(x_orig_0)
-    #     x_pred_0_0 = dict_model_g[(0, 0)].predict(x_orig_0)
-    #     x_pred_0_1_0 = dict_model_g_trans[(0, 1)].predict(x_orig_0)
+    #     x_pred_0_1 = dict_model_g[(0, 1)].predict_auto(x_orig_0)
+    #     x_pred_0_0 = dict_model_g[(0, 0)].predict_auto(x_orig_0)
+    #     x_pred_0_1_0 = dict_model_g_trans[(0, 1)].predict_auto(x_orig_0)
     #
-    #     x_pred_1_0 = dict_model_g[(1, 0)].predict(x_orig_1)
-    #     x_pred_1_1 = dict_model_g[(1, 1)].predict(x_orig_1)
-    #     x_pred_1_0_1 = dict_model_g_trans[(1, 0)].predict(x_orig_1)
+    #     x_pred_1_0 = dict_model_g[(1, 0)].predict_auto(x_orig_1)
+    #     x_pred_1_1 = dict_model_g[(1, 1)].predict_auto(x_orig_1)
+    #     x_pred_1_0_1 = dict_model_g_trans[(1, 0)].predict_auto(x_orig_1)
     #
     #     def row_start(row):
     #         return n_testing*row + 1
@@ -586,9 +586,9 @@ def main():
     def testing(digit_in = 0, digit_out = 1):
         n_testing = 10
         x_orig_i = x_i_test[digit_in][:n_testing, ...]
-        x_pred_i_j = dict_model_g[(digit_in, digit_out)].predict(x_orig_i)
-        x_pred_i_i = dict_model_g[(digit_in, digit_in)].predict(x_orig_i)
-        x_pred_i_j_i = dict_model_g_trans[(digit_in, digit_out)].predict(x_orig_i)
+        x_pred_i_j = dict_model_g[(digit_in, digit_out)].predict_auto(x_orig_i)
+        x_pred_i_i = dict_model_g[(digit_in, digit_in)].predict_auto(x_orig_i)
+        x_pred_i_j_i = dict_model_g_trans[(digit_in, digit_out)].predict_auto(x_orig_i)
 
         def row_start(row):
             return n_testing * row + 1
@@ -670,7 +670,7 @@ def main():
         
         x_orig_i = x_i_test[digit_in][:n_testing, ...]
 
-        y_pred = dict_model_super[(digit_in)].predict(x_orig_i)
+        y_pred = dict_model_super[(digit_in)].predict_auto(x_orig_i)
         
         print(len(y_pred))
         
@@ -720,9 +720,9 @@ def main():
             
         plt.show()
 
-        # x_pred_i_j = dict_model_g[(digit_in, digit_out)].predict(x_orig_i)
-        # x_pred_i_i = dict_model_g[(digit_in, digit_in)].predict(x_orig_i)
-        # x_pred_i_j_i = dict_model_g_trans[(digit_in, digit_out)].predict(x_orig_i)
+        # x_pred_i_j = dict_model_g[(digit_in, digit_out)].predict_auto(x_orig_i)
+        # x_pred_i_i = dict_model_g[(digit_in, digit_in)].predict_auto(x_orig_i)
+        # x_pred_i_j_i = dict_model_g_trans[(digit_in, digit_out)].predict_auto(x_orig_i)
         #
         # def row_start(row):
         #     return n_testing * row + 1
@@ -769,8 +769,8 @@ def main():
     y_0_1_fool = np.ones((x_0_len, 1, 1, 1))
 
     def generate_conv():
-        x_1_0 = dict_model_g[(1, 0)].predict(x_1)
-        x_0_1 = dict_model_g[(0, 1)].predict(x_0)
+        x_1_0 = dict_model_g[(1, 0)].predict_auto(x_1)
+        x_0_1 = dict_model_g[(0, 1)].predict_auto(x_0)
         return x_0_1, x_1_0
 
     def generate_like(i = None):
@@ -837,11 +837,11 @@ def main():
             n_i = len(x_i_picked)
             for j in range(n_digits):
                 if i != j:
-                    x_ij = dict_model_g_trans[(i, j)].predict(x_i_picked)
+                    x_ij = dict_model_g_trans[(i, j)].predict_auto(x_i_picked)
                     print(np.shape(x_ij))
                     x_gen = np.concatenate([x_gen, x_ij], axis=0)
                 if i == j:
-                    x_ii = dict_model_g_trans[(i, i)].predict(x_i_picked)
+                    x_ii = dict_model_g_trans[(i, i)].predict_auto(x_i_picked)
                     x_gen_auto = np.concatenate([x_gen_auto, x_ii], axis=0)
                     y_ii = np.zeros(shape=(n_i , 1, 1, 11))
                     y_ii[:, :, :, i] = 1
