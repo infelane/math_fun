@@ -5,7 +5,7 @@ import keras
 from keras.layers import Conv2D, Input
 from keras.models import Model
 
-import keras_ipi
+import link_to_keras_ipi as keras_ipi
 
 n_in = 132
 n_code = 10
