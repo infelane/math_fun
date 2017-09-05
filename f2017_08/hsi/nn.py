@@ -9,6 +9,8 @@ import link_to_keras_ipi as keras_ipi
 
 n_in = 132
 n_code = 10
+n_out = 8
+l = 0.0001
 
 
 def gen_layer_in(w = 1, ext = 0):
@@ -27,30 +29,36 @@ def gen_encoder(w, ext):
     # act_reg2 = keras_ipi.regularizers.ClassBal_reg(l = 0.01)
     # act_reg = keras_ipi.regularizers.Multi_reg(act_reg1, act_reg2)
     # act_reg = None  # TODO
-    layer_encode = Conv2D(2*n_code, (2, 2), padding='valid', activation='elu')(layer_in)
-    layer_encode = Conv2D(n_code, (2, 2), padding='valid', activation='softmax')(layer_encode)
+    
+    l2 = keras.regularizers.l2(l)
+    
+    layer_encode = Conv2D(2*n_code, (2, 2), padding='valid', activation='elu', kernel_regularizer=l2)(layer_in)
+    layer_encode = Conv2D(n_code, (2, 2), padding='valid', activation='softmax', kernel_regularizer=l2)(layer_encode)
     model = Model(layer_in, layer_encode, name = 'encoder')
     
     return model
 
 
 def gen_decoder(w, ext):
+    l2 = keras.regularizers.l2(l)
+    
     layer_code = gen_layer_code(w, ext)
-    layer_decode = Conv2D(2*n_code, (2, 2), activation='elu', padding='valid')(layer_code)
-    layer_decode = Conv2D(n_in, (2, 2), activation='linear', padding='valid')(layer_decode)
+    layer_decode = Conv2D(2*n_code, (2, 2), activation='elu', padding='valid', kernel_regularizer=l2)(layer_code)
+    layer_decode = Conv2D(n_in, (2, 2), activation='linear', padding='valid', kernel_regularizer=l2)(layer_decode)
     model = Model(layer_code, layer_decode, name = 'decoder')
     
     return model
 
 
 def gen_classifier(w, ext):
+    l2 = keras.regularizers.l2(l)
+    
     layer_code = gen_layer_code(w, ext)
-    layer_classifier = Conv2D(2*n_code, (2, 2), activation='elu', padding='valid')(layer_code)
-    layer_classifier = Conv2D(6, (2, 2), activation='softmax', padding='valid')(layer_classifier)
+    layer_classifier = Conv2D(2*n_code, (2, 2), activation='elu', padding='valid', kernel_regularizer=l2)(layer_code)
+    layer_classifier = Conv2D(n_out, (2, 2), activation='softmax', padding='valid', kernel_regularizer=l2)(layer_classifier)
     model = Model(layer_code, layer_classifier, name='classifier')
     
     return model
-
 
 
 class Network():
