@@ -80,8 +80,7 @@ def imshow(rgb, n = 1, mask = None, title = None):
         for i in range(n):
             plt.subplot(1, n, i+1)
             plotter(rgb[i], title[i])
-            
-            
+     
             # if mask is None:
             #     plt.imshow(rgb[i])
             #

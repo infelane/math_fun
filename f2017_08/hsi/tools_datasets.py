@@ -56,14 +56,14 @@ def hsi_processed():
 def hsi_annot():
     folder_save = '/home/lameeus/data/hsi/'
     
-    if 0:
+    if 1:   # TODO SET AT 0 after done
         folder_annot = '/ipi/research/lameeus/data/hsi/'
         
-        file = folder_annot + 'annot.png'
+        file = folder_annot + 'annot2.png'
         img = image_tools.path2im(file)[..., 0:3]
        
         shape = np.shape(img)
-        shape_annot = [shape[0], shape[1], 6]
+        shape_annot = [shape[0], shape[1], 8]
         img_annot = np.zeros(shape = shape_annot)
         
         r0 = np.equal(img[:,:,0], 0)
@@ -79,17 +79,29 @@ def hsi_annot():
         cyan = np.logical_and(np.logical_and(r0, g1), b1)
         yellow = np.logical_and(np.logical_and(r1, g1), b0)
         magenta = np.logical_and(np.logical_and(r1, g0), b1)
-
-        # white = np.logical_and(np.logical_and(r1, g0), b0)
-
-        # red = first*(1-second)*(1-third)
-        # green = (1-first) * (second) * (1 - third)
-        # red_map = )
-        # print(np.shape(red_map))
-        # img_annot[red, 0] = 1
-        # img_annot[green, 1] = 1
-        # green_map = np.equal(img, [0, 1, 0])
-        # img_annot[red_map, 1] = 1
+        white = np.logical_and(np.logical_and(r1, g1), b1)
+        black = np.logical_and(np.logical_and(r0, g0), b0)
+        
+        if 0:
+            import matplotlib.pyplot as plt
+            plt.imshow(white)
+            plt.show()
+    
+            import matplotlib.pyplot as plt
+            plt.imshow(black)
+            plt.show()
+            
+            a = image_tools.path2im('/ipi/research/lameeus/data/hsi/hsi_rgb_grey.png')[..., 0:3]
+            # a = (a-0.5)*0.5 + 0.5
+            a[red] = [1, 0, 0]
+            a[green] = [0, 1, 0]
+            a[blue] = [0, 0, 1]
+            a[cyan] = [0, 1, 1]
+            a[yellow] = [1, 1, 0]
+            a[magenta] = [1, 0, 1]
+            
+            if 0:
+                image_tools.save_im(a, '/ipi/research/lameeus/data/hsi/annot2.png')
 
         img_annot[red, 0] = 1
         img_annot[green, 1] = 1
@@ -97,6 +109,8 @@ def hsi_annot():
         img_annot[cyan, 3] = 1
         img_annot[yellow, 4] = 1
         img_annot[magenta, 5] = 1
+        img_annot[white, 6] = 1
+        img_annot[black, 7] = 1
         
         np.save(folder_save + 'y_annot.npy', img_annot)
         
