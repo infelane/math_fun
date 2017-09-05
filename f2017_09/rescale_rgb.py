@@ -17,6 +17,9 @@ def main():
     file = 'hsi_rgb.png'
     hsi_rgb = image_tools.path2im(folder + file)
     
+    if 1:
+        image_tools.save_im((hsi_rgb-0.5)*0.5+0.5, '/ipi/research/lameeus/data/hsi/hsi_rgb_grey.png')
+    
     def show_prog(a, bool_mix = False):
         plt.figure()
         plt.subplot(1,3, 1)
@@ -74,8 +77,8 @@ def main():
     
     shape = np.shape(hsi_rgb)
     
-    h0 = 83
-    w0 = 36
+    h0 = 83-7
+    w0 = 36-7
     
     h1 = h0 + shape[0]
     w1 = w0 + shape[1]
@@ -91,6 +94,9 @@ def main():
     crop2_copy = np.copy(crop2)
     crop2_copy[mask == 1, :] = 1.
     show_prog(crop2_copy, True)
+    
+    if 0:
+        image_tools.save_im(crop2, '/home/lameeus/data/hsi/rgb_registrated.png')
 
 
 if __name__ == '__main__':
