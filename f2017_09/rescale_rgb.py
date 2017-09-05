@@ -38,47 +38,63 @@ def main():
     # initial crop
     crop = rgb_orig[400:5286, 3648:7252, :]
     
-    hsi_p1_h = 218
-    hsi_p1_w = 320
-
-    hsi_p2_h = 2490
-    hsi_p2_w = 1707
-
-    rgb_p1_h = 534
-    rgb_p1_w = 574
+    def resize_im(a):
+        hsi_p1_h = 218
+        hsi_p1_w = 320
     
-    rgb_p2_h = 4381
-    rgb_p2_w = 2985
+        hsi_p2_h = 2490
+        hsi_p2_w = 1707
     
-    delta_hsi_h = hsi_p2_h - hsi_p1_h
-    delta_hsi_w = hsi_p2_w - hsi_p1_w
-    delta_hsi = np.sqrt(np.square(delta_hsi_h) + np.square(delta_hsi_w))
+        rgb_p1_h = 534
+        rgb_p1_w = 574
     
-    delta_rgb_h = rgb_p2_h - rgb_p1_h
-    delta_rgb_w = rgb_p2_w - rgb_p1_w
-    delta_rgb = np.sqrt(np.square(delta_rgb_h) + np.square(delta_rgb_w))
+        rgb_p2_h = 4381
+        rgb_p2_w = 2985
     
-    print(delta_hsi_h/delta_rgb_h)
-    print(delta_hsi_w / delta_rgb_w)
-   
+        delta_hsi_h = hsi_p2_h - hsi_p1_h
+        delta_hsi_w = hsi_p2_w - hsi_p1_w
+        delta_hsi = np.sqrt(np.square(delta_hsi_h) + np.square(delta_hsi_w))
+    
+        delta_rgb_h = rgb_p2_h - rgb_p1_h
+        delta_rgb_w = rgb_p2_w - rgb_p1_w
+        delta_rgb = np.sqrt(np.square(delta_rgb_h) + np.square(delta_rgb_w))
+    
+        print(delta_hsi_h / delta_rgb_h)
+        print(delta_hsi_w / delta_rgb_w)
+    
+        rescale = delta_hsi / delta_rgb
+        print(rescale)
+        
+        theta_hsi = np.arctan2(delta_hsi_h, delta_hsi_w)
+        theta_rgb = np.arctan2(delta_rgb_h, delta_rgb_w)
+        
+        print(theta_hsi)
+        print(theta_rgb)
+        print((theta_rgb - theta_hsi) * 57.2957795131)  # -0.673245714777
+        
+        return cv2.resize(a, (0, 0), fx=rescale, fy=rescale, interpolation=4)
 
-    rescale = delta_hsi / delta_rgb
-    print(rescale)
+    def rotate_im(a):
+        rot = -0.673245714777
+        rows, cols, ch = np.shape(a)
+        M = cv2.getRotationMatrix2D((rows / 2, cols / 2), float(rot), 1)
+        return cv2.warpAffine(a, M, (cols, rows))
 
-    im2_reshape =  cv2.resize(crop, (0, 0), fx=rescale, fy=rescale, interpolation=4)
-
+    rgb_new = rotate_im(crop)
+    rgb_new = resize_im(rgb_new)
+    
     # new_rgb = cv2.flip(rgb_orig, 1)
     
     if 0:
         show_prog(crop)
         
     if 0:
-        show_prog(im2_reshape)
+        show_prog(rgb_new)
     
     shape = np.shape(hsi_rgb)
     
-    h0 = 83-7
-    w0 = 36-7
+    h0 = 83 - 12
+    w0 = 36 - 16
     
     h1 = h0 + shape[0]
     w1 = w0 + shape[1]
@@ -89,13 +105,13 @@ def main():
     plt.figure()
     plt.imshow(mask)
     
-    crop2 = im2_reshape[h0:h1, w0:w1,:]
+    crop2 = rgb_new[h0:h1, w0:w1,:]
     
     crop2_copy = np.copy(crop2)
     crop2_copy[mask == 1, :] = 1.
     show_prog(crop2_copy, True)
     
-    if 0:
+    if 1:
         image_tools.save_im(crop2, '/home/lameeus/data/hsi/rgb_registrated.png')
 
 
