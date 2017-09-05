@@ -24,6 +24,8 @@ def hsi_raw():
     lib = envi.open(folder + name_header, image=folder + name_image)
 
     img = np.array(lib[:, :, :])
+    img = np.flip(img, axis = 1)    # had to be flipped horizontally, like the RGB image
+    
     wavelengths = np.array(lib.bands.centers)
     max_value = lib.params().metadata['max value']
     
@@ -37,7 +39,7 @@ def hsi_processed():
     folder = '/home/lameeus/data/hsi/'
     file = folder + 'img_norm.npy'
     
-    if 0:
+    if 0:   # Changes back to 0
         # takes 26s
         
         hsi_data = hsi_raw()
@@ -49,14 +51,14 @@ def hsi_processed():
     else:
         # Takes
         img_norm = np.load(file)
-    
+        
     return img_norm
 
 
 def hsi_annot():
     folder_save = '/home/lameeus/data/hsi/'
     
-    if 1:   # TODO SET AT 0 after done
+    if 0:   # TODO SET AT 0 after done
         folder_annot = '/ipi/research/lameeus/data/hsi/'
         
         file = folder_annot + 'annot2.png'
