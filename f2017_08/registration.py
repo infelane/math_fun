@@ -1,4 +1,4 @@
-from maus.paint_tools import image_tools
+from link_to_soliton.paint_tools import image_tools
 import matplotlib.pyplot as plt
 import cv2
 import numpy as np
