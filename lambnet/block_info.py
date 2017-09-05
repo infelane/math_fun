@@ -1,19 +1,15 @@
 # #todo things like the summary!
 #
+
+import keras.backend as K
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.misc
-import os, sys
-import keras
-import keras.backend as K
 
-folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_04'
-cmd_subfolder = os.path.realpath(folder_loc)
-if cmd_subfolder not in sys.path:
-    sys.path.insert(0, cmd_subfolder)
-#
-import block_data
+from f2017_04 import block_data
 # import generate_h_images
+
+from link_to_soliton.paint_tools import image_tools
 
 
 class Info():
@@ -223,21 +219,23 @@ class Info():
         if cmd_subfolder not in sys.path:
             sys.path.insert(0, cmd_subfolder)
         #
-        import block_data
-        from paint_tools import image_tools
-        
+
+
         if set == 'zach':
             im_clean = image_tools.path2im('/home/lameeus/data/ghent_altar/input/13_clean.tif')
         elif set == 'hand':
             im_clean = image_tools.path2im('/home/lameeus/data/ghent_altar/input/19_clean_crop_scale.tif')
         elif set == 'zach_small':
             im_clean = image_tools.path2im('/scratch/lameeus/data/ghentaltarpiece/altarpiece_close_up/beard_updated/rgb_cleaned.tif')
+        elif set == 'hand_small':
+            im_clean = image_tools.path2im(
+                '/scratch/lameeus/data/ghentaltarpiece/altarpiece_close_up/finger/hand_cleaned.tif')
 
         # data_input, map = block_data.test_data(set, width, ext, bool_new_data = False)
         import block_data2
         data_input = block_data2.test_data(set, width, ext)
 
-        generated_im = net2h_image(self, data_input, tophat_bool=False)
+        generated_im = net2h_image(self, data_input)
     
         gen_pred0 = generated_im[..., 0]
         gen_pred1 = generated_im[..., 1]
@@ -328,6 +326,66 @@ class Info():
         # plt.title('map')
         #
         plt.show()
+        
+    
+    def certainty_discr(self, width, ext, set = None):
+        
+        if set == 'zach':
+            im_clean = image_tools.path2im('/home/lameeus/data/ghent_altar/input/13_clean.tif')
+        elif set == 'hand':
+            im_clean = image_tools.path2im('/home/lameeus/data/ghent_altar/input/19_clean_crop_scale.tif')
+        elif set == 'zach_small':
+            im_clean = image_tools.path2im(
+                '/scratch/lameeus/data/ghentaltarpiece/altarpiece_close_up/beard_updated/rgb_cleaned.tif')
+        elif set == 'hand_small':
+            im_clean = image_tools.path2im(
+                '/scratch/lameeus/data/ghentaltarpiece/altarpiece_close_up/finger/hand_cleaned.tif')
+        
+        folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_06'
+        cmd_subfolder = os.path.realpath(folder_loc)
+        if cmd_subfolder not in sys.path:
+            sys.path.insert(0, cmd_subfolder)
+        import block_data2
+        from f2017_06 import block_data2
+        
+        data_input = block_data2.test_data(set, width, ext)
+
+        generated_im = net2h_image_discr(self, data_input)
+
+        gen_pred0 = generated_im[..., 3]  # background
+        gen_pred1 = generated_im[..., 4]  # paint loss
+        gen_pred2 = generated_im[..., 5]  # segmented
+        
+        
+        
+        # gen_pred1 = generated_im[..., 1]
+
+        # cert0 = 1 - np.abs(gen_pred0 - 1.0)
+        # cert1 = 1 - np.abs(gen_pred1 - 1.0)
+
+        # orange = np.reshape([1., 165. / 255., 0], (1, 1, 3))
+        # red = np.reshape([1., 0., 0], (1, 1, 3))
+
+        # im_clean[np.greater_equal(gen_pred1, 0.5)] = orange
+        # im_clean[np.greater_equal(gen_pred1, 0.8)] = red
+
+        plt.figure()
+        plt.subplot(3, 2, 1)
+        plt.imshow(im_clean)
+        plt.title('original input')
+        plt.subplot(3, 2, 3)
+        plt.imshow(gen_pred0, vmin=0.0, vmax=1.0, cmap='seismic')
+        plt.title('discr: background')
+        plt.subplot(3, 2, 4)
+        plt.imshow(gen_pred1, vmin=0.0, vmax=1.0, cmap='seismic')
+        plt.title('discr: paint loss')
+        plt.subplot(3, 2, 5)
+        plt.imshow(gen_pred2, vmin=0.0, vmax=1.0, cmap='seismic')
+        plt.title('discr: segmented with computer')
+        
+  
+
+        plt.show()
 
 def gen_image(func, data_input):
     in_patches = data_input.in_patches()
@@ -366,10 +424,50 @@ def gen_image(func, data_input):
     im_lam[-width:, -width:, :] = im_bot_right[...]
     
     return im_lam
-    
 
-def net2h_image(info=None, data=None, tophat_bool=True):
+
+def gen_image_discr(func, data_input):
+    # TODO
+
+    in_patches = data_input.in_patches()
+    out_patches = data_input.out_patches()
+    batch_size = 100
+    batch_amount = int(np.ceil(np.shape(in_patches)[0] / batch_size))
+
+    out = []
+    for batch_i in range(batch_amount):
+        x = in_patches[batch_i * batch_size:(batch_i + 1) * batch_size]
+        y = out_patches[batch_i * batch_size:(batch_i + 1) * batch_size]
+    
+        # out_i = np.concatenate((func([x, y]))[0], axis=-1)
+        # out_i =(func([x, y]))[0]
+        out_i = np.concatenate(func([x, y]), axis = 3)
+
+        # print(np.shape((func([x, y]))[0]))
+        # print(np.shape(out_i))
+        
+        out.append(out_i)
+    out = np.concatenate(out, axis=0)
+    im_lam = data_input.patches2images(out, normalize=False)
+    
+    return im_lam
+
+def net2h_image(info=None, data=None):  # , tophat_bool=True
+    # TODO, is this even okey?
+    # if isinstance(info.model.output, list):
+    #
+    # else:
     layer_out = info.model.output[..., :]
+    # layer_out = info.model.output[0][..., :]
+    
     func = K.function([info.model.input, K.learning_phase()], [layer_out])
     im_lam = gen_image(func, data)
+    return im_lam
+
+
+def net2h_image_discr(info, data):
+    # layer_out = info.model.output[..., :]
+    # func = K.function([info.model.input, K.learning_phase()], [layer_out])
+    func = info.model.predict_auto
+    im_lam = gen_image_discr(func, data)
     return im_lam
