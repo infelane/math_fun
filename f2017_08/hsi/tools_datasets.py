@@ -123,13 +123,23 @@ def hsi_annot():
     
 
 def hsi_mask():
+    
+    bool_mask1 = False
+    
     if 1:
         from link_to_soliton.paint_tools import image_tools
-        mask_img = image_tools.path2im('/home/lameeus/data/hsi/mask.png', type = 'png')
+        
+        if bool_mask1:
+            mask_img = image_tools.path2im('/home/lameeus/data/hsi/mask.png', type='png')
+        else:
+            mask_img = image_tools.path2im('/home/lameeus/data/hsi/mask_painting.png')
     
         shape = np.shape(mask_img)
         mask = np.zeros(shape = (shape[0], shape[1]), dtype=int)
-    
-        mask[mask_img[:,:,0] < 0.5] = 1
+
+        if bool_mask1:
+            mask[mask_img[:,:,0] < 0.5] = 1
+        else:
+            mask[mask_img[:,:,0] > 0] = 1   # just not 0
         
         return mask
