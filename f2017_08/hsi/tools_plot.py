@@ -21,7 +21,6 @@ def n_to_rgb(x, with_col = True, with_sat = False, with_lum = False):
     
     # def func(a):
     #     return n_col[a]
-
     
     if with_col:
         foo = n_col[x_arg]
@@ -80,14 +79,17 @@ def imshow(rgb, n = 1, mask = None, title = None):
         for i in range(n):
             plt.subplot(1, n, i+1)
             plotter(rgb[i], title[i])
-     
-            # if mask is None:
-            #     plt.imshow(rgb[i])
-            #
-            # else:
-            #     rgb_mask = rgb[...]
-            #     rgb_mask[mask, :] = 0.5
-            #     plt.imshow(rgb_mask)
-            #
-            # if title:
-            #     plt.title(title[i])
+
+
+def show_histo(array, show: bool = True):
+    a_min = np.min(array)
+    a_max = np.max(array)
+    
+    intens, bins = np.histogram(np.reshape(array, (-1)), bins=50, range=[a_min, a_max])
+
+    bins_center = (bins[0:-1] + bins[1:]) / 2.0
+
+    plt.figure()
+    plt.plot(bins_center, intens)
+    if show:
+        plt.show()
