@@ -3,25 +3,30 @@
 
 import numpy as np
 
+from f2017_08.hsi import tools_plot
 
-def norm_hsi(a):
+
+def norm_hsi(img):
     """ normalization specific to the hsi dataset
     """
 
     if 0:
-        img_max = np.max(a)
-        img_min = np.min(a)
+        img_max = np.max(img)
+        img_min = np.min(img)
         print(img_max)
         print(img_min)
 
-    a_norm = np.empty(shape=np.shape(a))
-    a_norm[...] = (a + 100) / 2046.
+    a_norm = np.empty(shape=np.shape(img))
+    a_norm[...] = (img + 100) / 2046.
 
-    # show_histo(img)
-    # show_histo(capped(img_norm))
+    a_capped = capped01(a_norm)
 
-    return capped01(a_norm)
 
+    if 1:
+        tools_plot.show_histo(img, show = False)
+        tools_plot.show_histo(a_capped)
+
+    return a_capped
 
 def capped01(a):
     a[a > 1.] = 1.
@@ -86,16 +91,11 @@ class Data(object):
         
         for i_h in range(n_h):
             for i_w in range(n_w):
-                # x[i_h * n_w + i_w, :,:,:] = img[i_h*self.w:(i_h+1)*w, i_w*w:(i_w+1)*w, :]
-                
-                
                 x[i_h * n_w + i_w, :, :, :] = img_ext.get_crop(i_h * self.w, i_w * self.w, self.w)#[:(i_h + 1) * w, i_w * w:(i_w + 1) * w, :]
 
-        # shape = (self.shape[0]*self.shape[1], 1, 1, self.shape[2])
-        # return np.reshape(img, newshape=shape)
         return x
     
-    def img_mask_to_x(self, img, mask, ext = 0):
+    def img_mask_to_x(self, img, mask, ext = 0, name = None):
         # TODO adjust the mask according to the width!
         """ img can be a list of img's """
         
@@ -113,11 +113,19 @@ class Data(object):
         
         shape = np.shape(img[0])
         folder_xyz =  '/home/lameeus/data/hsi/'
-        path_xyz = '/home/lameeus/data/hsi/x_mask.npz'
 
         x_list = []
+
+        if name is None:
+            file_name = 'x_mask{}.npy'
+        else:
+            file_name = 'x_' + name + '_mask{}.npy'
+        
         if 0:
-            path_coords = '/home/lameeus/data/hsi/coords.npy'
+            if name:
+                path_coords = folder_xyz + 'coords_' + name + '.npy'
+            else:
+                path_coords = folder_xyz + 'coords.npy'
             if 1:
                 coords = []
                 for i in range(shape[0]):
@@ -141,67 +149,34 @@ class Data(object):
             idx_n = idx[0:n]
     
             coords_n = coords[idx_n, :]
-    
-            # x = img[coords_n, :]
-    
+        
             w = 10
             left = (w - 1) // 2
             right = w - left
-            
-            # x = [[]]*n_img
-            # x = []
-            
-            # x = []*n_img
-            
-            # x = {}
-            #
-            # for i in range(n_img):
-            #     x.update({i : []})
-
-            
-                # x_i = []
-                
-            # ext_i = ext[i]
             
             for i_img in range(n_img):
     
                 x_i = []
                 for i_co in coords_n:
-                    h_0 = i_co[0]-left#-ext_i
-                    h_1 = i_co[0]+right#+ext_i
-                    w_0 = i_co[1]-left#-ext_i
-                    w_1 = i_co[1]+right#+ext_i
+                    h_0 = i_co[0]-left
+                    h_1 = i_co[0]+right
+                    w_0 = i_co[1]-left
+                    w_1 = i_co[1]+right
                     
-                   
-                    
-                    # if h_0 >= 0 & h_1 <= shape[0] & w_0 >= 0 & w_1 <= shape[1]:
                     if (h_0 >= 0) and (h_1 <= shape[0]) and (w_0 >= 0) and (w_1 <= shape[1]):
-                        
                         x_i.append(img_ext[i_img].get_crop(h_0, w_0, w))
-                        # x[i].append(img[i][h_0:h_1, w_0:w_1, :])
-                        # x_i.append(img[i][h_0:h_1, w_0:w_1, :])
 
                 x_i_stack = np.stack(x_i, axis=0)
-                np.save(folder_xyz + 'x_mask{}.npy'.format(i_img), x_i_stack)
+                
+                np.save(folder_xyz + file_name.format(i_img), x_i_stack)
                 
                 x_list.append(x_i_stack)
-                # for x_i in range(977):
-                #     if np.shape(x[x_i])[0] != 10 or np.shape(x[x_i])[1] != 10:
-                #         print(np.shape(x_i))
-            
-            # x_list = []
-            # for i in range(n_img):
-                # x_list.append(np.stack(x[i], axis=0))
                 
-                # x.append(x_i)
-            
-            # np.save(path_xyz, x_list)
-            
         else:
             for i_img in range(n_img):
-                x_i_stack = np.load(folder_xyz + 'x_mask{}.npy'.format(i_img))
+                
+                x_i_stack = np.load(folder_xyz +file_name.format(i_img))
                 x_list.append(x_i_stack)
-            # x_list = np.load(path_xyz)
             
         if n_img == 1:
             return x_list[0]

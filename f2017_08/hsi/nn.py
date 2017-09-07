@@ -10,12 +10,16 @@ import link_to_keras_ipi as keras_ipi
 n_in = 132
 n_code = 10
 n_out = 8
-l = 0.0001
+l = 1e-5
 
 
-def gen_layer_in(w = 1, ext = 0):
+def gen_layer_in(w = 1, ext = 0, nr = None):
     shape = (w + 2*ext, w + 2*ext, n_in)
-    return Input(shape = shape, name = 'input_x')
+    if nr is None:
+        name = 'input_x'
+    else:
+        name = 'input_x_{}'.format(nr)
+    return Input(shape = shape, name = name)
 
 
 def gen_layer_code(w, ext):
@@ -73,18 +77,19 @@ class Network():
         
         w = self.w
         ext = self.ext
-        layer_in = gen_layer_in(w, ext)
+        layer_in_auto = gen_layer_in(w, ext, nr = 0)
+        layer_in_discr = gen_layer_in(w, ext, nr = 1)
         self.encoder = gen_encoder(w, ext)
         self.decoder = gen_decoder(w, ext // 2)
         self.classifier = gen_classifier(w, ext // 2)
         
-        auto = self.decoder(self.encoder(layer_in))
-        discr = self.classifier(self.encoder(layer_in))
+        auto = self.decoder(self.encoder(layer_in_auto))
+        discr = self.classifier(self.encoder(layer_in_discr))
         
-        self.model_auto = Model(layer_in, auto)
-        self.model_encoder = Model(layer_in, self.encoder(layer_in))
-        self.model_discr = Model(layer_in, discr)
-        self.model_all = Model(layer_in, [auto, discr])
+        self.model_auto = Model(layer_in_auto, auto)
+        self.model_encoder = Model(layer_in_discr, self.encoder(layer_in_discr))
+        self.model_discr = Model(layer_in_discr, discr)
+        self.model_all = Model([layer_in_auto, layer_in_discr], [auto, discr])
         
         loss = keras.losses.mean_squared_error
         psnr = keras_ipi.metrics.psnr
@@ -151,13 +156,19 @@ class Network():
             if save == True:
                 self.save()
                 
-    def train_all(self, x, y, epochs=1, save=True):
+    def train_all(self, x, y, x_auto = None, epochs=1, save=True):
         """ no need of y since in auto encoder output is input """
+        
+        if x_auto is None:
+            x_placeholder = x
+        else:
+            x_placeholder = x_auto
+            
         ext = self.ext
-        x_out = x[:, ext:-ext, ext:-ext, :]
+        x_out = x_placeholder[:, ext:-ext, ext:-ext, :]
         for i in range(epochs):
             print('Epoch {}/{}'.format(i + 1, epochs))
-            self.model_all.fit(x, [x_out, y], epochs=1)
+            self.model_all.fit([x_placeholder, x], [x_out, y], epochs=1)
             if save == True:
                 self.save()
 
