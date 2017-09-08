@@ -121,6 +121,68 @@ def hsi_annot():
         
     return img_annot
     
+    
+def hsi_annot_test():
+    folder_save = '/home/lameeus/data/hsi/load/'
+
+    if 0:  # TODO SET AT 0 after done
+        folder_annot = '/ipi/research/lameeus/data/hsi/'
+    
+        file = folder_annot + 'annot_test.png'
+        img = image_tools.path2im(file)[..., 0:3]
+    
+        shape = np.shape(img)
+        shape_annot = [shape[0], shape[1], 8]
+        img_annot = np.zeros(shape=shape_annot)
+    
+        r0 = np.equal(img[:, :, 0], 0)
+        r1 = np.equal(img[:, :, 0], 1)
+        g0 = np.equal(img[:, :, 1], 0)
+        g1 = np.equal(img[:, :, 1], 1)
+        b0 = np.equal(img[:, :, 2], 0)
+        b1 = np.equal(img[:, :, 2], 1)
+    
+        red = np.logical_and(np.logical_and(r1, g0), b0)
+        green = np.logical_and(np.logical_and(r0, g1), b0)
+        blue = np.logical_and(np.logical_and(r0, g0), b1)
+        cyan = np.logical_and(np.logical_and(r0, g1), b1)
+        yellow = np.logical_and(np.logical_and(r1, g1), b0)
+        magenta = np.logical_and(np.logical_and(r1, g0), b1)
+        white = np.logical_and(np.logical_and(r1, g1), b1)
+        black = np.logical_and(np.logical_and(r0, g0), b0)
+    
+        if 0:
+            import matplotlib.pyplot as plt
+            a = image_tools.path2im('/ipi/research/lameeus/data/hsi/hsi_rgb_grey.png')[..., 0:3]
+            # a = (a-0.5)*0.5 + 0.5
+            a[red] = [1, 0, 0]
+            a[green] = [0, 1, 0]
+            a[blue] = [0, 0, 1]
+            a[cyan] = [0, 1, 1]
+            a[yellow] = [1, 1, 0]
+            a[magenta] = [1, 0, 1]
+            a[white] = [1, 1, 1]
+            a[black] = [0, 0, 0]
+            
+            plt.imshow(a)
+            plt.show()
+            
+        img_annot[red, 0] = 1
+        img_annot[green, 1] = 1
+        img_annot[blue, 2] = 1
+        img_annot[cyan, 3] = 1
+        img_annot[yellow, 4] = 1
+        img_annot[magenta, 5] = 1
+        img_annot[white, 6] = 1
+        img_annot[black, 7] = 1
+    
+        np.save(folder_save + 'y_annot_test.npy', img_annot)
+        
+    else:
+        img_annot = np.load(folder_save + 'y_annot_test.npy')
+    
+    return img_annot
+
 
 def hsi_mask():
     

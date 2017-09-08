@@ -74,7 +74,7 @@ class Data(object):
     def __init__(self, img):
         self.shape = np.shape(img)
         
-    def img_to_x(self, img, ext = 0):
+    def img_to_x(self, img: object, ext: object = 0) -> object:
     
         w = self.w
         
@@ -95,7 +95,7 @@ class Data(object):
 
         return x
     
-    def img_mask_to_x(self, img, mask, ext = 0, name = None):
+    def img_mask_to_x(self, img, mask, w = 10, ext = 0, name = None, bool_new = False):
         # TODO adjust the mask according to the width!
         """ img can be a list of img's """
         
@@ -114,30 +114,41 @@ class Data(object):
         shape = np.shape(img[0])
         folder_xyz =  '/home/lameeus/data/hsi/'
 
-        x_list = []
+        
 
         if name is None:
             file_name = 'x_mask{}.npy'
         else:
             file_name = 'x_' + name + '_mask{}.npy'
-        
-        if 0:
+
+        try:
+            if bool_new:
+                raise PermissionError('New data is wanted')
+            x_list = []
+            for i_img in range(n_img):
+                x_i_stack = np.load(folder_xyz + file_name.format(i_img))
+                x_list.append(x_i_stack)
+
+        except:
+            x_list = []
             if name:
                 path_coords = folder_xyz + 'coords_' + name + '.npy'
             else:
                 path_coords = folder_xyz + 'coords.npy'
-            if 1:
+    
+            try:
+                coords = np.load(path_coords)
+                
+            except:
                 coords = []
                 for i in range(shape[0]):
                     for j in range(shape[1]):
                         if mask[i, j] == 1:
                             coords.append([i, j])
-        
+    
                 coords = np.array(coords)
                 np.save(path_coords, coords)
-    
-            else:
-                coords = np.load(path_coords)
+                
     
             print(np.shape(coords))
             idx = np.arange(np.shape(coords)[0])
@@ -150,7 +161,6 @@ class Data(object):
     
             coords_n = coords[idx_n, :]
         
-            w = 10
             left = (w - 1) // 2
             right = w - left
             
@@ -172,12 +182,6 @@ class Data(object):
                 
                 x_list.append(x_i_stack)
                 
-        else:
-            for i_img in range(n_img):
-                
-                x_i_stack = np.load(folder_xyz +file_name.format(i_img))
-                x_list.append(x_i_stack)
-            
         if n_img == 1:
             return x_list[0]
         
