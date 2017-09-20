@@ -7,6 +7,7 @@ import numpy as np
 import scipy.misc
 
 from f2017_04 import block_data
+from f2017_06 import block_data2
 # import generate_h_images
 
 from link_to_soliton.paint_tools import image_tools
@@ -58,7 +59,6 @@ class Info():
         """
 
         # data_input, map = block_data.test_data(set, width, ext, bool_new_data=False)
-        import block_data2
         data_input = block_data2.test_data(set, width, ext)
         
         n_depth = self.model.get_depth()
@@ -135,7 +135,6 @@ class Info():
             # set = 'hand'
 
         data_input, map = block_data.test_data(set, width, ext, bool_new_data = False)
-        import block_data2
         data_input = block_data2.test_data(set, width, ext)
 
         generated_im = net2h_image(self, data_input, tophat_bool=False)
@@ -214,13 +213,6 @@ class Info():
             set = 'zach'
             # set = 'hand'
 
-        folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_06'
-        cmd_subfolder = os.path.realpath(folder_loc)
-        if cmd_subfolder not in sys.path:
-            sys.path.insert(0, cmd_subfolder)
-        #
-
-
         if set == 'zach':
             im_clean = image_tools.path2im('/home/lameeus/data/ghent_altar/input/13_clean.tif')
         elif set == 'hand':
@@ -229,10 +221,12 @@ class Info():
             im_clean = image_tools.path2im('/scratch/lameeus/data/ghentaltarpiece/altarpiece_close_up/beard_updated/rgb_cleaned.tif')
         elif set == 'hand_small':
             im_clean = image_tools.path2im(
-                '/scratch/lameeus/data/ghentaltarpiece/altarpiece_close_up/finger/hand_cleaned.tif')
+                '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/finger/hand_cleaned.tif')
+        elif set == 'hand_big':
+            im_clean = image_tools.path2im('/home/lameeus/data/ghent_altar/input/19_clean.tif')
+            
 
         # data_input, map = block_data.test_data(set, width, ext, bool_new_data = False)
-        import block_data2
         data_input = block_data2.test_data(set, width, ext)
 
         generated_im = net2h_image(self, data_input)
@@ -293,6 +287,8 @@ class Info():
         im_clean[np.greater_equal(gen_pred1, 0.5)] = orange
         im_clean[np.greater_equal(gen_pred1, 0.8)] = red
 
+        path_class = '/home/lameeus/data/ghent_altar/classification/class_{}_v{}.tif'.format(set, version_nr)
+        image_tools.save_im(gen_pred1, path_class)
         path = '/home/lameeus/data/ghent_altar/output/{}_7in_vhand_v{}.tif'.format(set, version_nr)
         image_tools.save_im(im_clean, path)
         
@@ -340,14 +336,7 @@ class Info():
         elif set == 'hand_small':
             im_clean = image_tools.path2im(
                 '/scratch/lameeus/data/ghentaltarpiece/altarpiece_close_up/finger/hand_cleaned.tif')
-        
-        folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_06'
-        cmd_subfolder = os.path.realpath(folder_loc)
-        if cmd_subfolder not in sys.path:
-            sys.path.insert(0, cmd_subfolder)
-        import block_data2
-        from f2017_06 import block_data2
-        
+               
         data_input = block_data2.test_data(set, width, ext)
 
         generated_im = net2h_image_discr(self, data_input)
