@@ -75,14 +75,13 @@ def gen_n_col(n = 1):
     return HSV_tuples
 
 
-def imshow(rgb, n = 1, mask = None, title = None):
+def imshow(rgb, mask = None, title = None):
     """
     :param rgb:
     :param n:
     :param mask:
     :return:
     """
-    # TODO n, multiple img's
     
     plt.figure()
     
@@ -98,14 +97,15 @@ def imshow(rgb, n = 1, mask = None, title = None):
         if b:
             plt.title(b)
     
+    if type(rgb) is list:
+        n = len(rgb)
     
-    if n == 1:
-        plotter(rgb, title)
-        
-    else:
         for i in range(n):
             plt.subplot(1, n, i+1)
             plotter(rgb[i], title[i])
+            
+    else:
+        plotter(rgb, title)
 
 
 def show_histo(array, show: bool = True):

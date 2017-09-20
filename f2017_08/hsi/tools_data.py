@@ -137,6 +137,8 @@ class Data(object):
                 path_coords = folder_xyz + 'coords.npy'
     
             try:
+                if bool_new:
+                    raise PermissionError('New coords data is wanted')
                 coords = np.load(path_coords)
                 
             except:

@@ -9,18 +9,24 @@ from mpl_toolkits.mplot3d import Axes3D
 def example():
     folder = '/home/lameeus/data/ghent_altar/input/'
     im1 = image_tools.path2im(folder + '19_clean.tif')
-    # im2 = image_tools.path2im(folder + '19_rgb.tif')[:, :, 0:3]
-    im2 = image_tools.path2im(folder + '19_ir.tif')[:, :, 0:3]
+    im2 = image_tools.path2im(folder + '19_rgb.tif')[:, :, 0:3]
+    # im2 = image_tools.path2im(folder + '19_ir.tif')[:, :, 0:3]
     
     reg1(im1, im2)
 
 
 def reg1(im1, im2):
+    # # for IR
+    # expand_h = 2.742140625 * 0.9965318627450981
+    # expand_w = 2.72565557753 * 1.0002197802197803#2.71565837363
+    # shift_h = -11 #-11
+    # shift_w = -17 #-11
     
-    expand_h = 2.742140625
-    expand_w = 2.72565557753 #2.71565837363
-    shift_h = -11
-    shift_w = -11
+    # for RGB
+    expand_h = 2.74207569428
+    expand_w = 2.72543070106 #2.71565837363
+    shift_h = -11 #-11
+    shift_w = -11 #-11
     
     if 0:
         plt.figure()
@@ -32,14 +38,20 @@ def reg1(im1, im2):
     # First y (height) then x (width)
     # im2_reshape = apply_change(im2, 2.745, 2.727, rot = -0.1) # 2.73747126457
     im2_reshape = apply_change(im2, expand_h, expand_w, rot = 0) # 2.73747126457
-    im_overlay = overlay1(im1, im2_reshape, 0, 0)
+    # im_overlay = overlay1(im1, im2_reshape, shift_h, shift_w)
+    im_overlay, im2_shifted = overlay2(im1, im2_reshape, shift_h, shift_w)
+    
+    if 0:
+        folder = '/home/lameeus/data/ghent_altar/input/registration/'
+        image_tools.save_im(im2_shifted, folder + '19_rgb_reg.tif', check_prev=False)
     
     if 0:
         plt.figure()
         plt.subplot(1, 3, 1)
         imshow(im1)
         plt.subplot(1, 3, 2)
-        imshow(im2)
+        # imshow(im2_reshape)
+        imshow(im2_shifted)
         plt.subplot(1, 3, 3)
         imshow(im_overlay)
         plt.show()
@@ -462,6 +474,88 @@ def overlay1(im1, im2, delta_h_in, delta_w_in):
     # im_mix[:,:,1] = 1
 
     return im_mix
+
+
+
+def overlay2(im1, im2, delta_h_in, delta_w_in):
+    """im 2 recut to be registrated on im1
+    """
+    
+    delta_h = -delta_h_in
+    delta_w = -delta_w_in
+    
+    shape1 = np.shape(im1)
+    shape2 = np.shape(im2)
+    
+    if delta_h > 0:
+        h0_new = delta_h
+        h0_old = 0
+    else:
+        h0_new = 0
+        h0_old = -delta_h
+        
+    if delta_w > 0:
+        w0_new = delta_w
+        w0_old = 0
+    else:
+        w0_new = 0
+        w0_old = -delta_w
+        
+    if delta_h + shape2[0] > shape1[0]:
+        h1_new = shape1[0]
+        h1_old = shape1[0] - delta_h
+    else:
+        h1_new = shape2[0] + delta_h
+        h1_old = shape2[0]
+        
+    if delta_w + shape2[1] > shape1[1]:
+        w1_new = shape1[1]
+        w1_old = shape1[1] - delta_w
+    else:
+        w1_new = shape2[1] + delta_w
+        w1_old = shape2[1]
+        
+    # bot = max(shape1[0], shape2[0] + delta_h)
+    # left = min(0, delta_w)
+    # right = max(shape1[1], shape2[1] + delta_w)
+    #
+    # tot_h = bot - top
+    # tot_w = right - left
+    #
+    
+    im2_new = np.ones(shape=(shape1[0], shape1[1], 3)) * 0.5
+    im_mix = np.zeros(shape=(shape1[0], shape1[1], shape2[2]))
+
+    # im2_new[a:b, c:d, :] = im2[e:f, g:h, :]
+    
+    delta = 3000
+    
+    im2_new[h0_new:h1_new, w0_new:w1_new, :] = im2[h0_old: h1_old, w0_old:w1_old, :]
+    
+    # print(np.shape(im_mix))
+    #
+    # # im_mix[-top : -top + shape1[0], -left : -left + shape1[1], 0] =\
+    # #     np.mean(self.im1, axis = 2)
+    # # im_mix[-top + delta_h: -top + delta_h + shape2[0], -left + delta_w: -left + delta_w + shape2[1], 2] =\
+    # #     np.mean(im2_reshape, axis=2)
+    #
+    # if len(shape1) == 3:
+    #     im1_partial = im1[:, :, 0]
+    # elif len(shape1) == 2:
+    #     im1_partial = im1[...]
+    #
+    # if len(shape2) == 3:
+    #     im2_partial1 = im2[:, :, 1]
+    #     im2_partial2 = im2[:, :, 2]
+    # elif len(shape2) == 2:
+    #     im2_partial1 = im2[...]
+    #     im2_partial2 = im2[...]
+    
+    im_mix[:, :, 0:1] = im1[:,:,0:1]
+    im_mix[:, :, 1] = im2_new[:, :, -1]
+    im_mix[:, :, 2] = im2_new[:, :, -1]
+
+    return im_mix, im2_new
 
 
 if __name__ == '__main__':

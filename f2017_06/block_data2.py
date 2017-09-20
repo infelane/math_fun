@@ -1,15 +1,8 @@
 import numpy as np
 from PIL import Image
-import sys, os
 
-folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_February/super_res_challenge'
-cmd_subfolder = os.path.realpath(folder_loc)
-if cmd_subfolder not in sys.path:
-    sys.path.insert(0, cmd_subfolder)
-
-import data_net
-
-from maus.paint_tools import image_tools
+from f2017_02.super_res_challenge import data_net
+from link_to_soliton.paint_tools import image_tools
 
 # def im2array(path):
 #
@@ -68,6 +61,18 @@ def ex_raw_hand_small():
     input_2 = folder + "hand_rgb.tif"
     input_3 = folder + "hand_ir.tif"
     out = folder + "ground_truth.tif"
+    
+    return ExRawImage(input_1, input_2, input_3, out)
+
+
+def ex_raw_hand_big():
+    folder = '/home/lameeus/data/ghent_altar/input/'
+    input_1 = folder + "19_clean.tif"
+    out = folder + "19_annot_big.tif"
+
+    folder = '/home/lameeus/data/ghent_altar/input/registration/'
+    input_2 = folder + "19_rgb_reg.tif"
+    input_3 = folder + "19_ir_reg.tif"
     
     return ExRawImage(input_1, input_2, input_3, out)
 
@@ -140,5 +145,7 @@ def test_data(set, width, ext):
         ex_raw_i = ex_raw_hand
     elif set == 'hand_small':
         ex_raw_i = ex_raw_hand_small
+    elif set == 'hand_big':
+        ex_raw_i = ex_raw_hand_big
     foo = ex_raw_i()
     return raw_data(foo, width, ext)

@@ -55,8 +55,6 @@ def main():
     hsi_data = main_multimodal.HsiData()
     img = hsi_data.get_img()
     
-    
-
     if 1:
         img_rgb = hsi_data.to_rgb(img)
         plt.figure()
@@ -67,13 +65,8 @@ def main():
         plt.imsave('/home/lameeus/data/multimodal/rgb.png', rgb)
         
     if 0:
-        
-        
-        
         # img = main_multimodal.example_crop(img)
         
-        
-    
         flat = main_multimodal.Flat(img)
         img_flat = flat.flatten(img)
         
@@ -83,8 +76,6 @@ def main():
         # img_data = img[mask_01 == 1, :]
         
         img_data = hsi_data.get_data()
-        
-
         
         n = 7
         nn = NN(img_data, n)
@@ -125,7 +116,6 @@ def main():
             plt.plot(nn.points[i, :], color = colors[i], label = '{}'.format(i))
         # plt.show()
         
-       
         thingy()
         for i in range(0):
             

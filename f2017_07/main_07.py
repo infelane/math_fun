@@ -3,7 +3,7 @@
 import keras
 import numpy as np
 
-import keras_ipi
+import link_to_keras_ipi
 import lambnet
 
 # folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_06'
@@ -21,12 +21,12 @@ def load_xy(set):
 
 def gen_model():
     input_img = gen_layer_in()
-    foo = keras_ipi.layers.Cropping2D(((5, 5), (5, 5)))(input_img)
+    foo = link_to_keras_ipi.layers.Cropping2D(((5, 5), (5, 5)))(input_img)
     foo = keras.layers.Conv2D(2, (5,5), activation= 'sigmoid'
                               )(foo)
     foo = gen_layer_end()(foo)
     
-    single = keras_ipi.layers.Cropping2D(((4, 4), (4, 4)))(input_img)
+    single = link_to_keras_ipi.layers.Cropping2D(((4, 4), (4, 4)))(input_img)
     single = keras.layers.Conv2D(1, (1,1), activation='sigmoid')(single)
     single = keras.layers.Conv2D(1, (7,7), activation='elu')(single)
     single = gen_layer_end()(single)
@@ -68,9 +68,9 @@ def layer_inception(layer_input):
 
 
 def compile(model):
-    dice = keras_ipi.metrics.dice
+    dice = link_to_keras_ipi.metrics.dice
     metrics = [dice]
-    loss = keras_ipi.losses.bin_square()
+    loss = link_to_keras_ipi.losses.bin_square()
     optimizer = {'class_name': 'adam', 'config': {'lr': 1.0e-3, 'beta_1': 0.90}} #otherwise  = 'adam'
     model.compile(loss=loss,
                   optimizer=optimizer,
@@ -83,12 +83,12 @@ def gen_model2():
 
     encoding_dim = 12
 
-    layer_encode = keras_ipi.layers.Cropping2D(((1, 1), (1, 1)))(layer_in)
+    layer_encode = link_to_keras_ipi.layers.Cropping2D(((1, 1), (1, 1)))(layer_in)
     # layer_encode = keras.layers.Conv2D(encoding_dim, (3,3), activation='sigmoid',
     #                         )(layer_encode)
     
     layer_encode = layer_inception(layer_encode)    #layer_encode
-    layer_encode = keras_ipi.layers.Cropping2D(((6, 6), (6, 6)))(layer_encode)
+    layer_encode = link_to_keras_ipi.layers.Cropping2D(((6, 6), (6, 6)))(layer_encode)
     
     # layer_decoder = keras.la
 
@@ -109,7 +109,7 @@ def gen_model3():
     
     from keras.layers import Conv2D, MaxPooling2D, concatenate, Conv2DTranspose
     
-    in_crop = keras_ipi.layers.Cropping2D(((6, 7), (6, 7)))(layer_in)
+    in_crop = link_to_keras_ipi.layers.Cropping2D(((6, 7), (6, 7)))(layer_in)
     
     
 
@@ -168,7 +168,7 @@ def gen_model3():
 
     conv10 = Conv2D(2, (1, 1), activation='softmax')(conv9)
     
-    end_crop = keras_ipi.layers.Cropping2D(((1, 0), (1, 0)))(conv10)
+    end_crop = link_to_keras_ipi.layers.Cropping2D(((1, 0), (1, 0)))(conv10)
 
     model = keras.models.Model(inputs=[layer_in], outputs=[end_crop])
 
@@ -183,7 +183,7 @@ def gen_model3():
     def dice_coef_loss(y_true, y_pred):
         return -dice_coef(y_true, y_pred)
     
-    dice_ipi = keras_ipi.metrics.dice
+    dice_ipi = link_to_keras_ipi.metrics.dice
     
     model.compile(optimizer=keras.optimizers.Adam(lr=1e-4), loss=dice_coef_loss, metrics=[dice_coef, dice_ipi])
     return model
@@ -239,7 +239,8 @@ def net_test():
     info.certainty(width, ext, set = 'hand')
     # info.certainty(width, ext, set = 'zach_small')
     # info.certainty(width, ext, set = 'zach')
-    info.certainty(width, ext, set = 'hand_small')
+    # info.certainty(width, ext, set = 'hand_small')
+    info.certainty(width, ext, set = 'hand_big')
     
 
 def net_other():
@@ -247,7 +248,7 @@ def net_other():
 
 
 def main():
-    train_net()
+    # train_net()
     net_test()
     
     net_other()
@@ -255,4 +256,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-    

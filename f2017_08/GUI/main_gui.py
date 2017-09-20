@@ -13,7 +13,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 from tkinter import Entry, Button, OptionMenu
 
-from maus.paint_tools import image_tools
+from link_to_soliton.paint_tools import image_tools
 
 from f2017_08 import registration
 

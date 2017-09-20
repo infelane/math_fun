@@ -5,9 +5,9 @@ from keras.layers import Conv2D, Conv2DTranspose, Input, MaxPooling2D, concatena
 from keras.losses import mean_squared_error
 from keras.models import Model
 
-import keras_ipi
+import link_to_keras_ipi
 import lambnet
-from maus.paint_tools import image_tools
+from link_to_soliton.paint_tools import image_tools
 
 
 def gen_encoder(layer_in):
