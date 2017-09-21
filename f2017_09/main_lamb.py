@@ -10,6 +10,7 @@ from link_to_soliton.paint_tools import image_tools
 
 
 class MainData(object):
+    version = 2
     def __init__(self):
         self.foo = block_data2.ex_raw_hand_big()
         
@@ -56,7 +57,8 @@ class MainData(object):
 
 
 def main_training(dict_data):
-    network = nn.Network()
+    network = nn.Network(version = dict_data.version)
+    network.load()
     
     img_clean = dict_data.get_img_clean()
     img_ir = dict_data.get_img_ir()
@@ -75,16 +77,15 @@ def main_training(dict_data):
                                      ext = [2, 2, 2, 0], name = 'lamb_test', bool_new= False)
     
     x_clean = x_list_test[0]
-    x_ir = x_list_test[1]
     x_rgb = x_list_test[2]
+    x_ir = x_list_test[1]
     y = x_list_test[3]
     
-    network.load()
-    epochs = 1000
+    epochs = 100
     validation_split = 0.2
     network.train([x_clean, x_rgb, x_ir], y, epochs = epochs, validation_split = validation_split)
     
-    if 1:
+    if 0:
         n_train = int((1 - validation_split) * (np.shape(x_clean))[0])
         x_clean_test = x_clean[n_train:, ...]
         x_rgb_test = x_rgb[n_train:, ...]
@@ -96,7 +97,7 @@ def main_training(dict_data):
         print('hsi accuracy = {}%'.format(acc_hsi * 100))
     
 def main_plotting(dict_data):
-    network = nn.Network()
+    network = nn.Network(version = dict_data.version)
     network.load()
     
     version = 0

@@ -35,7 +35,7 @@ def main():
     n_h = np.ceil(shape[0]/w_crop).astype(int)
     n_w = np.ceil(shape[1] / w_crop).astype(int)
     
-    for i_h in range(13):
+    for i_h in range(n_h):
         for i_w in range(n_w):
             
             name_ext = '_v{}_h{}_w{}_out_f{}_gap{}.bmp'.format(version, i_h+1, i_w+1, f, gap)
