@@ -50,33 +50,55 @@ def norm11_to_norm01(a):
 
 class ImgExt(object):
     def __init__(self, img, ext):
-        assert ext >= 0
         shape = np.shape(img)
-        shape_ext = [shape[0] + 2*ext, shape[1] + 2*ext, shape[2]]
+        if type(ext) is tuple:
+            assert len(ext) == 2
+            assert ext[0] >= 0
+            assert ext[1] >= 0
+            shape_ext = [shape[0] + ext[0] + ext[1], shape[1] + ext[0] + ext[1], shape[2]]
+        
+        elif type(ext) is int:
+            assert ext >= 0
+            shape_ext = [shape[0] + 2 * ext, shape[1] + 2 * ext, shape[2]]
+            
+        else:
+            raise TypeError
+            
         # TODO something at borders, now greyvalue!
         self.__img_ext = np.ones(shape_ext)*0.5
         self.ext = ext
-        if ext > 0:
-            self.__img_ext[ext:-ext, ext:-ext, :] = img
-        else:
-            self.__img_ext[...] = img
+
+        if type(ext) is tuple:
+            self.__img_ext[ext[0]:ext[0]+shape[0], ext[0]:ext[0]+shape[1], :] = img
+
+        elif type(ext) is int:
+            
+            if ext > 0:
+                self.__img_ext[ext:-ext, ext:-ext, :] = img
+            else:
+                self.__img_ext[...] = img
     
     def get_crop(self, i_h, i_w, w):
         ext = self.ext
-        return self()[i_h: i_h + w +2*ext, i_w: i_w + w + 2*ext, :]
+        if type(ext) is tuple:
+            return self()[i_h: i_h + w + ext[0] + ext[1], i_w: i_w + w + ext[0] + ext[1], :]
+        elif type(ext) is int:
+            return self()[i_h: i_h + w + 2*ext, i_w: i_w + w + 2*ext, :]
     
     def __call__(self, *args, **kwargs):
         return self.__img_ext
 
 
 class Data(object):
-    w = 10
-    def __init__(self, img):
+    def __init__(self, img, w = 10):
         self.shape = np.shape(img)
+        self.w = w
         
     def img_to_x(self, img: object, ext: object = 0) -> object:
     
         w = self.w
+        
+        shape_in = np.shape(img)
         
         n_h = self.shape[0] // w
         n_w = self.shape[1] // w
@@ -84,7 +106,17 @@ class Data(object):
         self.n_h = n_h
         self.n_w = n_w
         
-        shape = (n_h*n_w, w + 2*ext, w + 2*ext, self.shape[2])
+        if type(ext) is tuple:
+            assert len(ext) == 2
+            shape = (n_h * n_w, w + ext[0] + ext[1], w + ext[0] + ext[1], shape_in[2])
+        
+        elif type(ext) is int:
+            shape = (n_h * n_w, w + 2 * ext, w + 2 * ext, shape_in[2])
+        
+        else:
+            raise TypeError('ext is expected to be tuple or integer')
+        
+        
         x = np.empty(shape = shape)
 
         img_ext = ImgExt(img, ext = ext)
