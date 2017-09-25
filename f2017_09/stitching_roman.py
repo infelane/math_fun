@@ -16,7 +16,7 @@ def main():
     img_in = image_tools.path2im(folder_in + name_in)
     
     #settings:
-    version = 4
+    version = 0
     
     if 0:
         plt.imshow(img_in)
@@ -26,6 +26,13 @@ def main():
     
     img_new = np.ones(shape) * 0.5
     
+    # Specs should be correct!
+    if version == 0:
+        f = 6
+        gap = 4
+        w_crop = 400
+        ext = 2*f
+    
     if version == 4:
         f = 4
         gap = 2
@@ -33,10 +40,10 @@ def main():
         ext = 5
         
     n_h = np.ceil(shape[0]/w_crop).astype(int)
-    n_w = np.ceil(shape[1] / w_crop).astype(int)
+    n_w = np.ceil(shape[1]/w_crop).astype(int)
     
-    for i_h in range(n_h):
-        for i_w in range(n_w):
+    for i_h in range(1):
+        for i_w in range(9):
             
             name_ext = '_v{}_h{}_w{}_out_f{}_gap{}.bmp'.format(version, i_h+1, i_w+1, f, gap)
             name_full = folder + name_base + name_ext
