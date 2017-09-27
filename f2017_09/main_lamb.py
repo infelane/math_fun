@@ -2,17 +2,22 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import django
 
 from f2017_06 import block_data2
 from f2017_08.hsi import tools_data, tools_plot, tools_analysis
 from f2017_09.lamb import nn
 from link_to_soliton.paint_tools import image_tools
+import link_to_keras_ipi as keras_ipi
 
 
 class MainData(object):
-    version = 2
-    def __init__(self):
+    version = 4
+    zoom = 1
+    def __init__(self, version = None):
         self.foo = block_data2.ex_raw_hand_big()
+        if version is not None:
+            self.version = version
         
     def get_img_clean(self):
         return self.foo.im_in_1
@@ -97,7 +102,7 @@ def main_training(dict_data):
         print('hsi accuracy = {}%'.format(acc_hsi * 100))
     
 def main_plotting(dict_data):
-    network = nn.Network(version = dict_data.version)
+    network = nn.Network(version = dict_data.version, zoom = dict_data.zoom)
     network.load()
     
     version = 0
@@ -117,7 +122,12 @@ def main_plotting(dict_data):
         y_pred = network.predict([x_clean, x_rgb, x_ir])
         
     pred_img = data.y_to_img(y_pred)
-
+    
+    if 1:
+        metric = keras_ipi.metrics.dice_with_0_labels
+        a = tools_analysis.metrics_after_predict(metric, [dict_data.get_img_y(),pred_img])
+        print(a)
+        
     rgb = tools_plot.n_to_rgb(pred_img, with_sat = True, with_lum= True)
     pred_rgb = np.copy(img_clean)
     pred_rgb[pred_img[:,:, 1] > 0.5, :] = [1, 0, 0]
@@ -131,10 +141,24 @@ def main_plotting(dict_data):
     
 
 def main():
-    dict_data = MainData()
-    if 1:
-        main_training(dict_data)
+    if 0:
+        for i in range(10000):
+            dict_data = MainData(version = 2)
+            if 1:
+                main_training(dict_data)
+            
+            dict_data = MainData(version = 4)
+            if 1:
+                main_training(dict_data)
+    
+    else:
+        dict_data = MainData()
+        if 0:
+            main_training(dict_data)
+    
     main_plotting(dict_data)
+    
+    
 
 
 if __name__ == '__main__':
