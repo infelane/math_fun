@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file:///ipi/private/lameeus/code/django/.idea/lambsite.iml" filepath="/ipi/private/lameeus/code/django/.idea/lambsite.iml" />
+      <module fileurl="file:///ipi/private/lameeus/code/django/mysite/.idea/mysite.iml" filepath="/ipi/private/lameeus/code/django/mysite/.idea/mysite.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/python.iml" filepath="$PROJECT_DIR$/.idea/python.iml" />
+    </modules>
+  </component>
+</project>

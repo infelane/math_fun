@@ -51,7 +51,7 @@ def main():
     #TODO cleanup
 
     # for filename in glob.glob(refdir + '/*.png'): #assuming gif
-    #     im=Image.open(filename)
+    #     im=Posting.open(filename)
     #     image_list.append(np.array(im))
     #     print('{}\t:{}'.format(index, filename))
     #     index+=1 #Update the index

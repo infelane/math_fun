@@ -12,12 +12,12 @@ import pylab
 # import skimage
 import scipy.ndimage
 
-import keras_ipi
+import link_to_keras_ipi as keras_ipi
 import lambnet
 
 from f2017_02.super_res_challenge import data_net
 
-from maus.paint_tools import image_tools
+from link_to_soliton.paint_tools import image_tools
 
 
 def time_func(func, n = 1):

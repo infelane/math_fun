@@ -26,7 +26,7 @@ from f2017_02.super_res_challenge import data_net
 #     sys.path.insert(0, cmd_subfolder)
 # import data_net
 # from training_data import Training_data
-# from PIL import Image
+# from PIL import Posting
 # import matplotlib.pyplot as plt
 # folder_loc = '/ipi/private/lameeus/private_Documents/python/2017_04'
 # cmd_subfolder = os.path.realpath(folder_loc)

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="/ipi/private/lameeus/code/django" vcs="Git" />
+    <mapping directory="/ipi/private/lameeus/code/django/lambsite" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/f2016_10/number_recogn" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/f2016_11/PhD" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/f2017_01/gui" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/link_to_keras_ipi" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/link_to_soliton" vcs="Git" />
+  </component>
+</project>
