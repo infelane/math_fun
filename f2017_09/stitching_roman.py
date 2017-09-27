@@ -28,12 +28,14 @@ def main():
     
     # Specs should be correct!
     if version == 0:
+        folder += 'v0/'
         f = 6
         gap = 4
         w_crop = 400
         ext = 2*f
     
     if version == 4:
+        folder += 'v4/'
         f = 4
         gap = 2
         w_crop = 100
@@ -42,12 +44,17 @@ def main():
     n_h = np.ceil(shape[0]/w_crop).astype(int)
     n_w = np.ceil(shape[1]/w_crop).astype(int)
     
-    for i_h in range(1):
-        for i_w in range(9):
+    for i_h in range(n_h):
+        for i_w in range(n_w):
             
             name_ext = '_v{}_h{}_w{}_out_f{}_gap{}.bmp'.format(version, i_h+1, i_w+1, f, gap)
             name_full = folder + name_base + name_ext
-            rgb_crop = image_tools.path2im(name_full)
+            
+            try:
+                rgb_crop = image_tools.path2im(name_full)
+            except:
+                print('No file: {}'.format(name_full))
+                continue
             
             if 0:
                 print(name_full)

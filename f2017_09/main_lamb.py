@@ -2,7 +2,6 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
-import django
 
 from f2017_06 import block_data2
 from f2017_08.hsi import tools_data, tools_plot, tools_analysis
