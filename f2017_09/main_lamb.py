@@ -13,8 +13,15 @@ import link_to_keras_ipi as keras_ipi
 class MainData(object):
     version = 4
     zoom = 1
-    def __init__(self, version = None):
-        self.foo = block_data2.ex_raw_hand_big()
+    def __init__(self, version = None, set = 'hand_big'):
+        if set == 'hand_big':
+            self.foo = block_data2.ex_raw_hand_big()
+        elif set == 'hand_small':
+            self.foo = block_data2.ex_raw_hand_small()
+        
+        else:
+            raise ValueError('Unknown set')
+        
         if version is not None:
             self.version = version
         
@@ -26,7 +33,20 @@ class MainData(object):
     
     def get_img_ir(self):
         shape = np.shape(self.foo.im_in_3)
-        return np.reshape(self.foo.im_in_3, newshape=(shape[0], shape[1], 1))
+        
+        if len(shape) == 3:
+            if shape[2] == 3:
+                return np.mean(self.foo.im_in_3, axis = 2, keepdims=True)
+            elif shape[2] == 1:
+                return self.foo.im_in_3
+            else:
+                raise ValueError
+        
+        elif len(shape) == 2:
+            return np.reshape(self.foo.im_in_3, newshape=(shape[0], shape[1], 1))
+        
+        else:
+            raise ValueError
     
     def get_img_y(self):
         folder_save = '/home/lameeus/data/ghent_altar/load/'

@@ -26,14 +26,20 @@ class SetStruct(object):
             self.image_rgb = ImageStruct('before cleaning', folder + 'hand_rgb.tif')
             self.image_ir = ImageStruct('IR', folder + 'hand_ir.tif')
 
-            folder = '/home/lameeus/data/ghent_altar/input/'
-            self.image_annot = ImageStruct('annotations', folder + '19_annot_clean.tif')
+            folder = '/home/lameeus/data/ghent_altar/annotation/'
+            self.image_annot = ImageStruct('annotations by restorer', folder + '19_annot_clean_big.tif')
 
+            folder = '/home/lameeus/data/ghent_altar/output/'
+            self.image_output = ImageStruct('demo result', folder + 'hand_big.tif')
+        
     def get_input_images(self):
         return [self.image_clean, self.image_rgb, self.image_ir]
     
     def get_annot_images(self):
         return [self.image_annot]
+    
+    def get_output_images(self):
+        return [self.image_output]
     
 
 class GUIData(object):
@@ -44,6 +50,8 @@ class GUIData(object):
     del(folder)
     set_struct = SetStruct('evangelist')
     
+    names_sets = ['hand_small', 'hand_big']
+    
     def __init__(self):
         ...
     
@@ -52,3 +60,9 @@ class GUIData(object):
     
     def get_annot_images(self):
         return self.set_struct.get_annot_images()
+    
+    def get_output_images(self):
+        return self.set_struct.get_output_images()
+    
+    def get_names_sets(self):
+        return self.names_sets

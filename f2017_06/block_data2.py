@@ -46,7 +46,7 @@ class ExRawImage(object):
     
 
 def ex_raw_zach_small():
-    folder = '/scratch/lameeus/data/ghentaltarpiece/altarpiece_close_up/beard_updated/'
+    folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/beard_updated/'
     input_1 = folder + "rgb_cleaned.tif"
     input_2 = folder + "rgb.tif"
     input_3 = folder + "ir.tif"
@@ -56,7 +56,7 @@ def ex_raw_zach_small():
     
     
 def ex_raw_hand_small():
-    folder = '/scratch/lameeus/data/ghentaltarpiece/altarpiece_close_up/finger/'
+    folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/finger/'
     input_1 = folder + "hand_cleaned.tif"
     input_2 = folder + "hand_rgb.tif"
     input_3 = folder + "hand_ir.tif"

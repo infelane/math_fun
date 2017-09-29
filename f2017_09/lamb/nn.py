@@ -64,7 +64,7 @@ def gen_net4(layer_clean, layer_rgb, layer_ir, zoom = 1):
 class Network(object):
     folder_model = '/home/lameeus/data/ghent_altar/net_weight/net_2017_09/'
     
-    def __init__(self, version = 1, zoom = 1):
+    def __init__(self, version = 1, zoom = 1, lr = 1e-4):
         """ zoom is for multi-resolution evalution (basically all stride is *zoom"""
         self.version = version
         w = 10
@@ -93,7 +93,7 @@ class Network(object):
             raise ValueError('not implemented version')
 
         loss = keras.losses.categorical_crossentropy
-        optimizer = {'class_name': 'adam', 'config': {'lr': 1.0e-4}}
+        optimizer = {'class_name': 'adam', 'config': {'lr': lr}}
         dice = keras_ipi.metrics.dice_with_0_labels
         self.tb = keras.callbacks.TensorBoard(log_dir='/home/lameeus/data/ghent_altar/tensorboard/conc_net/', histogram_freq=0,
                                     write_graph=False, write_images=False)
@@ -106,11 +106,17 @@ class Network(object):
                            metrics = metrics
                            )
 
-    def load(self):
-        self.model.load_weights(self.folder_model + self.file_name)
+    def load(self, name = None):
+        if name is None:
+            self.model.load_weights(self.folder_model + self.file_name)
+        else:
+            self.model.load_weights(self.folder_model + name + '.h5')
 
-    def save(self):
-        self.model.save_weights(self.folder_model + self.file_name)
+    def save(self, name = None):
+        if name is None:
+            self.model.save_weights(self.folder_model + self.file_name)
+        else:
+            self.model.save_weights(self.folder_model + name + '.h5')
 
     def train(self, x, y, epochs=1, save=True, validation_split = None):
     
@@ -119,13 +125,9 @@ class Network(object):
         if save:
             cb_saver = keras.callbacks.LambdaCallback(on_epoch_end=lambda *a:self.save())
             callback.append(cb_saver)
-        
-        epochs_sub = 10
-        
-        for i in range(epochs//epochs_sub):
-            print('Epoch {}/{}'.format((i)*epochs_sub+1, epochs))
-            self.model.fit(x, y, epochs=epochs_sub, validation_split=validation_split,
-                           callbacks=callback)
+            
+        self.model.fit(x, y, epochs=epochs, validation_split=validation_split,
+                       callbacks=callback)
                        
     def predict(self, x):
         return self.model.predict(x)
