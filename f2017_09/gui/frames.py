@@ -2,6 +2,93 @@ from tkinter import Frame, Canvas
 # from tkinter.ttk import
 from PIL import Image, ImageTk
 import numpy as np
+from tkinter.ttk import Button
+
+
+class PanelDualImage(object):
+    def __init__(self, master):
+        
+        f = Frame(master)
+        f.pack(side = 'top', fill = 'both', expand = 1)
+        
+        self.canvas_left = Canvas(f)
+        # self.canvas_left.pack(fill='both', expand=1)
+        #
+        self.canvas_right = Canvas(f)
+        # self.canvas_right.pack(fill='both', expand=1)
+        
+   
+            
+        f = Frame(master)
+        f.pack(side='bottom')
+        
+        b = Button(f, text='single', command=self.single)
+        b.pack(side = 'left', anchor = 'e')
+        b = Button(f, text='top-bottom', command=self.topbot)
+        b.pack(side='left', anchor='e')
+        # b.pack(side = None)
+        b = Button(f, text='left-right', command=self.leftright)
+        b.pack(side='left', anchor='e')
+        # b.pack(side = 'right', anchor = 'w')
+
+        self.start_widgets()
+
+    def start_widgets(self):
+        self.single()
+
+    def topbot(self):
+        self.canvas_left.pack(fill='both', expand=1, side='top')
+        self.canvas_right.pack(fill='both', expand=1, side='bottom')
+
+    def leftright(self):
+        self.canvas_left.pack(fill='both', expand=1, side='left')
+        self.canvas_right.pack(fill='both', expand=1, side='right')
+
+    def single(self):
+        self.canvas_left.pack(fill='both', expand=1, side='left')
+        self.canvas_right.pack_forget()
+        
+    def set_image(self, im, i):
+        if i == 0:
+            canvas = self.canvas_left
+        elif i == 1:
+            canvas = self.canvas_right
+        else:
+            print("i can only be 0 or 1")
+            return -1
+
+        if np.max(im) <= 1:
+            im = (im * 255).astype(np.uint8)
+        elif np.max(im) <= 255:
+            im = im.astype(np.uint8)
+        
+        img = Image.fromarray(im, 'RGB')
+        
+        if 1:
+            shape = (canvas.winfo_height(), canvas.winfo_width())
+            
+            self.orig_img = img
+    
+            self.shape_orig = (img.height, img.width)  # to keep height, width order
+    
+            ratio_canvas = shape[0] / shape[1]  # Height vs width
+            ratio_image = self.shape_orig[0] / self.shape_orig[1]
+    
+            if ratio_image >= ratio_canvas:
+                # image will be put on LEFT of canvas
+                new_shape = (shape[0], int(np.ceil(shape[0] / ratio_image)))
+            else:
+                # image will be on top of canvas
+                new_shape = (int(np.ceil(shape[1] * ratio_image)), shape[1])
+    
+            self.new_shape = new_shape
+            img = img.resize((new_shape[1], new_shape[0]), Image.ANTIALIAS)
+        
+        canvas.img = ImageTk.PhotoImage(img)
+        
+        canvas.create_image(0, 0, image=canvas.img, anchor="nw")
+
+        # canvas.update_idletasks()
 
 
 class PanelImages3(object):

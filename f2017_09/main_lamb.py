@@ -18,7 +18,10 @@ class MainData(object):
             self.foo = block_data2.ex_raw_hand_big()
         elif set == 'hand_small':
             self.foo = block_data2.ex_raw_hand_small()
-        
+        elif set == 'zach_small':
+            self.foo = block_data2.ex_raw_zach_small()
+        elif set == 'zach_big':
+            self.foo = block_data2.ex_raw_zach()
         else:
             raise ValueError('Unknown set')
         

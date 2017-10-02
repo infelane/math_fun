@@ -14,7 +14,7 @@ class NetworkStuff(object):
         self.network = nn.Network(version=self.dict_data.version, zoom=self.dict_data.zoom)
         
     def _init_network(self):
-        self.network = nn.Network(version=self.dict_data.version, zoom=self.dict_data.zoom, lr = 1e-3)
+        self.network = nn.Network(version=self.dict_data.version, zoom=self.dict_data.zoom, lr = 0.5e-3)
         
     def load_network(self, name):
         if name == 'pretrained':
@@ -39,6 +39,12 @@ class NetworkStuff(object):
             self.dict_data_set = main_lamb.MainData(set='hand_big')
         elif name == 'hand_small':
             self.dict_data_set = main_lamb.MainData(set='hand_small')
+        elif name == 'zach_small':
+            self.dict_data_set = main_lamb.MainData(set='zach_small')
+        elif name == 'zach_big':
+            self.dict_data_set = main_lamb.MainData(set='zach_big')
+        else:
+            print('! Unknown dataset:\n\t{}'.format(name))
     
     def training(self, epoch_func = None, func_print = print):
         print('started training')

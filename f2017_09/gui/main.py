@@ -6,7 +6,7 @@ import numpy as np
 from PIL import ImageTk, Image
 
 from f2017_08.GUI.main_gui import PlotPanel, PanelImages
-from f2017_09.gui.data_structs import GUIData, ImageStruct
+from f2017_09.gui.data_structs import GUIData, ImageStruct, InpaintingData
 from link_to_soliton.paint_tools import image_tools
 from f2017_09.gui import frames, network_stuff
 
@@ -285,109 +285,312 @@ class FramePlot(Frame):
         self.panel_images.set_image(im)
 
 
+class FramePlotDual(Frame):
+    def __init__(self, master=None, **args):
+        super(self.__class__, self).__init__(master=master, **args)
+        
+        self.panel_images = frames.PanelDualImage(self)
+    
+    def set_image(self, im, i):
+        self.panel_images.set_image(im, i)
+        
+        
+class ButtonsAll(Frame):
+    def __init__(self, master, **args):
+        super(self.__class__, self).__init__(master=master, **args)
+        
+        def callback(im):
+            print('alter image')
+            self.func(im)
+            
+            # frame_right.set_image(im2, i = 1)
+        
+        self.buttons = []
+        
+        l = lambda : callback(self.inpainting_set.get_orig())
+        b = Button(self, text="Original", command=l)
+        b.pack()
+        self.buttons.append(b)
+        l = lambda: callback(self.inpainting_set.get_map())
+        b = Button(self, text="Mask", command=l)
+        b.pack()
+        self.buttons.append(b)
+        l = lambda: callback(self.inpainting_set.get_result())
+        b = Button(self, text="Result", command=l)
+        b.pack()
+        self.buttons.append(b)
+
+        # only when given
+        l = lambda: callback(self.inpainting_set.get_restored())
+        b = Button(self, state = 'disabled', text="Real restoration", command=l)
+        b.pack()
+        self.buttons.append(b)
+        
+    def set_inpainting_set(self, inpainting_set):
+        self.inpainting_set = inpainting_set
+        
+    def set_func(self, func):
+        self.func = func
+        
+    def set_button(self, i, func):
+        self.buttons[i].bind('<Button-1>', lambda event: func())
+        
+    def enable_real(self, bool = False):
+        if bool:
+            self.buttons[3].config(state = 'normal')
+        else:
+            self.buttons[3].config(state = 'disabled')
+
+        
+class FrameInfoDual(Frame):
+    def __init__(self, master=None, **args):
+        super(self.__class__, self).__init__(master=master, **args)
+        
+        frame_set = TkFrame(self, background=bg_frame)
+        
+        
+        l = Label(frame_set, text='set:', bg=bg_frame)
+        self.sets_var = StringVar(frame_set)
+        self.om = OptionMenu(frame_set, self.sets_var, None)
+        
+        self.buttons1 = ButtonsAll(self)
+        self.buttons2 = ButtonsAll(self)
+        
+        def pack1(a):
+            a.pack(padx=10, pady=10, ipadx=10, ipady=10, anchor='center', side='top')
+        
+        # frame_set.pack(ipadx=10)
+        pack1(frame_set)
+        pack1(self.buttons1)
+        pack1(self.buttons2)
+        
+        l.pack(anchor='e', side = 'left')
+        self.om.pack(anchor='w', side='right')
+        
+        self.start_widgets()
+
+    def start_widgets(self):
+        ...
+        
+    def set_options(self, options, func_show_im):
+        # Reset var and delete all old options
+        menu = self.om['menu']
+        menu.delete(0, 'end')
+        
+        def func(opt_i):
+            self.buttons1.set_inpainting_set(opt_i)
+            self.buttons2.set_inpainting_set(opt_i)
+            
+            if opt_i.get_restored() is None:
+                self.buttons1.enable_real(False)
+                self.buttons2.enable_real(False)
+            else:
+                self.buttons1.enable_real(True)
+                self.buttons2.enable_real(True)
+            
+            self.buttons1.set_func(lambda im, i=0: func_show_im(im, i))
+            self.buttons2.set_func(lambda im, i=1: func_show_im(im, i))
+            
+
+            
+        for opt_i in options:
+            menu.add_command(label=opt_i.name,
+                             command=lambda opt_i=opt_i: func(opt_i))
+
+        # set to first value
+        self.sets_var.trace("w", lambda name, index, mode, opt_0=options[0]: func(opt_0))
+        self.sets_var.set(options[0].name)
+        
+class FrameInpainting(Frame):
+    def __init__(self, master = None, **args):
+        super(self.__class__, self).__init__(master = master, **args)
+
+        self.frame_left = FrameInfoDual(self)
+        self.frame_right = FramePlotDual(self)
+
+        self.frame_right.pack(anchor='nw', side='right', fill='both', expand=True)
+        self.frame_left.pack(anchor='ne', side='left')
+        
+        self.start_widgets()
+        
+    def start_widgets(self):
+        inpainting_data = InpaintingData()
+        self.frame_left.set_options(inpainting_data.get_sets(), self.frame_right.set_image)
+        
+    
+class FrameLosses(Frame):
+    def __init__(self, master = None, **args):
+        super(self.__class__, self).__init__(master = master, **args)
+        
+        gui_data = GUIData()
+
+        frame_left = FrameSettings(self)  # , style='ugent.TFrame')
+        
+        if 0:
+            frame_right = FramePlot(self, style='My2.TFrame')
+        else:
+            frame_right = FramePlotDual(self, style='My2.TFrame')
+        if 1:
+            frame_left.grid(row=0, column=0, sticky="NESW")
+            frame_right.grid(row=0, column=1,
+                             sticky="NESW",
+                             )
+
+            self.grid_columnconfigure(1, weight=1)
+            self.grid_rowconfigure(0, weight=1)
+        else:
+            frame_left.pack(anchor='n', fill='both', expand=False, side='left')
+            frame_right.pack(anchor='n', fill='both', expand=True, side='left')
+
+        frame_left.set_input_buttons(gui_data.get_input_images())
+        frame_left.set_annot_buttons(gui_data.get_annot_images())
+        frame_left.set_output_buttons(gui_data.get_output_images())
+
+        # frame_right.set_image(gui_data.get_input_images()[0].get_im(), i = 0)
+
+        def func_set_im(image_struct, i = 0):
+            print(image_struct.title)
+            frame_right.set_image(image_struct.get_im(), i)
+
+        # func_set_im = lambda image_struct :
+
+        frame_left.set_func(func_set_im)
+
+        network = network_stuff.NetworkStuff()
+
+        def func_set_inference():
+            print('test test test')
+    
+            im = network.inference()
+    
+            frame_right.set_image(im)
+    
+            # TODO something with after!
+            # self.after(10, None)
+
+        frame_left.set_func_inference(func_set_inference)
+
+        frame_left.set_loading_options(network.loading_options(),
+                                       lambda name: network.load_network(name))
+
+        epoch_func = func_set_inference
+
+        func_print = frame_left.set_text
+
+        frame_left.set_training_func(lambda: network.training(epoch_func, func_print=func_print))
+
+        # TODO
+        frame_left.set_result_sets(gui_data.get_names_sets(),
+                                   lambda name: network.set_name_set(name)
+                                   )
+
+
 class MainWindow(Frame):
     def __init__(self, master):
-        gui_data = GUIData()
+
         
         s = Style()
         
         print(s.theme_names())
         
         s.theme_use('clam')
-        # s.theme_use('alt')
-        # s.theme_use('classic')
+
+        font = ('Helvetica', 14)
+        font_tab = ('Helvetica', 20)
+
+        s.configure(".", font=font)
+        s.configure("TNotebook.Tab", font = font_tab)
+
+        mygreen = "#d2ffd2"
+        myred = "#dd0202"
         
-        # font = ('fixedsys', 12)
-        # font = ('system 10', 12)
-        # s.configure('.TFrame', font=font, background='grey')
-        # s.configure('.TLabel', font=font, background='white')
-        # s.configure('.', font=font, background='white')
         s.configure('My1.TFrame', background='cyan')
         s.configure('My2.TFrame', background='maroon')
         s.configure('ugent.clam') #, background = 'white')
         
-        # Frame.__init__(self, master)
         super(MainWindow, self).__init__(master=master, style='My1.TFrame')
 
         n = Notebook(master)
         n.pack(fill='both', expand=1)
         
-        f1 = Frame(n, style='ugent.TFrame')  # first page, which would get widgets gridded into it
-        n.add(f1, text='Iedereen UGent')
+        f1 = FrameLosses(n, style='ugent.TFrame')  # first page, which would get widgets gridded into it
+        n.add(f1, text='Verf verlies')
         
-        frame_left = FrameSettings(f1) #, style='ugent.TFrame')
-        frame_right = FramePlot(f1, style='My2.TFrame')
+        f2 = FrameInpainting(n)  # first page, which would get widgets gridded into it
+        n.add(f2, text='Inschildering')
 
-        if 1:
-            frame_left.grid(row=0, column=0, sticky="NESW")
-            frame_right.grid(row=0, column=1,
-                             sticky = "NESW",
-                             )
-
-            f1.grid_columnconfigure(1, weight = 1)
-            f1.grid_rowconfigure(0, weight=1)
-        else:
-            frame_left.pack(anchor='n', fill='both', expand=False, side='left' )
-            frame_right.pack(anchor='n', fill='both', expand=True, side='left' )
-
-
-        frame_left.set_input_buttons(gui_data.get_input_images())
-        frame_left.set_annot_buttons(gui_data.get_annot_images())
-        frame_left.set_output_buttons(gui_data.get_output_images())
-        
-        frame_right.set_image(gui_data.get_input_images()[0].get_im())
-        
-        def func_set_im(image_struct):
-            print(image_struct.title)
-            frame_right.set_image(image_struct.get_im())
-        # func_set_im = lambda image_struct :
-
-        frame_left.set_func(func_set_im)
-        
-        network = network_stuff.NetworkStuff()
-        
-        def func_set_inference():
-            print('test test test')
-            
-            im = network.inference()
-            
-            frame_right.set_image(im)
-            
-            # TODO something with after!
-            # self.after(10, None)
-        
-        frame_left.set_func_inference(func_set_inference)
-
-        frame_left.set_loading_options(network.loading_options(),
-                                       lambda name : network.load_network(name))
-
-        epoch_func = func_set_inference
-
-        func_print = frame_left.set_text
-        
-        frame_left.set_training_func(lambda : network.training(epoch_func, func_print = func_print))
-
-        
-        #TODO
-        frame_left.set_result_sets(gui_data.get_names_sets(),
-                                   lambda name: network.set_name_set(name)
-                                   )
-
-        self.make_widgets()
-    
-        if 0:
-            class TextOut(tk.Text):
-    
-                def write(self, s):
-                    self.insert(tk.CURRENT, s)
-    
-                def flush(self):
-                    pass
-    
-            import sys
-            text = TextOut(frame_left)
-            sys.stdout = text
-            text.grid(row = 6)
+        # frame_left = FrameSettings(f1)  # , style='ugent.TFrame')
+        # frame_right = FramePlot(f1, style='My2.TFrame')
+        #
+        # if 1:
+        #     frame_left.grid(row=0, column=0, sticky="NESW")
+        #     frame_right.grid(row=0, column=1,
+        #                      sticky="NESW",
+        #                      )
+        #
+        #     f1.grid_columnconfigure(1, weight=1)
+        #     f1.grid_rowconfigure(0, weight=1)
+        # else:
+        #     frame_left.pack(anchor='n', fill='both', expand=False, side='left')
+        #     frame_right.pack(anchor='n', fill='both', expand=True, side='left')
+        #
+        # frame_left.set_input_buttons(gui_data.get_input_images())
+        # frame_left.set_annot_buttons(gui_data.get_annot_images())
+        # frame_left.set_output_buttons(gui_data.get_output_images())
+        #
+        # frame_right.set_image(gui_data.get_input_images()[0].get_im())
+        #
+        # def func_set_im(image_struct):
+        #     print(image_struct.title)
+        #     frame_right.set_image(image_struct.get_im())
+        #
+        # # func_set_im = lambda image_struct :
+        #
+        # frame_left.set_func(func_set_im)
+        #
+        # network = network_stuff.NetworkStuff()
+        #
+        # def func_set_inference():
+        #     print('test test test')
+        #
+        #     im = network.inference()
+        #
+        #     frame_right.set_image(im)
+        #
+        #     # TODO something with after!
+        #     # self.after(10, None)
+        #
+        # frame_left.set_func_inference(func_set_inference)
+        #
+        # frame_left.set_loading_options(network.loading_options(),
+        #                                lambda name: network.load_network(name))
+        #
+        # epoch_func = func_set_inference
+        #
+        # func_print = frame_left.set_text
+        #
+        # frame_left.set_training_func(lambda: network.training(epoch_func, func_print=func_print))
+        #
+        # # TODO
+        # frame_left.set_result_sets(gui_data.get_names_sets(),
+        #                            lambda name: network.set_name_set(name)
+        #                            )
+        #
+        # self.make_widgets()
+        #
+        # if 0:
+        #     class TextOut(tk.Text):
+        #
+        #         def write(self, s):
+        #             self.insert(tk.CURRENT, s)
+        #
+        #         def flush(self):
+        #             pass
+        #
+        #     import sys
+        #     text = TextOut(frame_left)
+        #     sys.stdout = text
+        #     text.grid(row = 6)
 
     def make_widgets(self):
         # don't assume that self.parent is a root window.
