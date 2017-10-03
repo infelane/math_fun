@@ -5,10 +5,9 @@ from tkinter import Label, Entry, Tk, Frame as TkFrame, StringVar, Canvas, Optio
 import numpy as np
 from PIL import ImageTk, Image
 
-from f2017_08.GUI.main_gui import PlotPanel, PanelImages
 from f2017_09.gui.data_structs import GUIData, ImageStruct, InpaintingData
 from link_to_soliton.paint_tools import image_tools
-from f2017_09.gui import frames, network_stuff
+from f2017_09.gui import frames, network_stuff, general_widgets
 
 bg_frame = 'lightgrey'
 
@@ -36,6 +35,10 @@ class FrameSetttingsSub(TkFrame):
         
     def get_button_frame(self):
         return self.button_frame
+    
+    def delete_buttons(self):
+        for child in self.get_button_frame().winfo_children():
+            child.destroy()
 
 
 class FrameSettings(Frame):
@@ -55,19 +58,30 @@ class FrameSettings(Frame):
         self.grid_columnconfigure(0, weight = 0, minsize = 0, pad = 10, uniform = True)
 
     def __set_x_buttons(self, images, frame_part):
+    
+        frame_part.delete_buttons()
+    
+        for child in frame_part.get_button_frame().winfo_children():
+            child.destroy()
         
-        def lambda_button1(button_ii):
+        def lambda_button1(button_ii, i):
             self.set_text('Loading')
-            self.button_func(button_ii.get_image_struct())
+            self.button_func(button_ii.get_image_struct(), i)
             self.set_text('Done')
-        
+            
         for image_i in images:
             button_i = ButtonImage(image_i, frame_part.get_button_frame(), text=image_i.title)
             button_i.pack(side="left", padx=5, pady=5)
+            
+            # TODO cleaner way
+            # b = self.__create_button_plot(self.frame_output, text='Inference')
+            # l2 = lambda: self.func_output_im()
+            # b.set_im(l2)
         
-            lambda_button = lambda event, button_ii=button_i: lambda_button1(button_ii)
-        
+            lambda_button = lambda event, button_ii=button_i, i = 0: lambda_button1(button_ii, i)
             button_i.bind('<Button-1>', lambda_button)
+            lambda_button = lambda event, button_ii=button_i, i = 1: lambda_button1(button_ii, i)
+            button_i.bind('<Button-3>', lambda_button)
             
     def __set_sub_frame(self, text, row = None):
         sub_frame = FrameSetttingsSub(self)
@@ -81,20 +95,29 @@ class FrameSettings(Frame):
         b.pack(side="bottom", padx=5, pady=5)
         return b
     
+    def __create_button_plot(self, master, text = None):
+        b = general_widgets.ButtonPlot(master, text = text)
+        b.pack(side="bottom", padx=5, pady=5)
+        # This is always the same
+        l = lambda im, i: self.func_imshow(im, i)
+        b.set_plot_func(l)
+        return b
+    
     def init_frame_input(self):
         """ inputs """
         
         text = 'Inputs'
         self.frame_inputs = self.__set_sub_frame(text, 0)
+
+        self.input_sets_variable = StringVar(self.frame_inputs)
         
-        input_sets_variable = StringVar(self.frame_inputs)
         set_frame = TkFrame(self.frame_inputs, background = bg_frame)
         set_frame.pack(ipadx=10)
-        
+    
         l = Label(set_frame, text = 'set:', bg=bg_frame)
         l.pack(anchor = 'center', side = 'left')
-        om = OptionMenu(set_frame, input_sets_variable, None)
-        om.pack(anchor = 'center', side = 'right')
+        self.input_sets_option_menu = OptionMenu(set_frame, self.input_sets_variable, None)
+        self.input_sets_option_menu.pack(anchor = 'center', side = 'right')
         
     def init_frame_labeling(self):
         """ Annotations """
@@ -103,46 +126,55 @@ class FrameSettings(Frame):
         
     def init_frame_loading(self):
         """ Loading """
-        text = 'Loading'
+        text = 'Load the neural network'
         self.frame_loading = self.__set_sub_frame(text, 2)
 
-        # options = [
-        #     "None",
-        #     "pretrained",
-        # ]  # etc
-        #
-        # def OptionMenu_SelectionEvent(event):  # I'm not sure on the arguments here, it works though
-        #     ## do something
-        #
-        #     self.loading_option_func(self.loading_variable.get())
-        #
-        #     print(self.loading_variable.get())
+        set_frame = TkFrame(self.frame_loading, background=bg_frame)
+        set_frame.pack(ipadx=10)
 
+        l = Label(set_frame, text='weights:', bg=bg_frame)
+        l.pack(anchor='center', side='left')
+        
         self.loading_variable = StringVar(self.frame_loading)
-        # self.loading_variable.set(options[1])  # default value
-       
-        # self.loading_option_menu = OptionMenu(self.frame_loading, self.loading_variable, *options, command=OptionMenu_SelectionEvent)
-        self.loading_option_menu = OptionMenu(self.frame_loading, self.loading_variable, None)
-        self.loading_option_menu.pack()
+
+        self.loading_option_menu = OptionMenu(set_frame, self.loading_variable, None)
+        self.loading_option_menu.pack(anchor='center', side='right')
+
+        # l = Label(set_frame, text='set:', bg=bg_frame)
+        # l.pack(anchor='center', side='left')
+        # self.input_sets_option_menu = OptionMenu(set_frame, self.input_sets_variable, None)
+        # self.input_sets_option_menu.pack(anchor='center', side='right')
         
     def init_frame_training(self):
         """ train """
         
         text = 'Learning'
         self.frame_training = self.__set_sub_frame(text, 3)
+        # training function is different, so no fancy button_plot
         self.button_training = self.__create_button(self.frame_training, 'Start training')
         
     def init_frame_output(self):
         """ Annotations """
         text = 'Results'
         self.frame_output = self.__set_sub_frame(text, 4)
-        b = self.__create_button(self.frame_output, text='Inference')
-
-        b.bind('<Button-1>', lambda event : self.button_inference_func())
-
+        
+        b = self.__create_button_plot(self.frame_output, text = 'Inference')
+        l2 = lambda: self.func_output_im()
+        b.set_im(l2)
+        
         self.result_sets_variable = StringVar(self.frame_output)
-        self.results_sets_option_menu = OptionMenu(self.frame_output, self.result_sets_variable, None)
-        self.results_sets_option_menu.pack()
+        # self.results_sets_option_menu = OptionMenu(self.frame_output, self.result_sets_variable, None)
+        # self.results_sets_option_menu.pack(
+        #
+        # )
+        
+        set_frame = TkFrame(self.frame_output, background = bg_frame)
+        set_frame.pack(ipadx=10)
+        
+        l = Label(set_frame, text = 'set:', bg=bg_frame)
+        l.pack(anchor = 'center', side = 'left')
+        self.results_sets_option_menu = OptionMenu(set_frame, self.result_sets_variable, None)
+        self.results_sets_option_menu.pack(anchor = 'center', side = 'right')
 
     def init_frame_print(self):
         """ For printing notes """
@@ -174,6 +206,12 @@ class FrameSettings(Frame):
     def set_func_inference(self, func):
         self.button_inference_func = func
         
+    def set_func_imshow(self, func):
+        self.func_imshow = func
+        
+    def set_func_output_im(self, func):
+        self.func_output_im = func
+        
     def set_text(self, text):
         self.textvariable.set(text)
         self.text_box_info.update_idletasks()
@@ -196,9 +234,35 @@ class FrameSettings(Frame):
         self.loading_variable.set(names[0])
         
     def set_training_func(self, func):
-    
-        lambda_button = lambda event : func()
-        self.button_training.bind('<Button-1>', lambda_button)
+        """ the function is different so no fancy shortcuts with image showing """
+        lambda_button0 = lambda event : func(i =0)
+        self.button_training.bind('<Button-1>', lambda_button0)
+        lambda_button1 = lambda event: func(i = 1)
+        self.button_training.bind('<Button-3>', lambda_button1)
+        
+    def set_input_sets(self, sets):
+        # Reset var and delete all old options
+        menu = self.input_sets_option_menu['menu']
+        menu.delete(0, 'end')
+
+        sets_dict = {set_i.name: set_i for set_i in sets}
+        
+        for set_i in sets:
+            menu.add_command(label=set_i.name,
+                             command=lambda name_i=set_i.name: self.input_sets_variable.set(name_i)
+                             )
+            
+        def callback(sv):
+            print('inputs sets variable altered')
+
+            set_i = sets_dict[sv.get()]
+
+            self.set_input_buttons(set_i.get_input_images())
+            self.set_annot_buttons(set_i.get_annot_images())
+            self.set_output_buttons(set_i.get_output_images())
+        
+        self.input_sets_variable.trace("w", lambda name, index, mode, sv=self.input_sets_variable: callback(sv))
+        self.input_sets_variable.set(sets[0].name)
         
     def set_result_sets(self, names, func):
         # Reset var and delete all old options
@@ -206,13 +270,10 @@ class FrameSettings(Frame):
         menu.delete(0, 'end')
 
         for name_i in names:
-            # TODO
-            ...
             menu.add_command(label=name_i,
                              command=lambda value=name_i: self.result_sets_variable.set(value))
 
         def callback(sv):
-            print(sv.get())
             func(sv.get())
 
         self.result_sets_variable.trace("w", lambda name, index, mode, sv=self.result_sets_variable: callback(sv))
@@ -299,31 +360,34 @@ class ButtonsAll(Frame):
     def __init__(self, master, **args):
         super(self.__class__, self).__init__(master=master, **args)
         
-        def callback(im):
-            print('alter image')
-            self.func(im)
-            
-            # frame_right.set_image(im2, i = 1)
-        
         self.buttons = []
-        
-        l = lambda : callback(self.inpainting_set.get_orig())
-        b = Button(self, text="Original", command=l)
-        b.pack()
-        self.buttons.append(b)
-        l = lambda: callback(self.inpainting_set.get_map())
-        b = Button(self, text="Mask", command=l)
-        b.pack()
-        self.buttons.append(b)
-        l = lambda: callback(self.inpainting_set.get_result())
-        b = Button(self, text="Result", command=l)
-        b.pack()
-        self.buttons.append(b)
 
-        # only when given
-        l = lambda: callback(self.inpainting_set.get_restored())
-        b = Button(self, state = 'disabled', text="Real restoration", command=l)
+        b = general_widgets.ButtonPlot(self, text = 'Original')
+        b.set_im(lambda *args: self.inpainting_set.get_orig(*args))
+        self.button_stuff(b)
+        
+        b = general_widgets.ButtonPlot(self, text = 'Mask')
+        b.set_im(lambda *args: self.inpainting_set.get_map(*args))
+        self.button_stuff(b)
+
+        b = general_widgets.ButtonPlot(self, text='Result')
+        b.set_im(lambda *args: self.inpainting_set.get_result(*args))
+        self.button_stuff(b)
+
+        # only show when given
+        b = general_widgets.ButtonPlot(self, text='Real restoration')
+        b.set_im(lambda *args: self.inpainting_set.get_restored(*args))
+        self.button_stuff(b)
+        
+    def set_last_button_state(self, bool):
+        if bool:
+            self.buttons[-1].pack()
+        else:
+            self.buttons[-1].pack_forget()
+
+    def button_stuff(self, b):
         b.pack()
+        b.set_plot_func(lambda *args: self.func(*args))
         self.buttons.append(b)
         
     def set_inpainting_set(self, inpainting_set):
@@ -348,13 +412,12 @@ class FrameInfoDual(Frame):
         
         frame_set = TkFrame(self, background=bg_frame)
         
-        
         l = Label(frame_set, text='set:', bg=bg_frame)
         self.sets_var = StringVar(frame_set)
         self.om = OptionMenu(frame_set, self.sets_var, None)
         
         self.buttons1 = ButtonsAll(self)
-        self.buttons2 = ButtonsAll(self)
+        # self.buttons2 = ButtonsAll(self)
         
         def pack1(a):
             a.pack(padx=10, pady=10, ipadx=10, ipady=10, anchor='center', side='top')
@@ -362,7 +425,6 @@ class FrameInfoDual(Frame):
         # frame_set.pack(ipadx=10)
         pack1(frame_set)
         pack1(self.buttons1)
-        pack1(self.buttons2)
         
         l.pack(anchor='e', side = 'left')
         self.om.pack(anchor='w', side='right')
@@ -373,33 +435,57 @@ class FrameInfoDual(Frame):
         ...
         
     def set_options(self, options, func_show_im):
-        # Reset var and delete all old options
+        # # Reset var and delete all old options
         menu = self.om['menu']
         menu.delete(0, 'end')
-        
-        def func(opt_i):
-            self.buttons1.set_inpainting_set(opt_i)
-            self.buttons2.set_inpainting_set(opt_i)
-            
-            if opt_i.get_restored() is None:
-                self.buttons1.enable_real(False)
-                self.buttons2.enable_real(False)
-            else:
-                self.buttons1.enable_real(True)
-                self.buttons2.enable_real(True)
-            
-            self.buttons1.set_func(lambda im, i=0: func_show_im(im, i))
-            self.buttons2.set_func(lambda im, i=1: func_show_im(im, i))
-            
 
-            
+        self.buttons1.set_func(func_show_im)
+
+        options_dict = {opt_i.name : opt_i for opt_i in options}
+
+        # def func(opt_i):
+        #     self.sets_var.set(opt_i.name)
+    
         for opt_i in options:
-            menu.add_command(label=opt_i.name,
-                             command=lambda opt_i=opt_i: func(opt_i))
-
+            name_i = opt_i.name
+            menu.add_command(label=name_i,
+                             command=lambda name_ii=name_i: self.sets_var.set(name_ii))
+            
+        def callback(sv):
+            print(sv.get())
+            name_i = sv.get()
+            opt_i = options_dict[name_i]
+            self.buttons1.set_inpainting_set(opt_i)
+    
+            if opt_i.get_restored() is None:
+                self.buttons1.set_last_button_state(False)
+            else:
+                self.buttons1.set_last_button_state(True)
+            
         # set to first value
-        self.sets_var.trace("w", lambda name, index, mode, opt_0=options[0]: func(opt_0))
+        self.sets_var.trace("w", lambda name, index, mode, value= self.sets_var: callback(value))
         self.sets_var.set(options[0].name)
+
+        # self.sets_var.trace("w", lambda name, index, mode, value=self.sets_var: callback(value))
+        # self.sets_var.trace("w", lambda name, index, mode:None)
+        
+        
+        # # Reset var and delete all old options
+        # menu = self.results_sets_option_menu['menu']
+        # menu.delete(0, 'end')
+        #
+        # for name_i in names:
+        #     # TODO
+        #     menu.add_command(label=name_i,
+        #                      command=lambda value=name_i: self.result_sets_variable.set(value))
+        #
+        # def callback(sv):
+        #     print(sv.get())
+        #     func(sv.get())
+        #
+        # self.result_sets_variable.trace("w", lambda name, index, mode, sv=self.result_sets_variable: callback(sv))
+        # self.result_sets_variable.set(names[0])
+        
         
 class FrameInpainting(Frame):
     def __init__(self, master = None, **args):
@@ -417,7 +503,22 @@ class FrameInpainting(Frame):
         inpainting_data = InpaintingData()
         self.frame_left.set_options(inpainting_data.get_sets(), self.frame_right.set_image)
         
-    
+        
+class FrameHowTo(Frame):
+    def __init__(self, master = None, **args):
+        super(self.__class__, self).__init__(master = master, **args)
+        
+        def pack1(a):
+            a.pack(fill = 'both', expand = 0, pady = 10, padx = 10)
+            
+        text = 'Left click: show image'
+        pack1(Label(self, text = text))
+        text = 'Right click: show image at second canvas'
+        pack1(Label(self, text=text))
+        text = 'Scroll: zoom in/out'
+        pack1(Label(self, text=text))
+
+        
 class FrameLosses(Frame):
     def __init__(self, master = None, **args):
         super(self.__class__, self).__init__(master = master, **args)
@@ -442,12 +543,6 @@ class FrameLosses(Frame):
             frame_left.pack(anchor='n', fill='both', expand=False, side='left')
             frame_right.pack(anchor='n', fill='both', expand=True, side='left')
 
-        frame_left.set_input_buttons(gui_data.get_input_images())
-        frame_left.set_annot_buttons(gui_data.get_annot_images())
-        frame_left.set_output_buttons(gui_data.get_output_images())
-
-        # frame_right.set_image(gui_data.get_input_images()[0].get_im(), i = 0)
-
         def func_set_im(image_struct, i = 0):
             print(image_struct.title)
             frame_right.set_image(image_struct.get_im(), i)
@@ -458,28 +553,37 @@ class FrameLosses(Frame):
 
         network = network_stuff.NetworkStuff()
 
-        def func_set_inference():
+        def func_set_inference(i):
             print('test test test')
     
             im = network.inference()
     
-            frame_right.set_image(im)
+            frame_right.set_image(im, i)
     
             # TODO something with after!
             # self.after(10, None)
 
         frame_left.set_func_inference(func_set_inference)
+        frame_left.set_func_imshow(frame_right.set_image)
+        frame_left.set_func_output_im(network.inference)
 
         frame_left.set_loading_options(network.loading_options(),
                                        lambda name: network.load_network(name))
 
-        epoch_func = func_set_inference
+        # epoch_func = func_set_inference
 
         func_print = frame_left.set_text
+        
+        def training_func(i):
+            epoch_func = lambda arg = i: func_set_inference(arg)
+            network.training(epoch_func, func_print=func_print)
+            
 
-        frame_left.set_training_func(lambda: network.training(epoch_func, func_print=func_print))
+        frame_left.set_training_func(training_func)
 
         # TODO
+        frame_left.set_input_sets(gui_data.get_input_sets())
+        
         frame_left.set_result_sets(gui_data.get_names_sets(),
                                    lambda name: network.set_name_set(name)
                                    )
@@ -518,6 +622,9 @@ class MainWindow(Frame):
         
         f2 = FrameInpainting(n)  # first page, which would get widgets gridded into it
         n.add(f2, text='Inschildering')
+        
+        f2 = FrameHowTo(n)  # first page, which would get widgets gridded into it
+        n.add(f2, text='How to')
 
         # frame_left = FrameSettings(f1)  # , style='ugent.TFrame')
         # frame_right = FramePlot(f1, style='My2.TFrame')

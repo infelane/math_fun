@@ -20,17 +20,32 @@ class ImageStruct(object):
     
 class SetStruct(object):
     def __init__(self, name: str):
+        self.name = name
         if name == 'evangelist':
             folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/finger/'
             self.image_clean = ImageStruct('clean', folder + 'hand_cleaned.tif')
             self.image_rgb = ImageStruct('before cleaning', folder + 'hand_rgb.tif')
-            self.image_ir = ImageStruct('IR', folder + 'hand_ir.tif')
-
+            self.image_ir = ImageStruct('IR', folder + 'hand_ir_single.tif')
+            
             folder = '/home/lameeus/data/ghent_altar/annotation/'
-            self.image_annot = ImageStruct('annotations by restorer', folder + '19_annot_clean_big.tif')
+            self.image_annot = ImageStruct('annotations by restorer', folder + '19_annot_small_clean_red.tif')
 
             folder = '/home/lameeus/data/ghent_altar/output/'
             self.image_output = ImageStruct('demo result', folder + 'hand_big.tif')
+        elif name == 'zachary':
+            folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/beard_updated/'
+            self.image_clean = ImageStruct('clean', folder + 'rgb_cleaned.tif')
+            self.image_rgb = ImageStruct('before cleaning', folder + 'rgb.tif')
+            self.image_ir = ImageStruct('IR', folder + 'ir.tif')
+
+            folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/beard_updated/'
+            self.image_annot = ImageStruct('annotations by restorer', folder + 'ground_truth.tif')
+            
+            folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/beard_updated/'
+            self.image_output = ImageStruct('demo result', folder + 'ground_truth.tif')
+
+        else:
+            raise ValueError('unknown name')
         
     def get_input_images(self):
         return [self.image_clean, self.image_rgb, self.image_ir]
@@ -51,6 +66,7 @@ class GUIData(object):
     set_struct = SetStruct('evangelist')
     
     names_sets = ['hand_small', 'hand_big', 'zach_small', 'zach_big']
+    input_sets = [SetStruct('evangelist'), SetStruct('zachary')]
     
     def __init__(self):
         ...
@@ -63,6 +79,9 @@ class GUIData(object):
     
     def get_output_images(self):
         return self.set_struct.get_output_images()
+    
+    def get_input_sets(self):
+        return self.input_sets
     
     def get_names_sets(self):
         return self.names_sets
