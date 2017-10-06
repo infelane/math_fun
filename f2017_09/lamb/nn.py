@@ -61,6 +61,26 @@ def gen_net4(layer_clean, layer_rgb, layer_ir, zoom = 1):
     return layer_model
 
 
+def gen_net5(layer_clean, layer_rgb, layer_ir, zoom=1, depth5 = 40):
+    """ concatenate only at end """
+
+    layer_model_clean = elu(depth5, (3, 3), zoom)(layer_clean)
+    layer_model_clean = elu(depth5, (3, 3), zoom)(layer_model_clean)
+    layer_mode_rgb = elu(depth5, (3, 3), zoom)(layer_rgb)
+    layer_mode_rgb = elu(depth5, (3, 3), zoom)(layer_mode_rgb)
+    layer_mode_ir = elu(depth5, (3, 3), zoom)(layer_ir)
+    layer_mode_ir = elu(depth5, (3, 3), zoom)(layer_mode_ir)
+    layer_mode_conc = concatenate([layer_clean, layer_rgb, layer_ir])
+    layer_mode_conc = elu(depth5, (3, 3), zoom)(layer_mode_conc)
+    layer_mode_conc = elu(depth5, (3, 3), zoom)(layer_mode_conc)
+    
+    layer_model = concatenate([layer_model_clean, layer_mode_rgb, layer_mode_ir, layer_mode_conc])
+    layer_model = elu(depth5, (1, 1), zoom)(layer_model)
+    layer_model = softmax(2, (1, 1), zoom)(layer_model)
+    
+    return layer_model
+
+
 class Network(object):
     folder_model = '/home/lameeus/data/ghent_altar/net_weight/net_2017_09/'
     
@@ -88,6 +108,14 @@ class Network(object):
         elif version == 4:
             self.file_name = 'w_v4_cnn_conc.h5'
             layer_model = gen_net4(layer_clean, layer_rgb, layer_ir, zoom)
+            
+        elif version == 5:
+            self.file_name = 'w_v5_cnn_conc.h5'
+            layer_model = gen_net5(layer_clean, layer_rgb, layer_ir, zoom)
+            
+        elif version == 6:
+            self.file_name = 'w_v6_cnn_conc.h5'
+            layer_model = gen_net5(layer_clean, layer_rgb, layer_ir, zoom)
             
         else:
             raise ValueError('not implemented version')

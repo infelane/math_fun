@@ -5,13 +5,18 @@ from link_to_soliton.paint_tools import image_tools
 
 
 def main():
-    folder_in = '/home/lameeus/data/ghent_altar/roman/input/'
-    folder = '/home/lameeus/data/ghent_altar/roman/inpainting/'
-    folder_out = '/home/lameeus/data/ghent_altar/roman/stitch/'
+    if 0:
+        folder_in = '/home/lameeus/data/ghent_altar/roman/input/'
+        folder = '/home/lameeus/data/ghent_altar/roman/inpainting/'
+        # folder_out = '/home/lameeus/data/ghent_altar/roman/stitch/'
+    else:
+        folder_in = '/home/lameeus/data/ghent_altar/input/19_hand/'
+        folder = '/home/lameeus/data/ghent_altar/inpainting/hand/'
+        folder_out = '/home/lameeus/data/ghent_altar/inpainting/stitch/'
     
-    name_in = '16_VIS_reg.tif'
+    name_in = '19_hand_clean.tif'
     
-    name_base = 'roman_inpainting'
+    name_base = 'hand_inpainting'
 
     img_in = image_tools.path2im(folder_in + name_in)
     
@@ -28,11 +33,18 @@ def main():
     
     # Specs should be correct!
     if version == 0:
-        folder += 'v0/'
-        f = 6
-        gap = 4
-        w_crop = 400
-        ext = 2*f
+        if 0:
+            folder += 'v0/'
+            f = 6
+            gap = 4
+            w_crop = 400
+            ext = 2*f
+        else:
+            folder += 'v0/'
+            f = 4
+            gap = 2
+            w_crop = 200
+            ext = 2 * f
     
     if version == 4:
         folder += 'v4/'

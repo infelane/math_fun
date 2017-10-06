@@ -56,11 +56,19 @@ def ex_raw_zach_small():
     
     
 def ex_raw_hand_small():
-    folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/finger/'
-    input_1 = folder + "hand_cleaned.tif"
-    input_2 = folder + "hand_rgb.tif"
-    input_3 = folder + "hand_ir.tif"
-    out = folder + "ground_truth.tif"
+    if 0:
+        folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/finger/'
+        input_1 = folder + "hand_cleaned.tif"
+        input_2 = folder + "hand_rgb.tif"
+        input_3 = folder + "hand_ir.tif"
+        out = folder + "ground_truth.tif"
+    
+    else:
+        folder = '/home/lameeus/data/ghent_altar/input/19_hand/'
+        input_1 = folder + "19_hand_clean.tif"
+        input_2 = folder + "19_hand_rgb.tif"
+        input_3 = folder + "19_hand_ir.tif"
+        out = folder + "19_hand_annot.tif"
     
     return ExRawImage(input_1, input_2, input_3, out)
 

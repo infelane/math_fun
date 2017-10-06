@@ -17,8 +17,6 @@ class PanelDualImage(object):
         self.canvas_right = Canvas(f)
         # self.canvas_right.pack(fill='both', expand=1)
         
-   
-            
         f = Frame(master)
         f.pack(side='bottom')
         
@@ -42,6 +40,8 @@ class PanelDualImage(object):
         self.zimg_id_right = None
         self.orig_img_left = None
         self.orig_img_right = None
+        self.rescaling_factor_left = 1
+        self.rescaling_factor_right = 1
 
         self.canvas_left.bind("<Motion>", self.crop)
         self.canvas_left.bind("<Button-4>", self.zoomer)
@@ -55,11 +55,13 @@ class PanelDualImage(object):
         self.canvas_right.bind("<Configure>", lambda event: self.set_image(self.orig_img_right, 1) )
 
     def zoomer(self, event):
+        # windows
         if (event.delta > 0):
             if self.zoomcycle != 4: self.zoomcycle += 1
         elif (event.delta < 0):
             if self.zoomcycle != 0: self.zoomcycle -= 1
 
+        # linux
         if event.num == 4:
             if self.zoomcycle != 4: self.zoomcycle += 1
         elif event.num == 5:
@@ -78,50 +80,45 @@ class PanelDualImage(object):
         if (self.zoomcycle) != 0:
             x, y = event.x, event.y
 
-            x_rel = x / self.new_shape[1]
-            y_rel = y / self.new_shape[0]
+            w_rel_left = x / self.new_shape_left[1]
+            h_rel_left = y / self.new_shape_left[0]
 
-            x_orig = x_rel * self.shape_orig[1]
-            y_orig = y_rel * self.shape_orig[0]
+            w_rel_right = x / self.new_shape_right[1]
+            h_rel_right = y / self.new_shape_right[0]
+
+            w_orig_left = w_rel_left * self.shape_orig_left[1]
+            h_orig_left = h_rel_left * self.shape_orig_left[0]
+
+            w_orig_right = w_rel_right * self.shape_orig_right[1]
+            h_orig_right = h_rel_right * self.shape_orig_right[0]
 
             size = 600, 400     # first 300, 200
             
             if self.zoomcycle == 1:
-                # x2
-                # TODO for test x1
-                
                 zoom_fac = 2
-                
-                # w_half_crop = 45
-                # h_half_crop = 30
             elif self.zoomcycle == 2:
-                w_half_crop = 30
-                h_half_crop = 20
                 zoom_fac = 4
             elif self.zoomcycle == 3:
-                w_half_crop = 15
-                h_half_crop = 10
                 zoom_fac = 8
             elif self.zoomcycle == 4:
-                w_half_crop = 6
-                h_half_crop = 4
                 zoom_fac = 16
 
-            w_half_crop = int(size[0] / 2 / self.rescaling_factor/zoom_fac)
-            h_half_crop = int(size[1] / 2 / self.rescaling_factor/zoom_fac)
+            w_half_crop_left = int(size[0] / 2 / self.rescaling_factor_left/zoom_fac)
+            h_half_crop_left = int(size[1] / 2 / self.rescaling_factor_left/zoom_fac)
+
+            w_half_crop_right = int(size[0] / 2 / self.rescaling_factor_right / zoom_fac)
+            h_half_crop_right = int(size[1] / 2 / self.rescaling_factor_right / zoom_fac)
 
             if self.orig_img_left is not None:
-                tmp_left = self.orig_img_left.crop((x_orig - w_half_crop, y_orig - h_half_crop,
-                                          x_orig + w_half_crop, y_orig + h_half_crop))
+                tmp_left = self.orig_img_left.crop((w_orig_left - w_half_crop_left, h_orig_left - h_half_crop_left,
+                                                    w_orig_left + w_half_crop_left, h_orig_left + h_half_crop_left))
 
                 self.zimg_left = ImageTk.PhotoImage(tmp_left.resize(size))
                 self.zimg_id_left = self.canvas_left.create_image(event.x, event.y, image=self.zimg_left)
 
             if self.orig_img_right is not None:
-                tmp_right = self.orig_img_right.crop((x_orig - w_half_crop, y_orig - h_half_crop,
-                                          x_orig + w_half_crop, y_orig + h_half_crop))
-    
-                
+                tmp_right = self.orig_img_right.crop((w_orig_right - w_half_crop_right, h_orig_right - h_half_crop_right,
+                                                      w_orig_right + w_half_crop_right, h_orig_right + h_half_crop_right))
     
                 self.zimg_right = ImageTk.PhotoImage(tmp_right.resize(size))
     
@@ -143,7 +140,7 @@ class PanelDualImage(object):
         self.canvas_right.pack_forget()
         
     def set_image(self, im, i):
-        if im is None: return
+        if im is None: return -1
 
         if i == 0:
             canvas = self.canvas_left
@@ -160,10 +157,14 @@ class PanelDualImage(object):
                 im = (im * 255).astype(np.uint8)
             elif np.max(im) <= 255:
                 im = im.astype(np.uint8)
-    
-            self.shape_orig = np.shape(im) # to keep height, width order
+
+            shape_orig = np.shape(im)   # to keep height, width order
+            if i == 0:
+                self.shape_orig_left = shape_orig
+            elif i == 1:
+                self.shape_orig_right = shape_orig
             
-            if len(self.shape_orig) == 2:    # greyscale
+            if len(shape_orig) == 2:    # greyscale
                 img = Image.fromarray(im)
             elif np.shape(im)[-1] == 1: # greyscale
                 img = Image.fromarray(im)
@@ -172,30 +173,40 @@ class PanelDualImage(object):
             else:
                 raise AssertionError('depth should be 1 or 3')
         
-        if 1:
-            self.shape_canvas = (canvas.winfo_height(), canvas.winfo_width())
+        self.shape_canvas = (canvas.winfo_height(), canvas.winfo_width())
+        
+        if i == 0:
+            self.orig_img_left = img
+        if i == 1:
+            self.orig_img_right = img
+
+        ratio_canvas = self.shape_canvas[0] / self.shape_canvas[1]  # Height vs width
+        
+        if i == 0:
+            shape_orig = self.shape_orig_left
+        elif i == 1:
+            shape_orig = self.shape_orig_right
             
-            if i == 0:
-                self.orig_img_left = img
-            if i == 1:
-                self.orig_img_right = img
-    
-            ratio_canvas = self.shape_canvas[0] / self.shape_canvas[1]  # Height vs width
-            ratio_image = self.shape_orig[0] / self.shape_orig[1]
-    
-            if ratio_image >= ratio_canvas:
-                # image will be put on LEFT of canvas
-                rescaling_factor = self.shape_canvas[0] / self.shape_orig[0]
-                new_shape = (self.shape_canvas[0], int(np.ceil(self.shape_canvas[0] / ratio_image)))
-            else:
-                # image will be on top of canvas
-                rescaling_factor = self.shape_canvas[1]/self.shape_orig[1]
-                new_shape = (int(np.ceil(self.shape_canvas[1] * ratio_image)), self.shape_canvas[1])
-                
-            self.rescaling_factor = rescaling_factor
-    
-            self.new_shape = new_shape
-            img = img.resize((new_shape[1], new_shape[0]), Image.ANTIALIAS)
+        ratio_image = shape_orig[0] / shape_orig[1]
+
+        if ratio_image >= ratio_canvas:
+            # image will be put on LEFT of canvas
+            
+            rescaling_factor = self.shape_canvas[0] / shape_orig[0]
+            new_shape = (self.shape_canvas[0], int(np.ceil(self.shape_canvas[0] / ratio_image)))
+        else:
+            # image will be on top of canvas
+            rescaling_factor = self.shape_canvas[1]/shape_orig[1]
+            new_shape = (int(np.ceil(self.shape_canvas[1] * ratio_image)), self.shape_canvas[1])
+
+        if i == 0:
+            self.rescaling_factor_left = rescaling_factor
+            self.new_shape_left = new_shape
+        elif i == 1:
+            self.rescaling_factor_right = rescaling_factor
+            self.new_shape_right = new_shape
+ 
+        img = img.resize((new_shape[1], new_shape[0]), Image.ANTIALIAS)
         
         canvas.img = ImageTk.PhotoImage(img)
         

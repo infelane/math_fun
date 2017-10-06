@@ -17,7 +17,7 @@ class NetworkStuff(object):
         self.network = nn.Network(version=self.dict_data.version, zoom=self.dict_data.zoom, lr = 0.5e-3)
         
     def load_network(self, name):
-        if name == 'pretrained':
+        if name == 'pretrained hand':
             self.network.load()
         elif name == 'none':
             self._init_network()
@@ -32,12 +32,12 @@ class NetworkStuff(object):
         self.network.save('w_demo_ugent')
         
     def loading_options(self):
-        return ['none', 'pretrained', 'demo 200', 'bad']
+        return ['pretrained hand', 'none', 'demo 200', 'bad']
 
     def set_name_set(self, name):
         if name == 'hand_big':
             self.dict_data_set = main_lamb.MainData(set='hand_big')
-        elif name == 'hand_small':
+        elif name == 'hand':
             self.dict_data_set = main_lamb.MainData(set='hand_small')
         elif name == 'zach_small':
             self.dict_data_set = main_lamb.MainData(set='zach_small')
@@ -96,6 +96,10 @@ class NetworkStuff(object):
         func_print('Training complete ')
 
     def inference(self):
+
+        if 0:   # to save the 'bad' network
+            self.network.save('w_none')
+        
         t0 = time.time()
     
         version = 0
@@ -144,7 +148,8 @@ class NetworkStuff(object):
     
         # rgb = tools_plot.n_to_rgb(pred_img, with_sat=True, with_lum=True)
         pred_rgb = np.copy(img_clean)
-        pred_rgb[pred_img[:, :, 1] > 0.5, :] = [1, 0, 0]
+        cyan = [0, 1, 1]
+        pred_rgb[pred_img[:, :, 1] > 0.5, :] = cyan
         #
         # if 1:
         #     image_tools.save_im(pred_img[:, :, 1], '/home/lameeus/data/ghent_altar/classification/class_hand_big.tif')

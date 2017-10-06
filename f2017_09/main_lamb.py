@@ -11,9 +11,10 @@ import link_to_keras_ipi as keras_ipi
 
 
 class MainData(object):
-    version = 4
+    version = 6
     zoom = 1
     def __init__(self, version = None, set = 'hand_big'):
+        self.set = set
         if set == 'hand_big':
             self.foo = block_data2.ex_raw_hand_big()
         elif set == 'hand_small':
@@ -53,6 +54,11 @@ class MainData(object):
     
     def get_img_y(self):
         folder_save = '/home/lameeus/data/ghent_altar/load/'
+        
+        if self.set == 'hand_big':
+            file_name = 'y_annot_evangelist.npy'
+        elif self.set == 'hand_small':
+            file_name = 'y_annot_hand.npy'
 
         if 0:  # TODO SET AT 0 after done
             img = self.foo.im_out
@@ -75,10 +81,10 @@ class MainData(object):
             img_annot[blue, 0] = 1
             img_annot[red, 1] = 1
       
-            np.save(folder_save + 'y_annot_test.npy', img_annot)
+            np.save(folder_save + file_name, img_annot)
         
         else:
-            img_annot = np.load(folder_save + 'y_annot_test.npy')
+            img_annot = np.load(folder_save + file_name)
         
         return img_annot
 
@@ -108,7 +114,7 @@ def main_training(dict_data):
     x_ir = x_list_test[1]
     y = x_list_test[3]
     
-    epochs = 100
+    epochs = 10000
     validation_split = 0.2
     network.train([x_clean, x_rgb, x_ir], y, epochs = epochs, validation_split = validation_split)
     
@@ -155,8 +161,8 @@ def main_plotting(dict_data):
     pred_rgb[pred_img[:,:, 1] > 0.5, :] = [1, 0, 0]
     
     if 1:
-        image_tools.save_im(pred_img[:, :, 1], '/home/lameeus/data/ghent_altar/classification/class_hand_big.tif')
-        image_tools.save_im(pred_rgb, '/home/lameeus/data/ghent_altar/output/hand_big.tif')
+        image_tools.save_im(pred_img[:, :, 1], '/home/lameeus/data/ghent_altar/classification/class_{}.tif'.format(dict_data.set))
+        image_tools.save_im(pred_rgb, '/home/lameeus/data/ghent_altar/output/{}.tif'.format(dict_data.set))
 
     tools_plot.imshow([rgb, pred_rgb], title=['certainty', 'prediction map'])
     plt.show()
@@ -174,14 +180,12 @@ def main():
                 main_training(dict_data)
     
     else:
-        dict_data = MainData()
+        dict_data = MainData(set = 'hand_small')
         if 0:
             main_training(dict_data)
     
     main_plotting(dict_data)
     
     
-
-
 if __name__ == '__main__':
     main()

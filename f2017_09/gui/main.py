@@ -153,6 +153,15 @@ class FrameSettings(Frame):
         # training function is different, so no fancy button_plot
         self.button_training = self.__create_button(self.frame_training, 'Start training')
         
+        # The set option:
+        set_frame = TkFrame(self.frame_training, background=bg_frame)
+        set_frame.pack(ipadx=10)
+        self.result_sets_variable = StringVar(self.frame_training)
+        l = Label(set_frame, text='set:', bg=bg_frame)
+        l.pack(anchor='center', side='left')
+        self.results_sets_option_menu = OptionMenu(set_frame, self.result_sets_variable, None)
+        self.results_sets_option_menu.pack(anchor='center', side='right')
+        
     def init_frame_output(self):
         """ Annotations """
         text = 'Results'
@@ -161,20 +170,6 @@ class FrameSettings(Frame):
         b = self.__create_button_plot(self.frame_output, text = 'Inference')
         l2 = lambda: self.func_output_im()
         b.set_im(l2)
-        
-        self.result_sets_variable = StringVar(self.frame_output)
-        # self.results_sets_option_menu = OptionMenu(self.frame_output, self.result_sets_variable, None)
-        # self.results_sets_option_menu.pack(
-        #
-        # )
-        
-        set_frame = TkFrame(self.frame_output, background = bg_frame)
-        set_frame.pack(ipadx=10)
-        
-        l = Label(set_frame, text = 'set:', bg=bg_frame)
-        l.pack(anchor = 'center', side = 'left')
-        self.results_sets_option_menu = OptionMenu(set_frame, self.result_sets_variable, None)
-        self.results_sets_option_menu.pack(anchor = 'center', side = 'right')
 
     def init_frame_print(self):
         """ For printing notes """
@@ -530,7 +525,7 @@ class FrameLosses(Frame):
         if 0:
             frame_right = FramePlot(self, style='My2.TFrame')
         else:
-            frame_right = FramePlotDual(self, style='My2.TFrame')
+            frame_right = FramePlotDual(self)
         if 1:
             frame_left.grid(row=0, column=0, sticky="NESW")
             frame_right.grid(row=0, column=1,
@@ -591,8 +586,6 @@ class FrameLosses(Frame):
 
 class MainWindow(Frame):
     def __init__(self, master):
-
-        
         s = Style()
         
         print(s.theme_names())
@@ -623,8 +616,8 @@ class MainWindow(Frame):
         f2 = FrameInpainting(n)  # first page, which would get widgets gridded into it
         n.add(f2, text='Inschildering')
         
-        f2 = FrameHowTo(n)  # first page, which would get widgets gridded into it
-        n.add(f2, text='How to')
+        f3 = FrameHowTo(n)  # first page, which would get widgets gridded into it
+        n.add(f3, text='How to')
 
         # frame_left = FrameSettings(f1)  # , style='ugent.TFrame')
         # frame_right = FramePlot(f1, style='My2.TFrame')
