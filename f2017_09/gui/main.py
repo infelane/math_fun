@@ -23,8 +23,6 @@ class ButtonImage(Button):
 
 class FrameSetttingsSub(TkFrame):
     def __init__(self, master = None, **kwargs):
-        
-        
         super(self.__class__, self).__init__(master = master, **kwargs,
                                              relief="flat",
                                              # bd=2, relief="sunken",
@@ -53,9 +51,9 @@ class FrameSettings(Frame):
         
         self.init_frame_print()
         
-        self.grid_rowconfigure((0, 1, 2, 3, 4), weight = 0, minsize = 0, pad = 10, uniform = False)
-        self.grid_rowconfigure((5), weight = 10, minsize = 0, pad = 10, uniform = True)
-        self.grid_columnconfigure(0, weight = 0, minsize = 0, pad = 10, uniform = True)
+        self.grid_rowconfigure((0, 1, 2, 3, 4), weight = 0, minsize = 0, pad = 10)
+        self.grid_rowconfigure((5), weight = 1, minsize = 0, pad = 10)
+        self.grid_columnconfigure(0, weight = 0, minsize = 0, pad = 10)
 
     def __set_x_buttons(self, images, frame_part):
     
@@ -71,7 +69,7 @@ class FrameSettings(Frame):
             
         for image_i in images:
             button_i = ButtonImage(image_i, frame_part.get_button_frame(), text=image_i.title)
-            button_i.pack(side="left", padx=5, pady=5)
+            button_i.pack(side="top", padx=5, pady=5)
             
             # TODO cleaner way
             # b = self.__create_button_plot(self.frame_output, text='Inference')
@@ -85,7 +83,7 @@ class FrameSettings(Frame):
             
     def __set_sub_frame(self, text, row = None):
         sub_frame = FrameSetttingsSub(self)
-        sub_frame.grid(row=row, sticky="new", padx = 10, pady = 5)
+        sub_frame.grid(row=row, sticky="ew", padx = 10, pady = 5)
         Label(sub_frame, text = text, bg=bg_frame).pack(side='top', padx =5, pady = 5)
         
         return sub_frame
@@ -99,7 +97,7 @@ class FrameSettings(Frame):
         b = general_widgets.ButtonPlot(master, text = text)
         b.pack(side="bottom", padx=5, pady=5)
         # This is always the same
-        l = lambda im, i: self.func_imshow(im, i)
+        l = lambda *args: self.func_imshow(*args)
         b.set_plot_func(l)
         return b
     
@@ -169,7 +167,7 @@ class FrameSettings(Frame):
         
         b = self.__create_button_plot(self.frame_output, text = 'Inference')
         l2 = lambda: self.func_output_im()
-        b.set_im(l2)
+        b.set_im(l2, title = 'inference')
 
     def init_frame_print(self):
         """ For printing notes """
@@ -347,8 +345,8 @@ class FramePlotDual(Frame):
         
         self.panel_images = frames.PanelDualImage(self)
     
-    def set_image(self, im, i):
-        self.panel_images.set_image(im, i)
+    def set_image(self, im, name, i):
+        self.panel_images.set_image(im, name, i)
         
         
 class ButtonsAll(Frame):
@@ -358,20 +356,20 @@ class ButtonsAll(Frame):
         self.buttons = []
 
         b = general_widgets.ButtonPlot(self, text = 'Original')
-        b.set_im(lambda *args: self.inpainting_set.get_orig(*args))
+        b.set_im(lambda *args: self.inpainting_set.get_orig(*args), title = 'original')
         self.button_stuff(b)
         
         b = general_widgets.ButtonPlot(self, text = 'Mask')
-        b.set_im(lambda *args: self.inpainting_set.get_map(*args))
+        b.set_im(lambda *args: self.inpainting_set.get_map(*args), title = 'mask')
         self.button_stuff(b)
 
         b = general_widgets.ButtonPlot(self, text='Result')
-        b.set_im(lambda *args: self.inpainting_set.get_result(*args))
+        b.set_im(lambda *args: self.inpainting_set.get_result(*args), title = 'result')
         self.button_stuff(b)
 
         # only show when given
         b = general_widgets.ButtonPlot(self, text='Real restoration')
-        b.set_im(lambda *args: self.inpainting_set.get_restored(*args))
+        b.set_im(lambda *args: self.inpainting_set.get_restored(*args), title = 'real restoration')
         self.button_stuff(b)
         
     def set_last_button_state(self, bool):
@@ -540,7 +538,7 @@ class FrameLosses(Frame):
 
         def func_set_im(image_struct, i = 0):
             print(image_struct.title)
-            frame_right.set_image(image_struct.get_im(), i)
+            frame_right.set_image(image_struct.get_im(), image_struct.get_title(), i)
 
         # func_set_im = lambda image_struct :
 
@@ -549,11 +547,11 @@ class FrameLosses(Frame):
         network = network_stuff.NetworkStuff()
 
         def func_set_inference(i):
-            print('test test test')
     
             im = network.inference()
-    
-            frame_right.set_image(im, i)
+
+            title = 'learned by training'
+            frame_right.set_image(im, title, i)
     
             # TODO something with after!
             # self.after(10, None)

@@ -1,4 +1,4 @@
-from tkinter import Frame, Canvas
+from tkinter import Frame, Canvas, Label
 # from tkinter.ttk import
 from PIL import Image, ImageTk
 import numpy as np
@@ -8,14 +8,14 @@ from tkinter.ttk import Button
 class PanelDualImage(object):
     def __init__(self, master):
         
-        f = Frame(master)
-        f.pack(side = 'top', fill = 'both', expand = 1)
+        self.frame_canvases = Frame(master)
+        self.frame_canvases.pack(side = 'top', fill = 'both', expand = 1)
         
-        self.canvas_left = Canvas(f)
-        # self.canvas_left.pack(fill='both', expand=1)
-        #
-        self.canvas_right = Canvas(f)
-        # self.canvas_right.pack(fill='both', expand=1)
+        self.canvas_left = Canvas(self.frame_canvases)
+        self.label_left = Label(self.frame_canvases)
+        
+        self.canvas_right = Canvas(self.frame_canvases)
+        self.label_right = Label(self.frame_canvases)
         
         f = Frame(master)
         f.pack(side='bottom')
@@ -42,6 +42,8 @@ class PanelDualImage(object):
         self.orig_img_right = None
         self.rescaling_factor_left = 1
         self.rescaling_factor_right = 1
+        self.name_left = 'title 1'
+        self.name_right = 'title 2'
 
         self.canvas_left.bind("<Motion>", self.crop)
         self.canvas_left.bind("<Button-4>", self.zoomer)
@@ -51,8 +53,8 @@ class PanelDualImage(object):
         self.canvas_right.bind("<Button-4>", self.zoomer)
         self.canvas_right.bind("<Button-5>", self.zoomer)
 
-        self.canvas_left.bind("<Configure>", lambda event: self.set_image(self.orig_img_left, 0) )
-        self.canvas_right.bind("<Configure>", lambda event: self.set_image(self.orig_img_right, 1) )
+        self.canvas_left.bind("<Configure>", lambda event: self.set_image(self.orig_img_left, self.name_left, 0) )
+        self.canvas_right.bind("<Configure>", lambda event: self.set_image(self.orig_img_right, self.name_right, 1) )
 
     def zoomer(self, event):
         # windows
@@ -128,24 +130,74 @@ class PanelDualImage(object):
         self.topbot()
 
     def topbot(self):
-        self.canvas_left.pack(fill='both', expand=1, side='top')
-        self.canvas_right.pack(fill='both', expand=1, side='bottom')
+        if 0:
+            self.label_left.pack(side='top')
+            self.canvas_left.pack(fill='both', expand=1, side='top')
+    
+            self.canvas_right.pack(fill='both', expand=1, side='bottom')
+            self.label_right.pack(side='bottom')
+    
+        else:
+            self.label_left.grid(row=0, column = 0, sticky="nw")
+            self.canvas_left.grid(row=1, column = 0, sticky="nesw")
+            self.label_right.grid(row=2, column = 0, sticky="nw")
+            self.canvas_right.grid(row=3, column = 0, sticky="nesw")
 
+            self.frame_canvases.grid_rowconfigure((0, 2), weight=0)
+            self.frame_canvases.grid_rowconfigure((1, 3), weight = 1)
+            self.frame_canvases.grid_columnconfigure((0), weight=1)
+            self.frame_canvases.grid_columnconfigure((1), weight=0)
+        
     def leftright(self):
-        self.canvas_left.pack(fill='both', expand=1, side='left')
-        self.canvas_right.pack(fill='both', expand=1, side='right')
+        if 0:
+            self.label_left.pack(side='left')
+            self.canvas_left.pack(fill='both', expand=1, side='left')
+            self.label_right.pack(side='right')
+            self.canvas_right.pack(fill='both', expand=1, side='right')
+            
+        else:
+            self.label_left.grid(row=0, column = 0, sticky="nw")
+            self.canvas_left.grid(row=1, column = 0)
+            self.label_right.grid(row=0, column = 1, sticky="nw")
+            self.canvas_right.grid(row=1, column = 1)
+            
+            self.frame_canvases.grid_rowconfigure((0, 2, 3), weight=0)
+            self.frame_canvases.grid_rowconfigure((1), weight = 1)
+            self.frame_canvases.grid_columnconfigure((0, 1), weight=1)
 
     def single(self):
-        self.canvas_left.pack(fill='both', expand=1, side='left')
-        self.canvas_right.pack_forget()
+        if 0:
+            self.label_left.pack(side='left')
+            self.canvas_left.pack(fill='both', expand=1, side='left')
+            self.canvas_right.pack_forget()
+            self.label_right.pack_forget()
+            
+        else:
+            self.canvas_right.grid_forget()
+            self.label_right.grid_forget()
+            
+            self.label_left.grid(row=0, column=0, sticky="nw")#, sticky="nesw")
+            self.canvas_left.grid(row=1, column=0)#, sticky="nesw")
+
+            self.frame_canvases.grid_rowconfigure((0, 2, 3), weight=0)
+            self.frame_canvases.grid_rowconfigure((1), weight = 1)
+            self.frame_canvases.grid_columnconfigure((0), weight=1)
+            self.frame_canvases.grid_columnconfigure((1), weight=0)
         
-    def set_image(self, im, i):
+    def set_image(self, im, title:str, i):
+        
+        
         if im is None: return -1
 
         if i == 0:
             canvas = self.canvas_left
+            self.name_left = title
+            self.label_left['text'] = title
         elif i == 1:
             canvas = self.canvas_right
+            self.name_right = title
+            self.label_right['text'] = title
+            
         else:
             print("i can only be 0 or 1")
             return -1

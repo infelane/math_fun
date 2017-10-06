@@ -13,6 +13,8 @@ class ImageStruct(object):
         im = im*255
         return im.astype(np.uint8)
     
+    def get_title(self):
+        return self.title
 
     def __str__(self):
         return self.title + 'at' + self.path

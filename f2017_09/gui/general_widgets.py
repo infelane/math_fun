@@ -7,12 +7,13 @@ class ButtonPlot(Button):
     def set_plot_func(self, func):
         """ func to show the image"""
         
-        lambda0 = lambda: func(self.func_set_im(), 0)
+        lambda0 = lambda: func(self.func_set_im(), self.title, 0)
         self.bind('<Button-1>', lambda event: lambda0())
-        lambda1 = lambda: func(self.func_set_im(), 1)
+        lambda1 = lambda: func(self.func_set_im(), self.title, 1)
         self.bind('<Button-3>', lambda event: lambda1())
         
-    def set_im(self, func):
+    def set_im(self, func, title):
         """ func to get image"""
         
         self.func_set_im = func
+        self.title = title
