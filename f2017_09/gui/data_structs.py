@@ -59,10 +59,21 @@ class SetStruct(object):
             self.image_ir = ImageStruct('IR', folder + 'registration/19_ir_reg.tif')
             
             folder = '/home/lameeus/data/ghent_altar/annotation/'
-            self.image_annot = ImageStruct('annotations by restorer', folder + '19_annot_clean_big.tif')
+            self.image_annot = ImageStruct('annotations by restorer', folder + '19_annot_clean_big_cyan.tif')
             
             folder = '/home/lameeus/data/ghent_altar/output/'
             self.image_output = ImageStruct('demo result', folder + 'evangelist_cyan.tif')
+
+        elif name == 'pearls':
+            self.name = 'cracks on pearls'
+            folder = '/home/lameeus/data/ghent_altar/roman/Program_and_data/Image/qwe/'
+            self.image_clean = ImageStruct('clean', folder + '1im.png')
+            self.image_rgb = ImageStruct('IR', folder + '1ir.png')
+            self.image_ir = ImageStruct('XR', folder + '1xr.png')
+            
+            self.image_annot = ImageStruct('other technique', folder + 'bctf_crack_hair.png')
+            
+            self.image_output = ImageStruct('demo result', folder + 'Hair_Full.png')
 
         else:
             raise ValueError('unknown name: {}'.format(name))
@@ -88,7 +99,7 @@ class GUIData(object):
     # names_sets = ['hand_small', 'hand_big', 'zach_small', 'zach_big']
     names_sets = ['hand', 'zach_small'] #, 'zach_big']
 
-    input_sets = [SetStruct('hand'), SetStruct('zachary'), SetStruct('evangelist')]
+    input_sets = [SetStruct('hand'), SetStruct('zachary'), SetStruct('evangelist'), SetStruct('pearls')]
     
     def __init__(self):
         ...
@@ -133,6 +144,7 @@ def inpaint_set_zach():
         path_restored = folder_rest + '13_zach_restored.tif'
 
     return InpaintingSet('zachary', path_orig, path_map, path_result, path_restored)
+
 
 def inpaint_set_hand():
     if 0:

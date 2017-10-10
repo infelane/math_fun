@@ -157,9 +157,9 @@ class PanelDualImage(object):
             
         else:
             self.label_left.grid(row=0, column = 0, sticky="nw")
-            self.canvas_left.grid(row=1, column = 0)
+            self.canvas_left.grid(row=1, column = 0, sticky="nesw")
             self.label_right.grid(row=0, column = 1, sticky="nw")
-            self.canvas_right.grid(row=1, column = 1)
+            self.canvas_right.grid(row=1, column = 1, sticky="nesw")
             
             self.frame_canvases.grid_rowconfigure((0, 2, 3), weight=0)
             self.frame_canvases.grid_rowconfigure((1), weight = 1)
