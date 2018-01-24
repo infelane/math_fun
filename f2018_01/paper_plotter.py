@@ -30,7 +30,7 @@ def main():
             b = np.zeros(np.shape(a))
             n = shape[0]
             
-            ext = 10
+            ext = 5
             
             interpolator_func = np.zeros((2*ext+1))
             interpolator_func[ext+1] = ext+1
@@ -63,8 +63,14 @@ def main():
             label += '_jaccard'
         else:
             label += 'cross_entropy'
+            
+        y_smooth = smoother(y)
         
-        plt.plot(t, smoother(y), '--', label=label)
+        plt.plot(t, y_smooth, '--', label=label)
+        
+        a = np.stack([t, y_smooth], axis=1)
+
+        np.savetxt("perf_interp/" + file[12:-4] + "_interp.csv", a, delimiter=",", header = 'epoch, interpolated y')
     
     plt.legend()
     plt.show()
