@@ -7,19 +7,23 @@ from f2017_08.hsi import tools_data
 from link_to_soliton.paint_tools import image_tools
 
 
-def hsi_raw():
+def hsi_raw(folder=None, name_header=None, name_image=None):
     """
     hyperspectral image dataset from small painting, for Max!
     :return:
     """
     
+    if folder is None:
+        folder = '/ipi/research/ljilic/study/study__artwork_hsi_2017/images/portret_man_20170727_imec/'
+
+    if name_header is None:
+        name_header = 'painting_corrected.hdr'
+    if name_image is None:
+        name_image = 'painting_corrected.raw'
+
     import spectral.io.envi as envi
     
-    folder = '/ipi/research/ljilic/study/study__artwork_hsi_2017/images/portret_man_20170727_imec/'
     # TESTED! other images are not important
-
-    name_header = 'painting_corrected.hdr'
-    name_image = 'painting_corrected.raw'
 
     lib = envi.open(folder + name_header, image=folder + name_image)
 
