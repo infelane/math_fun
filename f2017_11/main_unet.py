@@ -3,12 +3,15 @@ Copy unet architecture
 """
 
 from keras.models import Model
-from keras.layers import Input, Conv2D, MaxPooling2D, concatenate, Conv2DTranspose, Add, Multiply, Lambda, Cropping2D
+from keras.layers import Input, Conv2D, MaxPooling2D, concatenate, Conv2DTranspose, Add, Multiply, Lambda, Cropping2D, AveragePooling2D
 from keras.optimizers import Adam
 from keras.losses import categorical_crossentropy
+from keras.regularizers import l2
 import keras.backend as K
 import numpy as np
 import keras.callbacks
+from keras.backend.tensorflow_backend import set_session
+import tensorflow as tf
 
 from f2017_08.hsi import tools_data, tools_plot
 from f2017_08.hsi.tools_network import gen_in, BaseNetwork, relu, softmax, inception
@@ -17,7 +20,13 @@ import link_to_keras_ipi as keras_ipi
 from link_to_keras_ipi.layers import CroppDepth
 from link_to_keras_contrib_lameeus.keras_contrib.callbacks.dead_relu_detector import DeadReluDetector
 from link_to_keras_ipi.preprocessing.image import ImageDataGenerator as ImageDataGenerator2
+from link_to_soliton.paint_tools import image_tools
 
+# reduce GPU usage to 80%
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.85   # From 0.9
+config.gpu_options.visible_device_list = '0'
+set_session(tf.Session(config=config))
 
 # img_rows = 96
 # img_cols = 96
@@ -205,9 +214,11 @@ def get_model_unet(in_list):
 
 
 def get_model_unet_v2(in_list):
-    doubling = False     # to double or not the downpooled layers
+    doubling = False     # to double or not the downpooled layers depth (False for memory usage restrictions)
     
     padding = 'valid'   # same or valid
+
+    kernel_regularizer = l2(1.e-6)
     
     n_pad = 0
 
@@ -230,25 +241,28 @@ def get_model_unet_v2(in_list):
     #level 0, x1, left
     i = 0
     dilation_rate = 2 ** i
-    conv1 = Conv2D(depth_i(dilation_rate), (3, 3), activation='relu', padding=padding)(in_list)
+    conv1 = Conv2D(depth_i(dilation_rate), (3, 3), activation='relu', padding=padding,
+                   kernel_regularizer=kernel_regularizer)(in_list)
     
     def down_part(i, conv_down_prev_i, n_pad, n_pad_dict, padding=padding):
         # TODO
         dilation_rate = 2 ** i
-        pool_i = MaxPooling2D(pool_size=(dilation_rate, dilation_rate), strides=1, padding=padding)(conv_down_prev_i)
-        conv_down_i = Conv2D(depth_i(dilation_rate), (3, 3), dilation_rate=dilation_rate, activation='relu', padding=padding)(pool_i)
-        conv_down_i = Conv2D(depth_i(dilation_rate), (3, 3), dilation_rate=dilation_rate, activation='relu', padding=padding)(conv_down_i)
+        
+        # TODO switched to MeanPooling since it makes more sense, more shift invariant
+        pool_i = AveragePooling2D(pool_size=(dilation_rate, dilation_rate), strides=1, padding=padding)(conv_down_prev_i)
+        conv_down_i = Conv2D(depth_i(dilation_rate), (3, 3), dilation_rate=dilation_rate, activation='relu',
+                             padding=padding, kernel_regularizer=kernel_regularizer)(pool_i)
+        conv_down_i = Conv2D(depth_i(dilation_rate), (3, 3), dilation_rate=dilation_rate, activation='relu',
+                             padding=padding, kernel_regularizer=kernel_regularizer)(conv_down_i)
         
         if padding == 'valid':
             n_pad_i = dilation_rate*5-1
             # n_pad+=n_pad_i
             
-            for k in range(i):  # does not include i, which it shoudln't!
+            for k in range(i):  # does not include i, which it shoudln't update!
                 n_pad_dict[k] += n_pad_i
             
         return conv_down_i, n_pad, n_pad_dict
-
-        # level 2, x4, left
 
     # level 1 x2, left
     conv2, n_pad, n_pad_dict = down_part(i=1, conv_down_prev_i=conv1, n_pad=n_pad, n_pad_dict=n_pad_dict)
@@ -257,23 +271,8 @@ def get_model_unet_v2(in_list):
     conv3, n_pad, n_pad_dict = down_part(i=2, conv_down_prev_i=conv2, n_pad=n_pad, n_pad_dict=n_pad_dict)
     
     # #level 3 x8, left
-    # i = 3
-    # dilation_rate = 2**i
-    # pool3 = MaxPooling2D(pool_size=(dilation_rate, dilation_rate), strides=1, padding='same')(conv3)
-    # conv4 = Conv2D(depth_i(dilation_rate), (3, 3), dilation_rate=dilation_rate, activation='relu', padding='same')(pool3)
-    # conv4 = Conv2D(depth_i(dilation_rate), (3, 3), dilation_rate=dilation_rate, activation='relu', padding='same')(conv4)
-    #
-
-    # #level 3 x8, left
     conv4, n_pad, n_pad_dict = down_part(i=3, conv_down_prev_i=conv3, n_pad=n_pad, n_pad_dict=n_pad_dict)  # , padding='same')
 
-    # # level 4, x16, Lowest level
-    # i = 4
-    # dilation_rate = 2**i
-    # pool4 = MaxPooling2D(pool_size=(dilation_rate, dilation_rate), strides=1, padding='same')(conv4)
-    # conv5 = Conv2D(depth_i(dilation_rate), (3, 3), dilation_rate=dilation_rate, activation='relu', padding='same')(pool4)
-    # conv5 = Conv2D(depth_i(dilation_rate), (3, 3), dilation_rate=dilation_rate, activation='relu', padding='same')(conv5)
-    
     #level 4, x16, Lowest level
     conv5, n_pad, n_pad_dict = down_part(i=4, conv_down_prev_i=conv4, n_pad=n_pad, n_pad_dict=n_pad_dict, padding='same') #, padding='same')
     
@@ -293,11 +292,15 @@ def get_model_unet_v2(in_list):
         depth_fix = depth_i(dilation_rate)  # 32*dilation_rate
 
         up_conv_i = concatenate([Conv2D(depth_fix, (2, 2), strides=(1, 1), dilation_rate=(dilation_rate),
-                                   padding=padding, name='up_lvl{}'.format(i+1))(conv_up_prev_i), crop_i])
+                                        padding=padding, name='up_lvl{}'.format(i+1),
+                                        kernel_regularizer=kernel_regularizer
+                                        )(conv_up_prev_i), crop_i])
         conv_up_i = Conv2D(depth_i(dilation_rate), (3, 3), strides=(1, 1), dilation_rate=(dilation_rate),
-                           activation='relu', padding=padding, name='conv_up1_l{}'.format(i+1))(up_conv_i)
+                           activation='relu', padding=padding, name='conv_up1_l{}'.format(i+1),
+                           kernel_regularizer=kernel_regularizer)(up_conv_i)
         conv_up_i = Conv2D(depth_i(dilation_rate), (3, 3), strides=(1, 1), dilation_rate=(dilation_rate),
-                           activation='relu', padding=padding, name='conv_up2_l{}'.format(i+1))(conv_up_i)
+                           activation='relu', padding=padding, name='conv_up2_l{}'.format(i+1),
+                           kernel_regularizer=kernel_regularizer)(conv_up_i)
         
         if padding == 'valid':
             n_pad+=dilation_rate*5
@@ -351,7 +354,9 @@ def get_unet(input_v):
     elif input_v == 1:
         # stacking at input (7 input channels instead of 1 (see above))
         in_conc = concatenate(in_list)
-        conv0 = Conv2D(depth_1, (3, 3), activation='relu', padding='valid')(in_conc)
+        kernel_regularizer = l2(1.e-6)
+        conv0 = Conv2D(depth_1, (3, 3), activation='relu', padding='valid',
+                       kernel_regularizer=kernel_regularizer)(in_conc)
     
     elif input_v == 0:
         # converting the input channels to single
@@ -380,7 +385,8 @@ def get_unet(input_v):
     model_unet_without_1_end.trainable = True
 
     in_list_end = Input(tensor=conv9)
-    conv10 = Conv2D(2, (1, 1), activation='softmax')(in_list_end)
+    kernel_regularizer = l2(1.e-6)
+    conv10 = Conv2D(2, (1, 1), activation='softmax', kernel_regularizer=kernel_regularizer)(in_list_end)
 
     # model_sub = Model(inputs=in_list_sub, outputs=[conv10])
 
@@ -403,13 +409,13 @@ def get_unet(input_v):
     # model_unet_without_1_end.get_layer().trainable = True
     # model_unet_1.trainable = False
 
-    if 0:
+    if 1:   # Without preprocessing on first modality
         total = model_unet_end(model_unet_without_1_end(model_unet_1(in_list)))
     
         # model = Model(inputs=in_list, outputs=conv10)
         model = Model(inputs=in_list, outputs=total)
     
-    else:
+    else:   # With preprocessing on first modality
         total = model_unet_end(model_unet_without_1_end(model_unet_1(in_list_upgraded2)))
         model = Model(inputs=in_list_upgraded, outputs=total)
     
@@ -474,7 +480,7 @@ class Network(BaseNetwork):
         
         # TODO here
 
-        batch_size = 32
+        batch_size = 16     # 32
         
         def generate_data_generator_list(x, y):
             seed = 1337
@@ -502,7 +508,7 @@ class Network(BaseNetwork):
         #     # class_mode='binary'
         #     )  # since we use binary_crossentropy loss, we need binary labels
 
-        n_data = 2000
+        n_data = np.shape(x[0])[0]  # x is a list (use x[0]). get the amount of samples
         
 
         self.model.fit_generator(generate_data_generator_list(x, y), epochs=epochs,
@@ -685,7 +691,7 @@ def main():
         w = img_rows
         ext_zoom = 0
 
-    if 1:
+    if 0:
         # training
         main_train()
 
@@ -695,19 +701,18 @@ def main():
 
     """ prediction """
 
-    # dict_data = main_lamb.MainData(set='zach_small', w=w)
+    dict_data = main_lamb.MainData(set='zach_small', w=w)
     # dict_data = main_lamb.MainData(set='hand_big', w=w)
-    dict_data = main_lamb.MainData(set='hand_small', w=w)
-
+    # dict_data = main_lamb.MainData(set='hand_small', w=w)
+    
     network = Network()
+    network.summary()
 
     ext_zoom = (network.n_pad)//2
     if 1:
         network.load()
         # network.save()
         # network.load2()
-
-    model_clean = network.sub_models[-1]
 
     img_clean = dict_data.get_img_clean()
     img_rgb = dict_data.get_img_rgb()
@@ -750,7 +755,7 @@ def main():
     
         return roc.curve2(y_pred=pred_imgs_i, y_true=img_out_i)
     
-    if 1: # calculate all the AUCs
+    if 0: # calculate all the AUCs
         auc_normal = None
         auc_all = []
         auc_upside_down = []
@@ -801,6 +806,15 @@ def main():
     # TODO check if both are correct!
     roc.curve2(y_pred=pred_imgs, y_true=img_y)
     
+    if 1:
+        y_true = data.img_to_x2(img_y, ext=0)
+
+        dice = K.eval(keras_ipi.metrics.dice_with_0_labels(y_true=y_true, y_pred=y_pred))
+        print('DICE = {}'.format(dice))
+
+        jaccard = K.eval(keras_ipi.metrics.jaccard_with_0_labels(y_true=y_true, y_pred=y_pred))
+        print('jaccard = {}'.format(jaccard))
+    
     # add difference 2:
 
     def get_pred_rgb(img_clean, pred_img):
@@ -809,10 +823,17 @@ def main():
         pred_rgb[pred_img[:, :, 1] > 0.5, :] = cyan
         return pred_rgb
 
-    list_rgbs = [get_pred_rgb(img_clean, pred_imgs)]
+    segmentation_rgb = get_pred_rgb(img_clean, pred_imgs)
+
+    image_tools.save_im(segmentation_rgb,
+                        '/home/lameeus/data/ghent_altar/output/shift_invariant_unet/segm_zach_cyan.tif')
+    
+    list_rgbs = [segmentation_rgb]
     list_titles = ['result']
 
     if 0:
+        model_clean = network.sub_models[-1]
+        
         y_pred_clean = model_clean.predict(x_clean_0)
     
         pred_imgs_clean = data.y_to_img2(y_pred_clean)
