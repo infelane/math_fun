@@ -129,9 +129,35 @@ def load_mnist():
 
 
 def load_multi():
+    rgb, img_y = get_multi_imgs()
+
+    from f2017_08.hsi import tools_data
+    data_x = tools_data.Data(rgb, w=10)
+    data_y = tools_data.Data(img_y, w=1)
+
+    x_all = data_x.img_to_x2(rgb, ext=0)
+    y_all = data_y.img_to_x2(img_y, ext=0)
+
+    n_all_x = np.shape(x_all)[0]
+    n_all_y = np.shape(y_all)[0]
+    
+    assert n_all_x == n_all_y, '{} !+ {}'.format(n_all_x, n_all_y)
+    
+    n_train = int(0.8*n_all_x)
+    
+    x_train = x_all[:n_train, ...]
+    y_train = y_all[:n_train, ...]
+
+    x_test = x_all[n_train:, ...]
+    y_test = y_all[n_train:, ...]
+    
+    return (x_train, y_train), (x_test, y_test)
+
+
+def get_multi_imgs():
     folder_data = '/home/lameeus/data/2018_IEEE_challenge/2018_Release_Phase1/2018_Release_Phase1/'
     rgb_folder = 'VHR - RGB/'
-
+    
     name1 = 'UH_NAD83_272056_3289689.tif'
     
     path1 = folder_data + rgb_folder + name1
@@ -142,36 +168,15 @@ def load_multi():
     path_ground = folder_data + folder_ground
     name_header = '2018_IEEE_GRSS_DFC_GT_TR.hdr'
     name_image = '2018_IEEE_GRSS_DFC_GT_TR'
-
+    
     img_y = t_datasets.hsi_raw(folder=path_ground, name_header=name_header,
-                           name_image=name_image)
-
+                               name_image=name_image)
+    
     img_y_correct = t_datasets.to_categorical_0_unknown(img_y[..., 0])
-
+    
     img_y_correct_crop = img_y_correct[:,:1192, :]
-
-    if 1:
-        from f2017_08.hsi import tools_data
-        data_x = tools_data.Data(rgb, w=10)
-        data_y = tools_data.Data(img_y_correct_crop, w=1)
-
-        x_all = data_x.img_to_x2(rgb, ext=0)
-        y_all = data_y.img_to_x2(img_y_correct_crop, ext=0)
-
-        n_all_x = np.shape(x_all)[0]
-        n_all_y = np.shape(y_all)[0]
-        
-        assert n_all_x == n_all_y, '{} !+ {}'.format(n_all_x, n_all_y)
-        
-        n_train = int(0.8*n_all_x)
     
-    x_train = x_all[:n_train, ...]
-    y_train = y_all[:n_train, ...]
-
-    x_test = x_all[n_train:, ...]
-    y_test = y_all[n_train:, ...]
-    
-    return (x_train, y_train), (x_test, y_test)
+    return rgb, img_y_correct_crop
 
 
 def checkers_masks(img, split_ratio=0.8, checker_width=20, seed=314):
