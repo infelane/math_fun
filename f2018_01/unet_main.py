@@ -16,13 +16,16 @@ def main():
                         help="Initial learning rate")
     parser.add_argument('--decay', default=1e-6, type=float,
                         help="learning rate decay over EACH UPDATE.")
+    # complex_unet, complex_unet_shift ...
     parser.add_argument('--model', default='complex_unet',
                         help="The model type")
-    parser.add_argument('--save_dir', default='/home/lameeus/data/general/weights/unet_complex_testing')     # where to save
+    parser.add_argument('--save_dir', default='/home/lameeus/data/general/weights/dirty')     # where to save
     parser.add_argument('-t', '--testing', action='store_true',
                         help="Test the trained model on testing dataset")
     parser.add_argument('-w', '--weights', default=None,
                         help="The path of the saved weights. Should be specified when testing")
+    parser.add_argument('--input', default='all',
+                        help='all or dirty: for ignoring the cleaned input')
     args = parser.parse_args()
     print(args)
 
@@ -34,6 +37,18 @@ def main():
         (x_train, y_train), (x_test, y_test) = data_sets.load_mnist()
     else:
         raise ValueError('Unknown dataset')
+    
+    if args.input == 'all':
+        ... # Nothing to do
+    elif args.input == 'dirty':
+        # remove clean
+        def remove_clean(lst):
+            return [lst[1], lst[2]]
+        x_train = remove_clean(x_train)
+        x_test = remove_clean(x_test)
+        x_val = remove_clean(x_val)
+    else:
+        raise ValueError('Unknown input set')
     
     # choose the model
     if args.model == 'shallow_fcc':
@@ -48,10 +63,10 @@ def main():
         model = builder_net.simple_unet(x=x_train, y=y_train)
     elif args.model == 'simple_unet_shift':
         model = builder_net.simple_unet_shift(x=x_train, y=y_train)
-    elif args.model == 'complex_unet_shift':
-        model = builder_net.complex_unet_shift(x=x_train, y=y_train)
     elif args.model == 'complex_unet':
         model = builder_net.complex_unet(x=x_train, y=y_train)
+    elif args.model == 'complex_unet_shift':
+        model = builder_net.complex_unet_shift(x=x_train, y=y_train)
     else:
         raise ValueError('Unknown model architecture')
         

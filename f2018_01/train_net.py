@@ -15,35 +15,65 @@ def test(model, data, args):
     :return:
     """
     
-    # weights = '/home/lameeus/data/general/weights/unet_complex/weights-'
-    weights = '/home/lameeus/data/general/weights/unet_complex_shift/weights-'
-    weights += 'best.h5'
-    model.load_weights(weights)
-
+    bool_orig = True
+    # U-Net
+    if bool_orig:
+        weights = '/scratch/lameeus/data/general/weights/unet_complex/weights-'
+    # TE-U-Net
+    else:
+        weights = '/scratch/lameeus/data/general/weights/unet_complex_shift/weights-'
+        
     x_val, y_val = data
-    y_pred = model.predict(x_val, batch_size=100)
     
-    jaccard = np.mean(K.eval(metrics.jaccard_with_0_labels(y_val, y_pred)))
-    print('jaccard = {}'.format(jaccard))
+    # multi_weight:
+    y_pred_multi = []
+    y_val_multi = []
 
-    roc.curve2(y_pred, y_val, save_data=True)
+    if bool_orig:
+        extra_lst = ['444.h5', '375.h5', '303.h5']
+    else:
+        extra_lst = ['403.h5', '395.h5', '374.h5']
+        
+    for extra in extra_lst:
+        weights_extra = weights + extra
+        model.load_weights(weights_extra)
+        
+        y_pred = model.predict(x_val, batch_size=100)
+    
+        jaccard = np.mean(K.eval(metrics.jaccard_with_0_labels(y_val, y_pred)))
+        print('jaccard = {}'.format(jaccard))
+    
+        roc.curve2(y_pred, y_val, save_data=True)
+        
+        y_pred_multi.append(y_pred)
+        y_val_multi.append(y_val)
 
-    from f2018_01 import builder_net
+    y_pred_multi = np.concatenate(y_pred_multi, axis=0)
+    y_val_multi = np.concatenate(y_val_multi, axis=0)
+
+    jaccard = np.mean(K.eval(metrics.jaccard_with_0_labels(y_val_multi, y_pred_multi)))
+    print('jaccard_ave = {}'.format(jaccard))
+
+    roc.curve2(y_pred_multi, y_val_multi, save_data=True)
     
     if 0:
-        w = 10          # output is 10x10
-        ext_double = 36- w    # input size is 36x36
-    else:
-        w = 100
-        ext_double = 26
-
-        x_builder1 = np.empty(shape=[1, w+ext_double, w+ext_double, 3])
-        x_builder3 = np.empty(shape=[1, w+ext_double, w+ext_double, 1])
-        x_builder = [x_builder1]*2 + [x_builder3]
-        y_builder = np.empty(shape=[1, w, w, 2])
-    model = builder_net.complex_unet_shift(x=x_builder, y=y_builder)
-    model.load_weights(weights)
-    segmentation_whole_image(model, w, ext_double)
+        from f2018_01 import builder_net
+    
+        if 0:
+            w = 10  # output is 10x10
+            ext_double = 36 - w  # input size is 36x36
+        else:
+            w = 100
+            ext_double = 26
+        
+            x_builder1 = np.empty(shape=[1, w + ext_double, w + ext_double, 3])
+            x_builder3 = np.empty(shape=[1, w + ext_double, w + ext_double, 1])
+            x_builder = [x_builder1] * 2 + [x_builder3]
+            y_builder = np.empty(shape=[1, w, w, 2])
+        model = builder_net.complex_unet_shift(x=x_builder, y=y_builder)
+        model.load_weights(weights)
+        
+        segmentation_whole_image(model, w, ext_double)
     
     
 def segmentation_whole_image(model, w, ext_double):
@@ -52,7 +82,7 @@ def segmentation_whole_image(model, w, ext_double):
     from f2017_09 import main_lamb
     from f2017_08.hsi import tools_data
     
-    dict_data = main_lamb.MainData(set='zach_big', w=w)
+    dict_data = main_lamb.MainData(set='zach_small', w=w)
 
     img_clean = dict_data.get_img_clean()
     img_rgb = dict_data.get_img_rgb()

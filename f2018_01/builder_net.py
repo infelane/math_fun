@@ -1,6 +1,6 @@
 import numpy as np
 from keras.layers import Flatten, Input, Dense, Reshape, Concatenate, Conv2D,\
-    MaxPooling2D, Conv2DTranspose, Cropping2D
+    MaxPooling2D, Conv2DTranspose, Cropping2D, BatchNormalization, Activation
 from keras.models import Model
 
 
@@ -141,11 +141,11 @@ def simple_unet_shift(x, y):
 
 def complex_unet(x, y):
     """
-        Regular U-Net
-        :param x:
-        :param y:
-        :return:
-        """
+    Regular U-Net
+    :param x:
+    :param y:
+    :return:
+    """
     
     inputs, layer_in = construct_input_layer(x)
     output_shape = np.shape(y)[1:]
@@ -182,7 +182,7 @@ def complex_unet(x, y):
     return model
 
 
-def complex_unet_shift(x, y):
+def complex_unet_shift(x, y, with_batch_norm = False):
     """
     Shift invariant U-Net,
     Conv2dtranspose are replaced by regular Conv2D, results in need for bigger input size
@@ -191,50 +191,90 @@ def complex_unet_shift(x, y):
     :return:
     """
     
+    if with_batch_norm:
+        norm = 'batch'
+    else:
+        norm = None
+    
     filters = 10
     
     inputs, layer_in = construct_input_layer(x)
     output_shape = np.shape(y)[1:]
     
     layer_1 = Cropping2D(((1, 1), (1, 1)))(layer_in)
-    layer_1 = _gen_conv(name='left1')(layer_1)
+    layer_1 = _gen_conv(name='left1', norm=norm)(layer_1)
     down1 = MaxPooling2D(pool_size=(2, 2), strides=(1, 1),
                          # padding='same'
                          )(layer_1)
-    layer_2_0 = _gen_conv(dr=2, name='left2')(down1)
+    layer_2_0 = _gen_conv(dr=2, name='left2', norm=norm)(down1)
     # max with 2x2 with dil_rate=2 becomes a 3x3
     down2 = MaxPooling2D(pool_size=(3, 3), strides=(1, 1),
                          # padding='same'
                          )(layer_2_0)
-    layer_3_0 = _gen_conv(dr=2 ** 2, name='left3')(down2)
+    layer_3_0 = _gen_conv(dr=2 ** 2, name='left3', norm=norm)(down2)
     # conv2dtranspose only works for upsampling, at same resolution you always have padding!
-    up2 = Conv2D(filters=filters, dilation_rate=(2, 2), kernel_size=(2, 2), strides=(1, 1),
-                 # padding='same',
-                 name = 'up2'
-                 )(layer_3_0)
+    
+    if with_batch_norm:
+        up2 = _conv_batch_norm(filters=filters, dilation_rate=(2, 2), kernel_size=(2, 2), strides=(1, 1),
+                               # padding='same',
+                               name = 'up2',
+                               )(layer_3_0)
+    else:
+        up2 = Conv2D(filters=filters, dilation_rate=(2, 2), kernel_size=(2, 2), strides=(1, 1),
+                     # padding='same',
+                     name = 'up2'
+                     )(layer_3_0)
     crop_val = ((6, 6), (6, 6))
     conc2 = Concatenate()([Cropping2D(crop_val)(layer_2_0), up2])
     
-    layer_right_1 = _gen_conv(dr=2, name='right_1')(conc2)
+    layer_right_1 = _gen_conv(dr=2, name='right_1', norm=norm)(conc2)
     
     # conv2dtranspose only works for upsampling, at same resolution you always have padding!
-    up1 = Conv2D(filters=filters, kernel_size=(2, 2), strides=(1, 1),
-                 # padding='same',
-                 name='up1'
-                 )(layer_right_1)
+    if with_batch_norm:
+        up1 = _conv_batch_norm(filters=filters, kernel_size=(2, 2), strides=(1, 1),
+                               # padding='same',
+                               name='up1'
+                               )(layer_right_1)
+    else:
+        up1 = Conv2D(filters=filters, kernel_size=(2, 2), strides=(1, 1),
+                     # padding='same',
+                     name='up1'
+                     )(layer_right_1)
     
     # TODO note how the cropping is bigger!, this is to solve the padding
     crop_val = ((11, 11), (11, 11))
     conc1 = Concatenate()([Cropping2D(crop_val)(layer_1), up1])
-    outputs = Conv2D(filters=output_shape[-1], kernel_size=(1, 1), activation='softmax')(conc1)
+    if with_batch_norm:
+        outputs = _conv_batch_norm(filters=output_shape[-1], kernel_size=(1, 1), activation='softmax')(conc1)
+    else:
+        outputs = Conv2D(filters=output_shape[-1], kernel_size=(1, 1), activation='softmax')(conc1)
     
     model = Model(inputs, outputs)
     
     return model
 
 
-def _gen_conv(act='elu', name=None, dr=1):
-    return Conv2D(filters=10, kernel_size=(3, 3), dilation_rate=(dr, dr), activation=act,
-                  # padding= 'same',
-                  name=name
-                  )
+def _conv_batch_norm(filters,
+                     kernel_size,
+                     strides=(1, 1),
+                     dilation_rate=(1, 1),
+                     name=None,
+                     activation=None):
+    
+    def foo(bar):
+        l1 = Conv2D(filters=filters, kernel_size=kernel_size, strides=strides, dilation_rate=dilation_rate, name=name)(bar)
+        l2 = BatchNormalization()(l1)
+        l3 = Activation(activation=activation)(l2)
+        return l3
+    
+    return foo
+    
+
+def _gen_conv(act='elu', name=None, dr=1, norm=None):
+    if norm == 'batch':
+        return _conv_batch_norm(filters=10, kernel_size=(3, 3), dilation_rate=(dr, dr), name = name, activation=act)
+    else:
+        return Conv2D(filters=10, kernel_size=(3, 3), dilation_rate=(dr, dr), activation=act,
+                      # padding= 'same',
+                      name=name
+                      )

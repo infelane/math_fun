@@ -519,8 +519,10 @@ class Layers1():
         # residue is this output + x
         return layer.get_output() + self.list_a[0]
     
-    
-config1 = tf.ConfigProto(log_device_placement=True, allow_soft_placement=True)
+config1 = tf.ConfigProto(
+                         log_device_placement=True,
+                         allow_soft_placement=True
+                         )
 config1.gpu_options.per_process_gpu_memory_fraction = 0.8
 
 class NetworkGroup(object):
