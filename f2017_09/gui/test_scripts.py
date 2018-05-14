@@ -1,25 +1,30 @@
-if 0:
+if 1:
     from link_to_soliton.paint_tools import image_tools
     from matplotlib import pyplot as plt
     import numpy as np
     
-    folder = '/home/lameeus/data/ghent_altar/output/'
+    folder = '/home/lameeus/data/ghent_altar/annotation/'
 
-    image_annot = image_tools.path2im(folder + 'hand_small.tif')
+    image_annot = image_tools.path2im(folder + '19_annot_clean_big_cyan.tif')
 
+    r0 = np.equal(image_annot[:, :, 0], 0)
     r1 = np.equal(image_annot[:, :, 0], 1)
-    b1 = np.equal(image_annot[:, :, 2], 1)
     g0 = np.equal(image_annot[:, :, 1], 0)
+    g1 = np.equal(image_annot[:, :, 1], 1)
     b0 = np.equal(image_annot[:, :, 2], 0)
+    b1 = np.equal(image_annot[:, :, 2], 1)
 
-    red = r1 * b0 * g0
+    red_map = r1 * b0 * g0
+    cyan_map = r0 * g1 * b1
+    cyan = [0, 1, 1]
+    red = [1, 0, 0]
 
     image_annot2 = np.copy(image_annot)
-    image_annot2[red, :] = [0, 1, 1]
+    image_annot2[cyan_map, :] = red
     
-    # folder_out = '/home/lameeus/data/ghent_altar/restorers_inpainting/'
-    #
-    # image_tools.save_im(image_annot2, folder + 'hand_small_cyan.tif')
+    # folder = '/home/lameeus/data/ghent_altar/restorers_inpainting/'
+    
+    image_tools.save_im(image_annot2, folder + '19_annot_clean_big_red_only.tif')
     
     plt.imshow(image_annot2)
     plt.show()
@@ -158,7 +163,7 @@ if 0:
     plt.imshow(image_annot2)
     plt.show()
     
-if 1:
+if 0:
     from link_to_soliton.paint_tools import image_tools
     from matplotlib import pyplot as plt
     import numpy as np

@@ -59,7 +59,7 @@ class SetStruct(object):
             self.image_ir = ImageStruct('IR', folder + 'registration/19_ir_reg.tif')
             
             folder = '/home/lameeus/data/ghent_altar/annotation/'
-            self.image_annot = ImageStruct('annotations by restorer', folder + '19_annot_clean_big_cyan.tif')
+            self.image_annot = ImageStruct('annotations by restorer', folder + '19_annot_clean_big_red_only.tif')
             
             folder = '/home/lameeus/data/ghent_altar/output/'
             self.image_output = ImageStruct('demo result', folder + 'evangelist_cyan.tif')

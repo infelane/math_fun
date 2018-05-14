@@ -3,6 +3,9 @@ import scipy.misc
 import data_net_sr
 from main_sr import *
 from link_to_soliton.paint_tools import image_tools
+import numpy as np
+from PIL import Image
+import matplotlib.pyplot as plt
 
 
 # Generate each output image

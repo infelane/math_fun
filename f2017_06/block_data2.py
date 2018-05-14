@@ -46,57 +46,59 @@ class ExRawImage(object):
     
 
 def ex_raw_zach_small():
-    folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/beard_updated/'
+    folder = '/scratch/lameeus/data/ghent_altar/OLD/altarpiece_close_up/beard_updated/'
     input_1 = folder + "rgb_cleaned.tif"
     input_2 = folder + "rgb.tif"
     input_3 = folder + "ir.tif"
-    out = folder + "ground_truth.tif"
+    folder_annot = '/scratch/lameeus/data/ghent_altar/annotation/'
+    out = folder_annot + "13_zach_small_annot2.tif"#"ground_truth.tif"
     
     return ExRawImage(input_1, input_2, input_3, out)
     
     
 def ex_raw_hand_small():
     if 0:
-        folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/finger/'
+        folder = '/scratch/lameeus/data/ghent_altar/OLD/altarpiece_close_up/finger/'
         input_1 = folder + "hand_cleaned.tif"
         input_2 = folder + "hand_rgb.tif"
         input_3 = folder + "hand_ir.tif"
         out = folder + "ground_truth.tif"
-    
+
     else:
-        folder = '/home/lameeus/data/ghent_altar/input/19_hand/'
+        folder = '/scratch/lameeus/data/ghent_altar/input/19_hand/'
         input_1 = folder + "19_hand_clean.tif"
         input_2 = folder + "19_hand_rgb.tif"
         input_3 = folder + "19_hand_ir.tif"
         out = folder + "19_hand_annot.tif"
-    
+
     return ExRawImage(input_1, input_2, input_3, out)
 
 
 def ex_raw_hand_big():
-    folder = '/home/lameeus/data/ghent_altar/input/'
+    folder = '/scratch/lameeus/data/ghent_altar/input/'
     input_1 = folder + "19_clean.tif"
     out = folder + "19_annot_big.tif"
 
-    folder = '/home/lameeus/data/ghent_altar/input/registration/'
+    folder = '/scratch/lameeus/data/ghent_altar/input/registration/'
     input_2 = folder + "19_rgb_reg.tif"
     input_3 = folder + "19_ir_reg.tif"
-    
+
     return ExRawImage(input_1, input_2, input_3, out)
 
-    
+
 def ex_raw_zach():
 
-    folder = '/home/lameeus/data/ghent_altar/input/'
+    folder = '/scratch/lameeus/data/ghent_altar/input/'
     input_1 = folder + "13_new_clean_reg1.tif"
     input_2 = folder + "13_new_rgb_reg1.tif"
     input_3 = folder + "13_new_ir_reg1.tif"
     out = folder + "13_annot.tif"
-    
+
     return ExRawImage(input_1, input_2, input_3, out)
 
+
 def ex_raw_hand():
-    folder = '/home/lameeus/data/ghent_altar/input/'
+    folder = '/scratch/lameeus/data/ghent_altar/input/'
     input_1 = folder + "19_clean_crop_scale.tif"
     input_2 = folder + "19_rgb.tif"
     input_3 = folder + "19_ir_single.tif"

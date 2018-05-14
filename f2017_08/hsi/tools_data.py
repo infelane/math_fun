@@ -303,7 +303,7 @@ class Data(object):
             img_ext.append(ImgExt(img[i], ext[i]))
         
         shape = np.shape(img[0])
-        folder_xyz =  '/home/lameeus/data/hsi/'
+        folder_xyz =  '/scratch/lameeus/data/hsi/'
 
         
 

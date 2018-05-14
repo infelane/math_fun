@@ -4,12 +4,20 @@ from skimage.color import colorconv
 import matplotlib.pyplot as plt
 
 
-def n_to_rgb(x, with_col = True, with_sat = False, with_lum = False, anno_col = False):
-    shape = np.shape(x)
+def n_to_rgb(x, with_col=True, with_sat=False, with_lum=False, anno_col=False, bool_argmax=True):
+    """ the arguments should be in last column """
 
-    # rgb = np.empty(shape = shape_rgb)
+    # rgb = np.empty(shape = shape_rgb)3
+    
+    if bool_argmax:
+        x_arg = np.argmax(x, axis=-1)
+        shape = np.shape(x)
+    else:
+        x_arg = x
+        shape = np.shape(x)
+        shape = [a for a in shape]
+        shape.append(1)
 
-    x_arg = np.argmax(x, axis=-1)
     if anno_col:
         shape_rgb = [a for a in shape]
         shape_rgb[-1] = 3
@@ -23,7 +31,7 @@ def n_to_rgb(x, with_col = True, with_sat = False, with_lum = False, anno_col = 
         white = [1, 1, 1]
         black = [0, 0, 0]
 
-        rgb = np.zeros(shape_rgb, dtype=float)
+        rgb = np.ones(shape_rgb, dtype=float)*0.5
 
         rgb[x_arg == 0, :] = red
         rgb[x_arg == 1, :] = green
@@ -37,8 +45,8 @@ def n_to_rgb(x, with_col = True, with_sat = False, with_lum = False, anno_col = 
         return rgb
         
     else:
-    
-        n_col = gen_n_col(shape[-1])
+        n = np.max(x_arg) + 1
+        n_col = gen_n_col(n)
         
         x_max = np.max(x, axis = -1)#[x_arg]
         # x_max = x[x_arg]
@@ -87,21 +95,24 @@ def imshow(rgb, mask = None, title = None):
     
     def plotter(a, b):
         if mask is None:
-            plt.imshow(a)
+            plt.imshow(a,  interpolation='nearest')
         else:
             rgb_mask = np.zeros(shape = np.shape(a))
             rgb_mask[...] = a
             rgb_mask[mask == 0, :] = 0.5
-            plt.imshow(rgb_mask)
+            plt.imshow(rgb_mask, interpolation='nearest')
     
         if b:
             plt.title(b)
     
     if type(rgb) is list:
         n = len(rgb)
-    
+        
+        n_w = int(np.ceil(np.sqrt(n)))
+        n_h = int(np.ceil(n/n_w))
+        
         for i in range(n):
-            plt.subplot(1, n, i+1)
+            plt.subplot(n_h, n_w, i+1)
             plotter(rgb[i], title[i])
             
     else:

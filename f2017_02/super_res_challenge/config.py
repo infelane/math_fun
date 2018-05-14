@@ -1,14 +1,14 @@
 # All config
 
 # import lambnet.layer.LayerConfig as LayerConfig
-from keras_ipi.layers import LayerConfig
+from link_to_keras_ipi.layers import LayerConfig
 
 # Settings
 class FLAGS1():
     lr = 1.0e-6
     batch_size = 100
     load_prev = True
-    train = True
+    train = False
     training_epochs = 1
     ipi_dir = '/ipi/private/lameeus/data/super_res/net2/'
     checkpoint_dir = ipi_dir + 'wb/'

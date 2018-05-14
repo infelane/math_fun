@@ -6,42 +6,12 @@ import matplotlib.pyplot as plt
 import time
 
 bit_max = 65536 - 1     # 16bit
-bit_max = 256 - 1     # 16bit
+# bit_max = 256 - 1     # 8bit
 
 h_top = 232  # Transition zone between top and middle pill
 h_bot = 1121  # Transition zone between middle and bottom pill
 r_pill = 877  # radius of the pill
 
-
-def main():
-    if 0:  # if you want to rerotate the images
-        if 0:
-            data_all = open_orig()
-        else:  # Data from Jan, preprocessed holes
-            data_all = open_jan()
-        
-        if 1:
-            cross_section(data_all, norm_im=False)
-            plot_inter(data_all, norm_im=False)
-        
-        data_rot = rotation(data_all)
-        
-        if 0:
-            cross_section(data_rot, norm_im=False)
-            plot_inter(data_rot, norm_im=False)
-        
-        save_interstate(data_rot, folder_name='/scratch/lameeus/data/pharmacy_tablets/rot_holes/')
-    
-    else:  # load rotated image
-        # data_rot = open_rot(folder_name='/scratch/lameeus/data/pharmacy_tablets/rot_holes/')
-
-        # cross_section(data_rot, norm_im=False)
-        # plot_inter(data_rot, norm_im=False)
-
-        # filter_cross_section(data_rot)
-        
-        scale_color()
-        
 
 def gen_3d_folder(n_begin, n_end, folder, ext = 'tif'):
     i_im = np.arange(n_begin, n_end + 1, dtype=int)
@@ -76,6 +46,16 @@ def open_jan():
     data_all = time_func(lambda0)  # 14s
     
     return data_all
+
+
+def open_10():
+    n_begin = 0
+    n_end = 9000
+    folder = '/ipids/microscopy/CT/NN_2017_0028 JDondt pills/LPPAT 10% 20rpm/reconstructed/'
+    lambda0 = lambda: gen_3d_folder(n_begin, n_end, folder, 'png')
+    data_all = time_func(lambda0)  # 14s
+    return data_all
+
 
 def open_rot(folder_name = '/scratch/lameeus/data/pharmacy_tablets/rotated/'):
 
@@ -118,7 +98,7 @@ def int16to8(map3d):
 def scale_color():
     # 0: no preprocessing
     # 1: holes preprocessing
-    bool_preproc = 1
+    bool_preproc = True
     
     if bool_preproc:
         folder = '/scratch/lameeus/data/pharmacy_tablets/results_from_holes/'
@@ -484,6 +464,39 @@ def cross_section(map3d, norm_im = True):
         plt.imshow(cross_ver, vmin = 0)
     plt.title('vertical cross section')
     plt.show()
+
+
+def main():
+    if 1:  # if you want to rerotate the images
+        if 0:
+            data_all = open_orig()
+        elif 0:  # Data from Jan, preprocessed holes
+            data_all = open_jan()
+        else:
+            data_all = open_10()
+        
+        if 1:
+            cross_section(data_all, norm_im=False)
+            plot_inter(data_all, norm_im=False)
+        
+        data_rot = rotation(data_all)
+        
+        if 0:
+            cross_section(data_rot, norm_im=False)
+            plot_inter(data_rot, norm_im=False)
+        
+        save_interstate(data_rot, folder_name='/scratch/lameeus/data/pharmacy_tablets/rot_holes/')
     
+    else:  # load rotated image
+        # data_rot = open_rot(folder_name='/scratch/lameeus/data/pharmacy_tablets/rot_holes/')
+        
+        # cross_section(data_rot, norm_im=False)
+        # plot_inter(data_rot, norm_im=False)
+        
+        # filter_cross_section(data_rot)
+        
+        scale_color()
+
+ 
 if __name__ == '__main__':
     main()

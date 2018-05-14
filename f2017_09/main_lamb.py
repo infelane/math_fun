@@ -13,7 +13,8 @@ import link_to_keras_ipi as keras_ipi
 class MainData(object):
     version = 6
     zoom = 1
-    def __init__(self, version = None, set = 'hand_big'):
+    w = 10
+    def __init__(self, version = None, set = 'hand_small', w = None, lr = None):
         self.set = set
         if set == 'hand_big':
             self.foo = block_data2.ex_raw_hand_big()
@@ -28,7 +29,11 @@ class MainData(object):
         
         if version is not None:
             self.version = version
-        
+        if w is not None:
+            self.w = w
+
+        self.lr = lr
+            
     def get_img_clean(self):
         return self.foo.im_in_1
     
@@ -53,14 +58,16 @@ class MainData(object):
             raise ValueError
     
     def get_img_y(self):
-        folder_save = '/home/lameeus/data/ghent_altar/load/'
+        folder_save = '/scratch/lameeus/data/ghent_altar/load/'
         
         if self.set == 'hand_big':
             file_name = 'y_annot_evangelist.npy'
         elif self.set == 'hand_small':
             file_name = 'y_annot_hand.npy'
+        elif self.set == 'zach_small':
+            file_name = 'y_annot_zach.npy'
 
-        if 0:  # TODO SET AT 0 after done
+        if 1:  # TODO SET AT 0 after done
             img = self.foo.im_out
 
             r0 = np.equal(img[:, :, 0], 0)
@@ -70,8 +77,8 @@ class MainData(object):
             b0 = np.equal(img[:, :, 2], 0)
             b1 = np.equal(img[:, :, 2], 1)
 
-            red = np.logical_and(np.logical_and(r1, g0), b0)
-            blue = np.logical_and(np.logical_and(r0, g0), b1)
+            red = r1 * g0 * b0 #np.logical_and(np.logical_and(r1, g0), b0)
+            blue = r0 * g0 * b1 #np.logical_and(np.logical_and(r0, g0), b1)
 
             shape = np.shape(img)
             shape_annot = [shape[0], shape[1], 2]
@@ -89,9 +96,9 @@ class MainData(object):
         return img_annot
 
 
-def main_training(dict_data):
-    network = nn.Network(version = dict_data.version)
-    network.load()
+def main_training(dict_data, epochs = 10):
+    network = nn.Network(version = dict_data.version, lr = dict_data.lr)
+    network.load(make_backup=True)
     
     img_clean = dict_data.get_img_clean()
     img_ir = dict_data.get_img_ir()
@@ -114,9 +121,9 @@ def main_training(dict_data):
     x_ir = x_list_test[1]
     y = x_list_test[3]
     
-    epochs = 10000
     validation_split = 0.2
-    network.train([x_clean, x_rgb, x_ir], y, epochs = epochs, validation_split = validation_split)
+    network.train([x_clean, x_rgb, x_ir], y, epochs = epochs,
+                  validation_split = validation_split, verbose=2)
     
     if 0:
         n_train = int((1 - validation_split) * (np.shape(x_clean))[0])
@@ -128,12 +135,14 @@ def main_training(dict_data):
         hsi_pred = network.predict([x_clean_test, x_rgb_test, x_ir_test])
         acc_hsi = tools_analysis.categorical_accuracy(y_test, hsi_pred)
         print('hsi accuracy = {}%'.format(acc_hsi * 100))
-    
+
+
 def main_plotting(dict_data):
     network = nn.Network(version = dict_data.version, zoom = dict_data.zoom)
     network.load()
+    network.summary()
     
-    version = 0
+    plot_version = 0
 
     img_clean = dict_data.get_img_clean()
     img_ir = dict_data.get_img_ir()
@@ -146,43 +155,62 @@ def main_plotting(dict_data):
     x_rgb = data.img_to_x(img_rgb, ext=2)
     x_ir = data_ir.img_to_x(img_ir, ext=2)
 
-    if version == 0:
+    if plot_version == 0:
         y_pred = network.predict([x_clean, x_rgb, x_ir])
         
     pred_img = data.y_to_img(y_pred)
     
+    if 0:
+        plt.figure()
+        plt.imshow(dict_data.foo.im_out)
+        plt.figure()
+        print(np.shape(dict_data.get_img_y()))
+        plt.imshow(dict_data.get_img_y()[..., 0])
+        plt.figure()
+        plt.imshow(dict_data.get_img_y()[..., 1])
+        plt.show()
+    
     if 1:
         metric = keras_ipi.metrics.dice_with_0_labels
-        a = tools_analysis.metrics_after_predict(metric, [dict_data.get_img_y(),pred_img])
-        print(a)
+        dice_score = tools_analysis.metrics_after_predict(metric, [dict_data.get_img_y(),pred_img])
+        print("dice = {}".format(dice_score))
+        metric = keras_ipi.metrics.jaccard_with_0_labels
+        jaccard_score = tools_analysis.metrics_after_predict(metric, [dict_data.get_img_y(),pred_img])
+        print("Jaccard = {}".format(jaccard_score))
         
     rgb = tools_plot.n_to_rgb(pred_img, with_sat = True, with_lum= True)
     pred_rgb = np.copy(img_clean)
     pred_rgb[pred_img[:,:, 1] > 0.5, :] = [1, 0, 0]
     
     if 1:
-        image_tools.save_im(pred_img[:, :, 1], '/home/lameeus/data/ghent_altar/classification/class_{}.tif'.format(dict_data.set))
-        image_tools.save_im(pred_rgb, '/home/lameeus/data/ghent_altar/output/{}.tif'.format(dict_data.set))
+        image_tools.save_im(pred_img[:, :, 1], '/scratch/lameeus/data/ghent_altar/classification/class_{}_v{}.tif'.format(dict_data.set, dict_data.version))
+        image_tools.save_im(pred_rgb, '/scratch/lameeus/data/ghent_altar/output/{}_v{}.tif'.format(dict_data.set, dict_data.version))
 
-    tools_plot.imshow([rgb, pred_rgb], title=['certainty', 'prediction map'])
+    tools_plot.imshow([img_clean, rgb, pred_rgb], title=['clean', 'certainty', 'prediction map'])
     plt.show()
     
 
 def main():
     if 0:
-        for i in range(10000):
-            dict_data = MainData(version = 2)
-            if 1:
-                main_training(dict_data)
-            
-            dict_data = MainData(version = 4)
-            if 1:
-                main_training(dict_data)
-    
+        # versions = [1, 2, 3, 4, 6]
+        versions = [2, 'combine', 'later']
+        dict_data = MainData(lr = 1e-4)
+        for run_i in range(10000):
+            for version_i in versions:
+                print('version {}'.format(version_i))
+                dict_data.version = version_i
+                main_training(dict_data, epochs=100)
+                
     else:
-        dict_data = MainData(set = 'hand_small')
+        version = 6
+        version = 'before' #1
+        # version = 'combine'
+        # version = 'later'
+        # dict_data = MainData(set = 'hand_small', version = version, lr = 1e-4)
+        # dict_data = MainData(set='hand_big', version = version)
+        dict_data = MainData(set='zach_small', version = version)
         if 0:
-            main_training(dict_data)
+            main_training(dict_data, epochs = 1000)
     
     main_plotting(dict_data)
     

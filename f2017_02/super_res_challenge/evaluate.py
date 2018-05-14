@@ -51,7 +51,7 @@ def main(test_dir, bool_print = True):
 if __name__ == '__main__':
     print("own method:")
     # test_dir = '//ipi/scratch/hluong/NTIRE17/DIV2K_train_HR_bicubic/X2-interpolation-bicubic'
-    test_dir ='/scratch/lameeus/data/challenges/NTIRE17/x2_v1'
+    test_dir ='/scratch/lameeus/NTIRE17/lameeus/x2_v1'
     main(test_dir, bool_print = False)
     
     print("bicubic:")
