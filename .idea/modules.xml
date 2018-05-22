@@ -2,8 +2,20 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file:///ipi/private/lameeus/code/django/mysite/.idea/mysite.iml" filepath="/ipi/private/lameeus/code/django/mysite/.idea/mysite.iml" />
-      <module fileurl="file:///ipi/private/lameeus/code/python/.idea/python.iml" filepath="/ipi/private/lameeus/code/python/.idea/python.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../personal/CapsNet-Keras/.idea/CapsNet-Keras.iml" filepath="$PROJECT_DIR$/../personal/CapsNet-Keras/.idea/CapsNet-Keras.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../personal/WoW/.idea/WoW.iml" filepath="$PROJECT_DIR$/../personal/WoW/.idea/WoW.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../detector/.idea/detector.iml" filepath="$PROJECT_DIR$/../detector/.idea/detector.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../personal/home/.idea/home.iml" filepath="$PROJECT_DIR$/../personal/home/.idea/home.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../Matlab/InpaintingCode/inpainting/.idea/inpainting.iml" filepath="$PROJECT_DIR$/../Matlab/InpaintingCode/inpainting/.idea/inpainting.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../open_source/keras_contrib_lameeus/.idea/keras_contrib_lameeus.iml" filepath="$PROJECT_DIR$/../open_source/keras_contrib_lameeus/.idea/keras_contrib_lameeus.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../keras_ipi/.idea/keras_ipi.iml" filepath="$PROJECT_DIR$/../keras_ipi/.idea/keras_ipi.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../personal/open_ai/.idea/open_ai.iml" filepath="$PROJECT_DIR$/../personal/open_ai/.idea/open_ai.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../personal/.idea/personal.iml" filepath="$PROJECT_DIR$/../personal/.idea/personal.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../pores_jens/.idea/pores_jens.iml" filepath="$PROJECT_DIR$/../pores_jens/.idea/pores_jens.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/python.iml" filepath="$PROJECT_DIR$/.idea/python.iml" />
+      <module fileurl="file://$USER_HOME$/Documents/teaching/AI_Aleksandra/practicum_github/neural-networks/python_2015/.idea/python_2015.iml" filepath="$USER_HOME$/Documents/teaching/AI_Aleksandra/practicum_github/neural-networks/python_2015/.idea/python_2015.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../soliton/.idea/soliton.iml" filepath="$PROJECT_DIR$/../soliton/.idea/soliton.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../open_source/ultrasound-nerve-segmentation/.idea/ultrasound-nerve-segmentation.iml" filepath="$PROJECT_DIR$/../open_source/ultrasound-nerve-segmentation/.idea/ultrasound-nerve-segmentation.iml" />
     </modules>
   </component>
 </project>

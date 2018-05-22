@@ -11,8 +11,27 @@
     <orderEntry type="module" module-name="mysite" />
     <orderEntry type="module" module-name="lambsite" />
     <orderEntry type="module" module-name="lambsite" />
-  </component>
-  <component name="PyDocumentationSettings">
-    <option name="renderExternalDocumentation" value="true" />
+    <orderEntry type="module" module-name="a-star" />
+    <orderEntry type="module" module-name="keras-contrib" />
+    <orderEntry type="module" module-name="keras_contrib_lameeus" />
+    <orderEntry type="module" module-name="ultrasound-nerve-segmentation" />
+    <orderEntry type="module" module-name="open_ai" />
+    <orderEntry type="module" module-name="keras_ipi" />
+    <orderEntry type="module" module-name="WoW" />
+    <orderEntry type="module" module-name="open_ai" />
+    <orderEntry type="module" module-name="python_2015" />
+    <orderEntry type="module" module-name="smiling" />
+    <orderEntry type="module" module-name="home" />
+    <orderEntry type="module" module-name="CapsNet-Keras" />
+    <orderEntry type="module" module-name="inpainting" />
+    <orderEntry type="module" module-name="data-fusion-contest" />
+    <orderEntry type="module" module-name="github" />
+    <orderEntry type="module" module-name="with_github" />
+    <orderEntry type="module" module-name="code" />
+    <orderEntry type="module" module-name="personal" />
+    <orderEntry type="module" module-name="soliton" />
+    <orderEntry type="module" module-name="detector" />
+    <orderEntry type="module" module-name="detector" />
+    <orderEntry type="module" module-name="pores_jens" />
   </component>
 </module>
