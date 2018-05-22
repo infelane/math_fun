@@ -1,5 +1,3 @@
-import tkinter as tk
-# import tkinter.ttk as ttk
 from tkinter.ttk import Frame, Style, Notebook, Button
 from tkinter import Label, Entry, Tk, Frame as TkFrame, StringVar, Canvas, OptionMenu
 import numpy as np
@@ -223,9 +221,14 @@ class FrameSettings(Frame):
             print(sv.get())
             func(sv.get())
 
-        self.loading_variable.trace("w", lambda name, index, mode, sv=self.loading_variable: callback(sv))
+        # TODO uncomment, now error: _tkinter.TclError: can't set "PY_VAR1":
+        # Now we changed order
         self.loading_variable.set(names[0])
+        func(self.loading_variable.get())
+
+        self.loading_variable.trace("w", lambda name, index, mode, sv=self.loading_variable: callback(sv))
         
+
     def set_training_func(self, func):
         """ the function is different so no fancy shortcuts with image showing """
         lambda_button0 = lambda event : func(i =0)
@@ -277,7 +280,7 @@ class PanelImages2(Frame):
     def __init__(self, master = None, **args):
         super(self.__class__, self).__init__(master = master, **args)
 
-        path = '/home/lameeus/Pictures/lameeus_pasfoto.png'
+        path = '/scratch/lameeus/Pictures/lameeus_pasfoto.png'
         img = ImageTk.PhotoImage(Image.open(path))
         panel = Label(self, image=img)
         panel.pack(side="bottom", fill="both", expand="yes")
@@ -287,11 +290,11 @@ class PanelImages2(Frame):
             # filename = filedialog.askopenfilename(title='open')
             # return filename
 
-            folder = '/home/lameeus/data/ghent_altar/input/'
+            folder = '/scratch/lameeus/data/ghent_altar/input/'
             image_clean2 = ImageStruct('clean2', folder + '19_clean.tif')
             
             return folder + '19_clean.tif'
-            # return '/home/lameeus/Pictures/lameeus_pasfoto.png'
+            # return '/scratch/lameeus/Pictures/lameeus_pasfoto.png'
 
         def open_img():
             x = openfn()

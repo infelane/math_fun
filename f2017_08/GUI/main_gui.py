@@ -19,19 +19,19 @@ from f2017_08 import registration
 
 
 def get_list():
-    # path = '/home/lameeus/data/ghent_altar/input/19_clean.tif'
+    # path = '/scratch/lameeus/data/ghent_altar/input/19_clean.tif'
     # a = {'name': 'clean',
     #      'path': path,
     #      'type': 'ir'}
     
-    folder = '/home/lameeus/data/ghent_altar/input/'
+    folder = '/scratch/lameeus/data/ghent_altar/input/'
     
     a = {'name':'clean',
           'path':folder + '19_clean_crop_scale.tif'}
     
     b = {'name':''}
     
-    path2 = '/home/lameeus/data/ghent_altar/input/19_ir.tif'
+    path2 = '/scratch/lameeus/data/ghent_altar/input/19_ir.tif'
     c = {'name': 'ir',
          'path': path2}
         
@@ -133,7 +133,7 @@ class FrameRegistration():
         self.button.pack()
         self.button.bind('<Button-1>', lambda event: self.mix())
         
-        folder = '/home/lameeus/data/ghent_altar/input/'
+        folder = '/scratch/lameeus/data/ghent_altar/input/'
         self.im1 = image_tools.path2im(folder + '19_clean.tif')
         self.im2 = image_tools.path2im(folder + '19_rgb.tif')[:, :, 0:3]
 

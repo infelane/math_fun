@@ -24,15 +24,15 @@ class SetStruct(object):
     def __init__(self, name: str):
         if name == 'hand':
             self.name = 'hand of John'
-            folder = '/scratch/lameeus/data/ghent_altar/altarpiece_close_up/finger/'
+            folder = '/scratch/lameeus/data/ghent_altar/OLD/altarpiece_close_up/finger/'
             self.image_clean = ImageStruct('clean', folder + 'hand_cleaned.tif')
             self.image_rgb = ImageStruct('before cleaning', folder + 'hand_rgb.tif')
             self.image_ir = ImageStruct('IR', folder + 'hand_ir_single.tif')
             
-            folder = '/home/lameeus/data/ghent_altar/annotation/'
+            folder = '/scratch/lameeus/data/ghent_altar/annotation/'
             self.image_annot = ImageStruct('annotations by restorer', folder + '19_annot_small_clean_red.tif')
 
-            folder = '/home/lameeus/data/ghent_altar/output/'
+            folder = '/scratch/lameeus/data/ghent_altar/output/'
             if 0:
                 self.image_output = ImageStruct('demo result', folder + 'hand_small.tif')
             else:  # cyan
@@ -45,28 +45,28 @@ class SetStruct(object):
             self.image_rgb = ImageStruct('before cleaning', folder + 'rgb.tif')
             self.image_ir = ImageStruct('IR', folder + 'ir.tif')
 
-            folder = '/home/lameeus/data/ghent_altar/annotation/'
+            folder = '/scratch/lameeus/data/ghent_altar/annotation/'
             self.image_annot = ImageStruct('annotations by restorer', folder + '13_zach_small_annot2_red.tif')
             
-            folder = '/home/lameeus/data/ghent_altar/output/'
+            folder = '/scratch/lameeus/data/ghent_altar/output/'
             self.image_output = ImageStruct('demo result', folder + '13_zach_small_shaoguang.tif')
 
         elif name == 'evangelist':
             self.name = 'John the evangelist'
-            folder = '/home/lameeus/data/ghent_altar/input/'
+            folder = '/scratch/lameeus/data/ghent_altar/input/'
             self.image_clean = ImageStruct('clean', folder + '19_clean.tif')
             self.image_rgb = ImageStruct('before cleaning', folder + 'registration/19_rgb_reg.tif')
             self.image_ir = ImageStruct('IR', folder + 'registration/19_ir_reg.tif')
             
-            folder = '/home/lameeus/data/ghent_altar/annotation/'
+            folder = '/scratch/lameeus/data/ghent_altar/annotation/'
             self.image_annot = ImageStruct('annotations by restorer', folder + '19_annot_clean_big_red_only.tif')
             
-            folder = '/home/lameeus/data/ghent_altar/output/'
+            folder = '/scratch/lameeus/data/ghent_altar/output/'
             self.image_output = ImageStruct('demo result', folder + 'evangelist_cyan.tif')
 
         elif name == 'pearls':
             self.name = 'cracks on pearls'
-            folder = '/home/lameeus/data/ghent_altar/roman/Program_and_data/Image/qwe/'
+            folder = '/scratch/lameeus/data/ghent_altar/roman/Program_and_data/Image/qwe/'
             self.image_clean = ImageStruct('clean', folder + '1im.png')
             self.image_rgb = ImageStruct('IR', folder + '1ir.png')
             self.image_ir = ImageStruct('XR', folder + '1xr.png')
@@ -91,7 +91,7 @@ class SetStruct(object):
 class GUIData(object):
     # image_clean = ImageStruct('clean', '/home/lameeus/Pictures/Selection_008.png')
     # image_annot = ImageStruct('annot', '/home/lameeus/Pictures/Selection_010.png')
-    # folder = '/home/lameeus/data/ghent_altar/input/'
+    # folder = '/scratch/lameeus/data/ghent_altar/input/'
     # image_clean2 = ImageStruct('clean2', folder + '19_clean.tif')
     # del(folder)
     # set_struct = SetStruct('evangelist')
@@ -121,26 +121,26 @@ class GUIData(object):
     
     
 def inpaint_set_book():
-    path_orig = '/home/lameeus/data/ghent_altar/roman/input/16_VIS_reg.tif'
+    path_orig = '/scratch/lameeus/data/ghent_altar/roman/input/16_VIS_reg.tif'
     if 0:
-        path_map = '/home/lameeus/data/ghent_altar/roman/input/crack_cnn.png'
+        path_map = '/scratch/lameeus/data/ghent_altar/roman/input/crack_cnn.png'
     else:
-        path_map = '/home/lameeus/data/ghent_altar/roman/input/book_pred.tif'
-    path_result = '/home/lameeus/data/ghent_altar/roman/stitch/inpainting_full_v4.png'
+        path_map = '/scratch/lameeus/data/ghent_altar/roman/input/book_pred.tif'
+    path_result = '/scratch/lameeus/data/ghent_altar/roman/stitch/inpainting_full_v4.png'
     return InpaintingSet('book', path_orig, path_map, path_result)
 
 
 def inpaint_set_zach():
-    folder = '/home/lameeus/data/ghent_altar/inpainting/detection_and_inpainting/Zachary/'
+    folder = '/scratch/lameeus/data/ghent_altar/inpainting/detection_and_inpainting/Zachary/'
     path_orig = folder + 'cut_ori_3.png'
     path_result = folder + 'src_inpainted_face.png'
     if 0:
         path_map = folder + 'src_i3_with.png'
-        path_restored = '/home/lameeus/data/ghent_altar/bart_devolder/02/x103112l.tif'
+        path_restored = '/scratch/lameeus/data/ghent_altar/bart_devolder/02/x103112l.tif'
     else:
         path_map = folder + '13_zach_crop_cyan.tif'
 
-        folder_rest = '/home/lameeus/data/ghent_altar/restorers_inpainting/'
+        folder_rest = '/scratch/lameeus/data/ghent_altar/restorers_inpainting/'
         path_restored = folder_rest + '13_zach_restored.tif'
 
     return InpaintingSet('zachary', path_orig, path_map, path_result, path_restored)
@@ -148,23 +148,23 @@ def inpaint_set_zach():
 
 def inpaint_set_hand():
     if 0:
-        folder = '/home/lameeus/data/ghent_altar/inpainting/detection_and_inpainting/John_the_Evangelist/'
+        folder = '/scratch/lameeus/data/ghent_altar/inpainting/detection_and_inpainting/John_the_Evangelist/'
         path_orig = folder + 'original_rgb_hand.tif'
         path_map = folder + 'src_i3_with.png'
         path_result = folder + 'src_inpainted_whole.png'
         path_restored ='/home/lameeus/data/ghent_altar/bart_devolder/02/x103692l.tif'
     else:
-        folder = '/home/lameeus/data/ghent_altar/input/19_hand/'
+        folder = '/scratch/lameeus/data/ghent_altar/input/19_hand/'
         path_orig = folder + '19_hand_clean.tif'
 
-        folder = '/home/lameeus/data/ghent_altar/output/'
+        folder = '/scratch/lameeus/data/ghent_altar/output/'
         path_map = folder + 'hand_small_cyan.tif'
         
-        folder = '/home/lameeus/data/ghent_altar/restorers_inpainting/'
+        folder = '/scratch/lameeus/data/ghent_altar/restorers_inpainting/'
         path_restored = folder+ '19_hand_restored.tif'
         
         # TODO
-        folder = '/home/lameeus/data/ghent_altar/inpainting/detection_and_inpainting/John_the_Evangelist/'
+        folder = '/scratch/lameeus/data/ghent_altar/inpainting/detection_and_inpainting/John_the_Evangelist/'
         path_result = folder + 'src_inpainted_whole.png'
 
     

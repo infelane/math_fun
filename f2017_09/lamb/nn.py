@@ -146,7 +146,7 @@ def gen_net9(layer_clean, layer_rgb, layer_ir, zoom=1):
 
 
 class Network(object):
-    folder_model = '/home/lameeus/data/ghent_altar/net_weight/net_2017_09/'
+    folder_model = '/scratch/lameeus/data/ghent_altar/net_weight/net_2017_09/'
     
     def __init__(self, version = 1, zoom = 1, lr = None, w = 10):
         """ zoom is for multi-resolution evalution (basically all stride is *zoom"""
@@ -203,7 +203,7 @@ class Network(object):
         optimizer = keras.optimizers.adam(lr = lr, clipnorm = 1.)
         
         dice = keras_ipi.metrics.dice_with_0_labels
-        self.tb = keras.callbacks.TensorBoard(log_dir='/home/lameeus/data/ghent_altar/tensorboard/conc_net/', histogram_freq=0,
+        self.tb = keras.callbacks.TensorBoard(log_dir='/scratch/lameeus/data/ghent_altar/tensorboard/conc_net/', histogram_freq=0,
                                     write_graph=False, write_images=False)
                
         metrics = [dice]
