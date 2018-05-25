@@ -228,7 +228,6 @@ class FrameSettings(Frame):
 
         self.loading_variable.trace("w", lambda name, index, mode, sv=self.loading_variable: callback(sv))
         
-
     def set_training_func(self, func):
         """ the function is different so no fancy shortcuts with image showing """
         lambda_button0 = lambda event : func(i =0)
