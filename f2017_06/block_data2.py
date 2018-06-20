@@ -20,7 +20,6 @@ class ExRawImage(object):
         self.im_in_3 = image_tools.path2im(input_3)
         self.im_out = image_tools.path2im(out)
         
-        
     # def set_crop(self, h0, h1, w0, w1):
     #     self.im_in_1 = self.im_in_1[h0:h1, w0:w1, ...]
     #     self.im_in_2 = self.im_in_2[h0:h1, w0:w1, ...]
