@@ -8,7 +8,6 @@ irr = plt.imread(folder + 'irr.bmp')
 xr = plt.imread(folder + 'xr.bmp')
 
 
-
 def cropper(a):
     h0 = 450
     h1 = 900
