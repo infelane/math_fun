@@ -3,14 +3,13 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="$USER_HOME$/Documents/teaching/AI_Aleksandra/practicum_github" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../Matlab/InpaintingCode/inpainting" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../data-fusion-contest" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../detector" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../django" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../keras_ipi" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../open_source/keras_contrib_lameeus" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../open_source/ultrasound-nerve-segmentation" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../personal/CapsNet-Keras" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../personal/WoW" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../personal/games" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../personal/home" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../personal/open_ai" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../personal/student_DEAP" vcs="Git" />
@@ -18,6 +17,5 @@
     <mapping directory="$PROJECT_DIR$/link_to_keras_ipi" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/link_to_soliton" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../soliton" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/../../../../shared/Challenges/2018_GRSS_Data_Fusion_Contest/with_github" vcs="Git" />
   </component>
 </project>
