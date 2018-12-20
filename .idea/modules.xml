@@ -4,9 +4,11 @@
     <modules>
       <module fileurl="file://$USER_HOME$/Documents/teaching/AI_Aleksandra/practicum_github/.idea/AI_pract.iml" filepath="$USER_HOME$/Documents/teaching/AI_Aleksandra/practicum_github/.idea/AI_pract.iml" />
       <module fileurl="file://$PROJECT_DIR$/../personal/CapsNet-Keras/.idea/CapsNet-Keras.iml" filepath="$PROJECT_DIR$/../personal/CapsNet-Keras/.idea/CapsNet-Keras.iml" />
+      <module fileurl="file:///net/ipi/private/lameeus/code/personal/Fruit-Images-Dataset/.idea/Fruit-Images-Dataset.iml" filepath="/net/ipi/private/lameeus/code/personal/Fruit-Images-Dataset/.idea/Fruit-Images-Dataset.iml" />
       <module fileurl="file://$PROJECT_DIR$/../personal/WoW/.idea/WoW.iml" filepath="$PROJECT_DIR$/../personal/WoW/.idea/WoW.iml" />
       <module fileurl="file://$PROJECT_DIR$/../detector/.idea/detector.iml" filepath="$PROJECT_DIR$/../detector/.idea/detector.iml" />
       <module fileurl="file://$PROJECT_DIR$/../personal/home/.idea/home.iml" filepath="$PROJECT_DIR$/../personal/home/.idea/home.iml" />
+      <module fileurl="file://$USER_HOME$/Downloads/imreg_dft-2.0.0/.idea/imreg_dft-2.0.0.iml" filepath="$USER_HOME$/Downloads/imreg_dft-2.0.0/.idea/imreg_dft-2.0.0.iml" />
       <module fileurl="file://$PROJECT_DIR$/../keras_ipi/.idea/keras_ipi.iml" filepath="$PROJECT_DIR$/../keras_ipi/.idea/keras_ipi.iml" />
       <module fileurl="file://$PROJECT_DIR$/../personal/open_ai/.idea/open_ai.iml" filepath="$PROJECT_DIR$/../personal/open_ai/.idea/open_ai.iml" />
       <module fileurl="file://$PROJECT_DIR$/../personal/.idea/personal.iml" filepath="$PROJECT_DIR$/../personal/.idea/personal.iml" />
