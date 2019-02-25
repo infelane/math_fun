@@ -1,2 +1,0 @@
-# starlight
-For hackaton: Astrohack

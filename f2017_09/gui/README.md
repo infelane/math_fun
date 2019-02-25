@@ -1,1 +1,0 @@
-GUI for Iedereen Ugent
